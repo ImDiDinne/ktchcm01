@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHN HCM01 — Kho 3D Layout</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0e1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+  #canvas { width: 100vw; height: 100vh; display: block; }
+  #ui {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 20px;
+    background: linear-gradient(180deg, rgba(10,14,26,0.95) 0%, transparent 100%);
+    z-index: 10; pointer-events: none;
+  }
+  #ui .title { color: #fff; }
+  #ui .title h1 { font-size: 18px; font-weight: 700; color: #e63946; letter-spacing: 1px; }
+  #ui .title p { font-size: 12px; color: #8899aa; }
+  #controls {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; z-index: 10;
+  }
+  .btn {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; backdrop-filter: blur(10px); pointer-events: all;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: rgba(230,57,70,0.3); border-color: #e63946; }
+  .btn.active { background: rgba(230,57,70,0.5); border-color: #e63946; }
+  #tooltip {
+    position: fixed; display: none;
+    background: rgba(10,14,26,0.92); border: 1px solid #e63946;
+    color: #fff; padding: 10px 15px; border-radius: 8px;
+    font-size: 13px; z-index: 20; pointer-events: none;
+    backdrop-filter: blur(10px); max-width: 220px;
+  }
+  #tooltip h4 { color: #e63946; font-size: 14px; margin-bottom: 4px; }
+  #tooltip p { color: #aabbcc; font-size: 12px; line-height: 1.5; }
+  #legend {
+    position: fixed; right: 20px; top: 70px;
+    background: rgba(10,14,26,0.85); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 12px 16px; z-index: 10; backdrop-filter: blur(10px);
+  }
+  #legend h3 { color: #fff; font-size: 12px; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 11px; color: #aabbcc; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  #compass {
+    position: fixed; left: 20px; bottom: 80px;
+    background: rgba(10,14,26,0.85); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%; width: 60px; height: 60px;
+    display: flex; align-items: center; justify-content: center;
+    color: #e63946; font-size: 22px; z-index: 10;
+  }
+</style>
+</head>
+<body>
+<div id="ui">
+  <div class="title">
+    <h1>🏭 GHN HCM01 HUB</h1>
+    <p>KTC Hồ Chí Minh 01 — Layout 3D Interactive</p>
+  </div>
+</div>
+<div id="legend">
+  <h3>Chú thích</h3>
+  <div class="legend-item"><div class="legend-dot" style="background:#e63946"></div>Khu xuất hàng</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f4a261"></div>CBS / Belt</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2a9d8f"></div>Kho KHL / GHN</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#457b9d"></div>Khu nhập hàng</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e9c46a"></div>Line sort xuất</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#6c757d"></div>Khu vực khác</div>
+</div>
+<div id="compass">🧭</div>
+<canvas id="canvas"></canvas>
+<div id="tooltip"><h4 id="tip-title"></h4><p id="tip-desc"></p></div>
+<div id="controls">
+  <button class="btn" id="btnTop">🔝 Top View</button>
+  <button class="btn" id="btnIso">📐 Iso View</button>
+  <button class="btn" id="btnReset">🔄 Reset</button>
+  <button class="btn" id="btnToggleRoof" id="btnRoof">🏠 Mái</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─── SCENE SETUP ───────────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1a);
+scene.fog = new THREE.Fog(0x0a0e1a, 80, 180);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(60, 50, 60);
+camera.lookAt(0, 0, 0);
+
+// ─── LIGHTS ────────────────────────────────────────────────────────────
+const ambient = new THREE.AmbientLight(0x334466, 0.8);
+scene.add(ambient);
+
+const sun = new THREE.DirectionalLight(0xffeedd, 1.5);
+sun.position.set(40, 60, 30);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 200;
+sun.shadow.camera.left = -80;
+sun.shadow.camera.right = 80;
+sun.shadow.camera.top = 80;
+sun.shadow.camera.bottom = -80;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0x4466aa, 0.5);
+fill.position.set(-30, 20, -20);
+scene.add(fill);
+
+// ─── HELPERS ───────────────────────────────────────────────────────────
+function box(w, h, d, color, x, y, z, name, desc, emissive) {
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(color),
+    emissive: emissive ? new THREE.Color(emissive) : new THREE.Color(0x000000),
+    emissiveIntensity: emissive ? 0.15 : 0,
+    roughness: 0.6, metalness: 0.2, transparent: false
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y + h / 2, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  if (name) { mesh.userData.name = name; mesh.userData.desc = desc || ''; }
+  scene.add(mesh);
+  return mesh;
+}
+
+function label3D(text, x, y, z, color = '#ffffff', size = 0.7) {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 64;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = 'rgba(0,0,0,0)';
+  ctx.fillRect(0, 0, 256, 64);
+  ctx.fillStyle = color;
+  ctx.font = `bold ${Math.round(size * 24)}px Segoe UI`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 128, 32);
+  const tex = new THREE.CanvasTexture(cv);
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+  const geo = new THREE.PlaneGeometry(4 * size, 1 * size);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  mesh.rotation.x = -Math.PI / 2;
+  scene.add(mesh);
+}
+
+// ─── GROUND ────────────────────────────────────────────────────────────
+const groundGeo = new THREE.PlaneGeometry(120, 80);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a2030, roughness: 0.9, metalness: 0.0 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Grid
+const grid = new THREE.GridHelper(120, 40, 0x334466, 0x222836);
+grid.material.opacity = 0.3;
+grid.material.transparent = true;
+scene.add(grid);
+
+// ─── OUTER WALLS ───────────────────────────────────────────────────────
+const wallH = 6; const wallT = 0.5;
+const W = 100; const D = 60; // warehouse full footprint
+const wx = 0; const wz = 0;
+// North wall
+box(W, wallH, wallT, 0x2d3a4a, wx, 0, wz - D/2, null, null);
+// South wall
+box(W, wallH, wallT, 0x2d3a4a, wx, 0, wz + D/2, null, null);
+// West wall
+box(wallT, wallH, D, 0x2d3a4a, wx - W/2, 0, wz, null, null);
+// East wall
+box(wallT, wallH, D, 0x2d3a4a, wx + W/2, 0, wz, null, null);
+
+// ─── ROOF (toggleable) ─────────────────────────────────────────────────
+const roofGeo = new THREE.BoxGeometry(W, 0.3, D);
+const roofMat = new THREE.MeshStandardMaterial({ color: 0x1c2a3a, transparent: true, opacity: 0.25, roughness: 0.8 });
+const roof = new THREE.Mesh(roofGeo, roofMat);
+roof.position.set(wx, wallH + 0.15, wz);
+scene.add(roof);
+let roofVisible = true;
+
+// ─── INTERIOR ZONES ────────────────────────────────────────────────────
+const clickables = [];
+
+// === CỔNG NHẬP (North entry)
+const g1 = box(8, 4, 2, 0x457b9d, 0, 0, -29.5, 'CỔNG NHẬP', 'Cổng nhập hàng chính\nDành cho xe tải vào lấy hàng', 0x457b9d);
+clickables.push(g1);
+label3D('CỔNG NHẬP', 0, 0.5, -28.5, '#7fd8ff');
+
+// === CỔNG XUẤT (South exit)
+const g2 = box(8, 4, 2, 0xe63946, 0, 0, 29.5, 'CỔNG XUẤT', 'Cổng xuất hàng chính\nXuất nội vùng 1740m²', 0xe63946);
+clickables.push(g2);
+label3D('CỔNG XUẤT', 0, 0.5, 28.5, '#ff8899');
+
+// === CBS – Central Belt System (center)
+const cbs = box(30, 3, 12, 0xf4a261, 0, 0, -2, 'CBS – Băng Chuyền Trung Tâm', 'Diện tích: 1800m²\nHệ thống băng chuyền phân loại hàng chính', 0xf4a261);
+clickables.push(cbs);
+label3D('CBS 1800m²', 0, 3.5, -2, '#ffd699');
+
+// CBS belt conveyor lines
+for (let i = 0; i < 5; i++) {
+  box(30, 0.3, 0.4, 0xff6b35, 0, 3.1, -4.5 + i * 1.5, null, null);
+}
+
+// === LINE SORT / XUẤT HÀNG (left side, lanes 49-55)
+const lineSort = box(6, 4, 40, 0xe9c46a, -44, 0, -4, 'Line Xuất Hàng Sort', 'Khu vực line xuất hàng\nLanes 49-55: Đà Nẵng, Bình Định, Khánh Hòa,\nQuảng Bình, Thanh Hóa, HN02', 0xe9c46a);
+clickables.push(lineSort);
+label3D('LINE SORT', -44, 4.5, -4, '#ffe08a', 0.8);
+
+// Left lane labels
+const leftLanes = [
+  { z: -16, label: '55 HN02 (A,MB,C)' },
+  { z: -10, label: '54 HN02 (A,MB,C)' },
+  { z: -4, label: '53 Thanh Hóa (M)' },
+  { z: 2, label: '52 Quảng Bình/Nghệ An' },
+  { z: 8, label: '51 Khánh Hòa (K)' },
+  { z: 14, label: '50 Bình Định (Q)' },
+  { z: 18, label: '49 Đà Nẵng (N)' },
+];
+
+// === KHO KHL (right bottom)
+const khl = box(10, 5, 12, 0x2a9d8f, 32, 0, 10, 'KHO KHL', 'Diện tích: 800m²\nKho hàng lớn không giao được\nKhu lưu trữ dài hạn', 0x2a9d8f);
+clickables.push(khl);
+label3D('KHO KHL\n800m²', 32, 5.5, 10, '#4ecdc4', 0.75);
+
+// === KHO GHN Miền Nam
+const khoMN = box(8, 5, 12, 0x1d7a6b, 41, 0, 10, 'KHO GHN Miền Nam', 'Diện tích: 300m²\nKho GHN khu vực Miền Nam', 0x1d7a6b);
+clickables.push(khoMN);
+label3D('GHN MN\n300m²', 41, 5.5, 10, '#4ecdc4', 0.7);
+
+// === KHO GHN HCM
+const khoHCM = box(7, 5, 12, 0x168a6a, 49, 0, 10, 'KHO GHN HCM', 'Diện tích: 250m²\nKho GHN khu vực Hồ Chí Minh', 0x168a6a);
+clickables.push(khoHCM);
+label3D('GHN HCM\n250m²', 49, 5.5, 10, '#4ecdc4', 0.7);
+
+// === XUẤT NỘI VÙNG (center-south)
+const xnv = box(35, 2, 10, 0xc77dff, 0, 0, 20, 'Xuất Nội Vùng', 'Diện tích: 1740m²\nKhu vực xuất hàng nội thành HCM', 0x9b59b6);
+clickables.push(xnv);
+label3D('Xuất Nội Vùng 1740m²', 0, 2.5, 20, '#d4aaff', 0.75);
+
+// === TOP LANES (01-19) – intake/sort north area
+for (let i = 0; i < 19; i++) {
+  const lx = -44 + i * 5;
+  const lane = box(4, 3.5, 6, i % 2 === 0 ? 0x3a4a5a : 0x2d3a4a, lx + 2, 0, -24, null, null);
+  label3D(`${String(i + 1).padStart(2, '0')}`, lx + 2, 3.6, -24, '#aabbcc', 0.55);
+}
+
+// === BOTTOM LANES (30-48)
+const bottomLabels = ['30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48'];
+for (let i = 0; i < bottomLabels.length; i++) {
+  const lx = 46 - i * 5;
+  box(4, 3.5, 5, i % 2 === 0 ? 0x3a5a4a : 0x2d4a3a, lx, 0, 26, null, null);
+  label3D(bottomLabels[i], lx, 3.6, 26, '#aaccaa', 0.55);
+}
+
+// === RIGHT SIDE RACKS (20-29)
+for (let i = 0; i < 10; i++) {
+  const rz = -20 + i * 4;
+  const rack = box(8, 5, 3.5, i % 2 === 0 ? 0x5a3a2a : 0x4a2d1a, 46, 0, rz, `Rack ${20 + i}`, `Kệ hàng số ${20 + i}`, null);
+  clickables.push(rack);
+  label3D(`${20 + i}`, 46, 5.5, rz, '#ffccaa', 0.6);
+}
+
+// === SORTING LANES in center (1-5)
+for (let i = 0; i < 5; i++) {
+  box(28, 0.2, 0.6, 0xff4d6d, 0, 3, -5 + i * 2, null, null);
+  label3D(`Belt ${i + 1}`, 14, 3.5, -5 + i * 2, '#ff8899', 0.5);
+}
+
+// === CỔNG KÊNH R (right exit)
+const ckr = box(3, 4, 8, 0xff6b35, 50.5, 0, 20, 'CỔNG KÊNH R', 'Cổng kênh R\nLối ra dành cho tuyến kênh đặc biệt', 0xff6b35);
+clickables.push(ckr);
+label3D('KÊNH R', 50.5, 4.5, 20, '#ffaa66', 0.65);
+
+// === KHU VỰC NHẬP 1 & 2
+const kv1 = box(8, 4, 6, 0x3a6ea8, -35, 0, -24, 'Khu vực nhập 1', 'Khu nhận hàng số 1\nDành cho xe tải nhập kho buổi sáng');
+clickables.push(kv1);
+const kv2 = box(8, 4, 6, 0x2d5a8a, -25, 0, -24, 'Khu vực nhập 2', 'Khu nhận hàng số 2\nDành cho xe tải nhập kho buổi chiều');
+clickables.push(kv2);
+
+// === OFFICE / WC khu trái
+box(6, 4, 4, 0x445566, -46, 0, -20, null, null);
+label3D('VP / WC', -46, 4.5, -20, '#8899aa', 0.6);
+
+// === Forklift paths (yellow lines)
+const pathMat = new THREE.MeshBasicMaterial({ color: 0xffd166 });
+const pathGeo = new THREE.PlaneGeometry(60, 0.3);
+const path1 = new THREE.Mesh(pathGeo, pathMat);
+path1.rotation.x = -Math.PI / 2; path1.position.set(0, 0.05, 5);
+scene.add(path1);
+const path2 = new THREE.Mesh(pathGeo, pathMat);
+path2.rotation.x = -Math.PI / 2; path2.position.set(0, 0.05, -10);
+scene.add(path2);
+
+// ─── PARTICLES / AMBIENT ───────────────────────────────────────────────
+const partGeo = new THREE.BufferGeometry();
+const partCount = 300;
+const positions = new Float32Array(partCount * 3);
+for (let i = 0; i < partCount; i++) {
+  positions[i * 3] = (Math.random() - 0.5) * 120;
+  positions[i * 3 + 1] = Math.random() * 15;
+  positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+}
+partGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+const partMat = new THREE.PointsMaterial({ color: 0x4488ff, size: 0.15, transparent: true, opacity: 0.4 });
+scene.add(new THREE.Points(partGeo, partMat));
+
+// ─── MOUSE / RAYCASTER ─────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const tooltip = document.getElementById('tooltip');
+const tipTitle = document.getElementById('tip-title');
+const tipDesc = document.getElementById('tip-desc');
+
+window.addEventListener('mousemove', e => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(clickables);
+  if (hits.length > 0 && hits[0].object.userData.name) {
+    const obj = hits[0].object;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 15) + 'px';
+    tooltip.style.top = (e.clientY - 30) + 'px';
+    tipTitle.textContent = obj.userData.name;
+    tipDesc.innerHTML = obj.userData.desc.replace(/\n/g, '<br>');
+    document.body.style.cursor = 'pointer';
+  } else {
+    tooltip.style.display = 'none';
+    document.body.style.cursor = 'default';
+  }
+});
+
+// ─── ORBIT CONTROLS (manual) ────────────────────────────────────────────
+let isDragging = false, lastX = 0, lastY = 0;
+let theta = Math.PI / 4, phi = Math.PI / 3.5, radius = 90;
+let targetTheta = theta, targetPhi = phi, targetRadius = radius;
+const center = new THREE.Vector3(0, 0, 0);
+
+canvas.addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+canvas.addEventListener('mouseup', () => isDragging = false);
+canvas.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  targetTheta -= (e.clientX - lastX) * 0.005;
+  targetPhi -= (e.clientY - lastY) * 0.005;
+  targetPhi = Math.max(0.1, Math.min(Math.PI / 2.05, targetPhi));
+  lastX = e.clientX; lastY = e.clientY;
+});
+canvas.addEventListener('wheel', e => {
+  targetRadius += e.deltaY * 0.1;
+  targetRadius = Math.max(20, Math.min(160, targetRadius));
+});
+
+// Touch
+canvas.addEventListener('touchstart', e => { isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; });
+canvas.addEventListener('touchend', () => isDragging = false);
+canvas.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  targetTheta -= (e.touches[0].clientX - lastX) * 0.005;
+  targetPhi -= (e.touches[0].clientY - lastY) * 0.005;
+  targetPhi = Math.max(0.1, Math.min(Math.PI / 2.05, targetPhi));
+  lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+});
+
+// ─── BUTTONS ────────────────────────────────────────────────────────────
+document.getElementById('btnTop').addEventListener('click', () => {
+  targetPhi = 0.15; targetRadius = 100;
+});
+document.getElementById('btnIso').addEventListener('click', () => {
+  targetTheta = Math.PI / 4; targetPhi = Math.PI / 3.5; targetRadius = 90;
+});
+document.getElementById('btnReset').addEventListener('click', () => {
+  targetTheta = Math.PI / 4; targetPhi = Math.PI / 3.5; targetRadius = 90;
+});
+document.getElementById('btnToggleRoof').addEventListener('click', () => {
+  roofVisible = !roofVisible;
+  roof.material.opacity = roofVisible ? 0.25 : 0;
+});
+
+// ─── RESIZE ─────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ─── ANIMATE ────────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // smooth camera
+  theta += (targetTheta - theta) * 0.06;
+  phi += (targetPhi - phi) * 0.06;
+  radius += (targetRadius - radius) * 0.06;
+
+  camera.position.x = center.x + radius * Math.sin(phi) * Math.sin(theta);
+  camera.position.y = center.y + radius * Math.cos(phi);
+  camera.position.z = center.z + radius * Math.sin(phi) * Math.cos(theta);
+  camera.lookAt(center);
+
+  // animate CBS emissive pulse
+  if (cbs.material) {
+    cbs.material.emissiveIntensity = 0.1 + Math.sin(t * 2) * 0.08;
+  }
+  // animate belt lines
+  scene.children.forEach(c => {
+    if (c.userData && c.userData.belt) c.position.x = Math.sin(t * 3) * 0.1;
+  });
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>

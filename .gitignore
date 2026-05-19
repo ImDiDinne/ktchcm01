@@ -1,0 +1,11 @@
+.DS_Store
+*.xlsx
+*.xls
+*.xlsm
+*.xlsb
+*.xls
+*.csv
+*.log
+__pycache__/
+*.pyc
+node_modules/

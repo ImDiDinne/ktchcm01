@@ -1,0 +1,345 @@
+[
+  {
+    "name": "Kho Chuyển Tiếp",
+    "total": 13227,
+    "normal": 1,
+    "bulky": 1168,
+    "freight": 1221,
+    "children": [
+      {
+        "name": "Kho Chuyển Tiếp Bình Phước",
+        "total": 1514,
+        "normal": 0,
+        "bulky": 192,
+        "freight": 206
+      },
+      {
+        "name": "Kho Chuyển Tiếp Bình Thuận",
+        "total": 922,
+        "normal": 0,
+        "bulky": 152,
+        "freight": 200
+      },
+      {
+        "name": "Kho Chuyển Tiếp Đắk Nông",
+        "total": 606,
+        "normal": 0,
+        "bulky": 65,
+        "freight": 48
+      },
+      {
+        "name": "Kho Chuyển Tiếp Đồng Nai",
+        "total": 6870,
+        "normal": 1,
+        "bulky": 689,
+        "freight": 722
+      },
+      {
+        "name": "Kho Chuyển Tiếp Quảng Ngãi",
+        "total": 554,
+        "normal": 0,
+        "bulky": 70,
+        "freight": 45
+      },
+      {
+        "name": "Kho Chuyến Tiếp Thanh Hoá",
+        "total": 2761,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      }
+    ]
+  },
+  {
+    "name": "Kho Giao Hàng Nặng",
+    "total": 2365,
+    "normal": 0,
+    "bulky": 88,
+    "freight": 2225,
+    "children": [
+      {
+        "name": "Kho Giao Hàng Nặng - Bến Cát - Bình Dương",
+        "total": 118,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 117
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - Dĩ An - Bình Dương",
+        "total": 143,
+        "normal": 0,
+        "bulky": 1,
+        "freight": 142
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - Đức Hòa - Long An",
+        "total": 129,
+        "normal": 0,
+        "bulky": 6,
+        "freight": 109
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - Hồ Chí Minh",
+        "total": 38,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 38
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - Nhà Bè - HCM",
+        "total": 255,
+        "normal": 0,
+        "bulky": 11,
+        "freight": 221
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - Tân Tạo - HCM",
+        "total": 383,
+        "normal": 0,
+        "bulky": 43,
+        "freight": 332
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - Thủ Dầu Một - Bình Dương",
+        "total": 165,
+        "normal": 0,
+        "bulky": 1,
+        "freight": 164
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - Thủ Đức - HCM",
+        "total": 395,
+        "normal": 0,
+        "bulky": 20,
+        "freight": 374
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - Thuận An - Bình Dương",
+        "total": 185,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 183
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - TP Bến Tre - Bến Tre",
+        "total": 108,
+        "normal": 0,
+        "bulky": 3,
+        "freight": 105
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - TP Mỹ Tho - Tiền Giang",
+        "total": 132,
+        "normal": 0,
+        "bulky": 2,
+        "freight": 127
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - TP Tân An - Long An",
+        "total": 116,
+        "normal": 0,
+        "bulky": 1,
+        "freight": 115
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - TP Tây Ninh - Tây Ninh",
+        "total": 129,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 129
+      },
+      {
+        "name": "Kho Giao Hàng Nặng - TX Cai Lậy - Tiền Giang",
+        "total": 69,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 69
+      }
+    ]
+  },
+  {
+    "name": "Kho KHL",
+    "total": 204,
+    "normal": 46,
+    "bulky": 82,
+    "freight": 76,
+    "children": [
+      {
+        "name": "Key Account Warehouse Ho Chi Minh",
+        "total": 204,
+        "normal": 46,
+        "bulky": 82,
+        "freight": 76
+      }
+    ]
+  },
+  {
+    "name": "Kho Trung Chuyển",
+    "total": 34869,
+    "normal": 14306,
+    "bulky": 2847,
+    "freight": 2193,
+    "children": [
+      {
+        "name": "Kho Trung Chuyển Bình Định",
+        "total": 906,
+        "normal": 371,
+        "bulky": 90,
+        "freight": 63
+      },
+      {
+        "name": "Kho Trung Chuyển Cần Thơ",
+        "total": 5768,
+        "normal": 30,
+        "bulky": 471,
+        "freight": 374
+      },
+      {
+        "name": "Kho Trung Chuyển Đà Nẵng",
+        "total": 1666,
+        "normal": 1088,
+        "bulky": 237,
+        "freight": 229
+      },
+      {
+        "name": "Kho Trung Chuyển Đắk Lắk",
+        "total": 2144,
+        "normal": 0,
+        "bulky": 203,
+        "freight": 195
+      },
+      {
+        "name": "Kho Trung Chuyển Dương Xá",
+        "total": 1522,
+        "normal": 0,
+        "bulky": 840,
+        "freight": 575
+      },
+      {
+        "name": "Kho Trung Chuyển Gia Lai",
+        "total": 1444,
+        "normal": 701,
+        "bulky": 195,
+        "freight": 175
+      },
+      {
+        "name": "Kho Trung Chuyển Hà Nội 02",
+        "total": 4401,
+        "normal": 4214,
+        "bulky": 20,
+        "freight": 25
+      },
+      {
+        "name": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "total": 2831,
+        "normal": 2105,
+        "bulky": 123,
+        "freight": 97
+      },
+      {
+        "name": "Kho Trung Chuyển Hưng Yên 01",
+        "total": 6445,
+        "normal": 5284,
+        "bulky": 311,
+        "freight": 192
+      },
+      {
+        "name": "Kho Trung Chuyển Khánh Hòa",
+        "total": 3240,
+        "normal": 0,
+        "bulky": 250,
+        "freight": 182
+      },
+      {
+        "name": "Kho Trung Chuyến Nghệ An",
+        "total": 3515,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      },
+      {
+        "name": "Kho Trung Chuyển Quảng Bình",
+        "total": 987,
+        "normal": 513,
+        "bulky": 107,
+        "freight": 86
+      }
+    ]
+  },
+  {
+    "name": "Nội Thành",
+    "total": 5122,
+    "normal": 0,
+    "bulky": 0,
+    "freight": 0,
+    "children": [
+      {
+        "name": "Hồ Chí Minh",
+        "total": 5122,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      }
+    ]
+  },
+  {
+    "name": "Nội vùng",
+    "total": 29170,
+    "normal": 0,
+    "bulky": 0,
+    "freight": 0,
+    "children": [
+      {
+        "name": "Bến Tre",
+        "total": 3305,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      },
+      {
+        "name": "Bình Dương",
+        "total": 9391,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      },
+      {
+        "name": "Long An",
+        "total": 7609,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      },
+      {
+        "name": "Tây Ninh",
+        "total": 4885,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      },
+      {
+        "name": "Tiền Giang",
+        "total": 3980,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      }
+    ]
+  },
+  {
+    "name": "Phú Quốc",
+    "total": 679,
+    "normal": 0,
+    "bulky": 0,
+    "freight": 0,
+    "children": [
+      {
+        "name": "Phú Quốc",
+        "total": 679,
+        "normal": 0,
+        "bulky": 0,
+        "freight": 0
+      }
+    ]
+  }
+]

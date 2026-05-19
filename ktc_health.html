@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KTC Health Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+.header{background:linear-gradient(135deg,#161b22,#1c2128);border-bottom:1px solid #30363d;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:800;color:#fff}
+.header h1 span{color:#f85149}
+.shift-badge{background:#21262d;border:1px solid #30363d;border-radius:20px;padding:8px 16px;font-size:13px;font-weight:600}
+.shift-badge .dot{width:8px;height:8px;border-radius:50%;background:#3fb950;display:inline-block;margin-right:8px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.clock{font-size:14px;color:#8b949e;margin-top:4px}
+.main{padding:20px 24px;display:grid;gap:20px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.red::before{background:#f85149}
+.kpi.yellow::before{background:#d29922}
+.kpi.green::before{background:#3fb950}
+.kpi.blue::before{background:#388bfd}
+.kpi-label{font-size:12px;color:#8b949e;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:32px;font-weight:800;margin:8px 0 4px}
+.kpi-sub{font-size:12px;color:#8b949e}
+.kpi.red .kpi-value{color:#f85149}
+.kpi.yellow .kpi-value{color:#d29922}
+.kpi.green .kpi-value{color:#3fb950}
+.kpi.blue .kpi-value{color:#388bfd}
+.modules{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.module{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.module h2{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.module h2 .icon{font-size:18px}
+.bar-container{margin-bottom:12px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;color:#8b949e;margin-bottom:6px}
+.bar-track{background:#21262d;border-radius:6px;height:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;transition:width .5s ease}
+.bar-fill.green{background:#3fb950}
+.bar-fill.yellow{background:#d29922}
+.bar-fill.red{background:#f85149}
+.gate-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.gate{height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;transition:background .3s}
+.gate.free{background:#1c3a2a;color:#3fb950;border:1px solid #2ea043}
+.gate.busy{background:#3a1c1c;color:#f85149;border:1px solid #f85149}
+.gate.idle{background:#21262d;color:#8b949e;border:1px solid #30363d}
+.section-title{font-size:11px;color:#8b949e;font-weight:600;text-transform:uppercase;margin-bottom:8px}
+.alerts-panel{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.alert-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:8px;margin-bottom:8px;font-size:13px}
+.alert-item.critical{background:#3a1c1c;border:1px solid #f85149}
+.alert-item.warning{background:#3a2c1c;border:1px solid #d29922}
+.alert-item.info{background:#1c2a3a;border:1px solid #388bfd}
+.alert-icon{font-size:16px;margin-top:1px}
+.alert-msg{font-weight:500}
+.alert-time{font-size:11px;color:#8b949e;margin-top:2px}
+.input-panel{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.input-panel h2{font-size:14px;font-weight:700;margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.form-group label{display:block;font-size:11px;color:#8b949e;font-weight:600;text-transform:uppercase;margin-bottom:6px}
+.form-group input,.form-group select{width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:14px;font-family:Inter,sans-serif;outline:none}
+.form-group input:focus,.form-group select:focus{border-color:#388bfd}
+.btn-update{background:#388bfd;border:none;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:16px;transition:background .2s}
+.btn-update:hover{background:#58a6ff}
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>🏭 KTC <span>HEALTH</span> DASHBOARD</h1>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+  <div class="shift-badge">
+    <span class="dot"></span>
+    <span id="shiftName">Ca 1 — 07:00–17:00</span>
+  </div>
+  <div style="text-align:right;font-size:12px;color:#8b949e">
+    <div>15 Cổng Auto | 20 Cổng Manual</div>
+    <div>Capacity: 140 xe/giờ</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="kpi-row">
+    <div class="kpi" id="kpi-tonkho">
+      <div class="kpi-label">📦 Tồn Kho</div>
+      <div class="kpi-value" id="v-tonkho">0%</div>
+      <div class="kpi-sub" id="s-tonkho">0 / 0 kiện</div>
+    </div>
+    <div class="kpi" id="kpi-xeton">
+      <div class="kpi-label">🚛 Xe Tồn (chờ nhập)</div>
+      <div class="kpi-value" id="v-xeton">0</div>
+      <div class="kpi-sub" id="s-xeton">Chờ ≈ 0 phút</div>
+    </div>
+    <div class="kpi" id="kpi-sort">
+      <div class="kpi-label">📦 Đã Chia Chọn</div>
+      <div class="kpi-value" id="v-sort">0</div>
+      <div class="kpi-sub" id="s-sort">kiện trong ca</div>
+    </div>
+    <div class="kpi" id="kpi-alert">
+      <div class="kpi-label">🚨 Cảnh Báo</div>
+      <div class="kpi-value" id="v-alert">0</div>
+      <div class="kpi-sub">cần xử lý ngay</div>
+    </div>
+  </div>
+
+  <div class="modules">
+    <div class="module">
+      <h2><span class="icon">📦</span> Tồn Kho</h2>
+      <div id="kho-bars"></div>
+    </div>
+    <div class="module">
+      <h2><span class="icon">🚛</span> Xe Nhập</h2>
+      <div class="section-title">Cổng AUTO (15 cổng)</div>
+      <div class="gate-grid" id="gates-auto"></div>
+      <div class="section-title" style="margin-top:12px">Cổng MANUAL (20 cổng)</div>
+      <div class="gate-grid" id="gates-manual"></div>
+      <div style="margin-top:12px;padding:10px;background:#21262d;border-radius:8px;font-size:12px">
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:#8b949e">Xe đang xử lý:</span>
+          <span id="xe-dang-xu-ly" style="color:#3fb950;font-weight:600">0 xe</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span style="color:#8b949e">Xe chờ:</span>
+          <span id="xe-cho-label" style="color:#d29922;font-weight:600">0 xe</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span style="color:#8b949e">T/gian chờ ước tính:</span>
+          <span id="wait-time" style="font-weight:600">0 phút</span>
+        </div>
+      </div>
+    </div>
+    <div class="module">
+      <h2><span class="icon">⚙️</span> Chia Chọn</h2>
+      <div class="bar-container">
+        <div class="bar-label"><span>Hiệu suất ca</span><span id="pct-sort">0%</span></div>
+        <div class="bar-track"><div class="bar-fill green" id="bar-sort" style="width:0%"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div style="background:#21262d;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#8b949e">Đã sort</div>
+          <div style="font-size:20px;font-weight:700;color:#3fb950" id="sort-done">0</div>
+        </div>
+        <div style="background:#21262d;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#8b949e">Còn lại</div>
+          <div style="font-size:20px;font-weight:700;color:#d29922" id="sort-remain">0</div>
+        </div>
+        <div style="background:#21262d;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#8b949e">Nhân sự</div>
+          <div style="font-size:20px;font-weight:700;color:#388bfd" id="sort-staff">0</div>
+        </div>
+        <div style="background:#21262d;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#8b949e">Kiện/người</div>
+          <div style="font-size:20px;font-weight:700;color:#a371f7" id="sort-per-staff">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="alerts-panel">
+      <h2 style="font-size:14px;font-weight:700;margin-bottom:16px">🚨 Cảnh Báo Vận Hành</h2>
+      <div id="alerts-list"><div style="color:#8b949e;font-size:13px;text-align:center;padding:20px">✅ Chưa có cảnh báo</div></div>
+    </div>
+    <div class="input-panel">
+      <h2>📝 Cập Nhật Nhanh</h2>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr">
+        <div class="form-group"><label>Xe tồn (chờ)</label><input type="number" id="in-xeton" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Tổng tồn kho (kiện)</label><input type="number" id="in-tonkho" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Đã sort (kiện)</label><input type="number" id="in-sort" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Mục tiêu sort</label><input type="number" id="in-target" placeholder="10000" min="0"></div>
+        <div class="form-group"><label>Nhân sự sort</label><input type="number" id="in-staff" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Capacity kho (kiện)</label><input type="number" id="in-capacity" placeholder="20000" min="1"></div>
+      </div>
+      <button class="btn-update" onclick="updateDash()">⚡ Cập Nhật</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KHO_ZONES = [
+  {name:'CBS', cap:5000, used:0},
+  {name:'Xuất Nội Vùng', cap:4000, used:0},
+  {name:'KHO KHL', cap:3000, used:0},
+  {name:'GHN Miền Nam', cap:2000, used:0},
+  {name:'GHN HCM', cap:2000, used:0},
+];
+
+let state = {
+  xeton:0, tonkho:0, capacity:16000,
+  sort:0, target:10000, staff:0,
+  autoBusy:0, manualBusy:0
+};
+
+function getShift() {
+  const h = new Date().getHours();
+  if (h>=7 && h<15) return {name:'Ca 1 — 07:00–17:00', color:'#3fb950'};
+  if (h>=15 && h<22) return {name:'Ca 2 — 15:00–00:00', color:'#d29922'};
+  return {name:'Ca 3 — 22:00–07:00', color:'#388bfd'};
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('vi-VN');
+  const sh = getShift();
+  document.getElementById('shiftName').textContent = sh.name;
+}
+
+function renderKhoBars() {
+  const totalUsed = state.tonkho;
+  const pctTotal = Math.min(100, Math.round(totalUsed / state.capacity * 100));
+  let html = '';
+  KHO_ZONES.forEach(z => {
+    const pct = Math.min(100, Math.round(z.used / z.cap * 100));
+    const cls = pct >= 80 ? 'red' : pct >= 60 ? 'yellow' : 'green';
+    html += `<div class="bar-container">
+      <div class="bar-label"><span>${z.name}</span><span>${pct}% (${z.used}/${z.cap})</span></div>
+      <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  document.getElementById('kho-bars').innerHTML = html;
+}
+
+function renderGates() {
+  const auto = document.getElementById('gates-auto');
+  const manual = document.getElementById('gates-manual');
+  auto.innerHTML = '';
+  manual.innerHTML = '';
+  for (let i=0; i<15; i++) {
+    const busy = i < state.autoBusy;
+    auto.innerHTML += `<div class="gate ${busy?'busy':'free'}">${busy?'🔴':'🟢'}</div>`;
+  }
+  for (let i=0; i<20; i++) {
+    const busy = i < state.manualBusy;
+    manual.innerHTML += `<div class="gate ${busy?'busy':'free'}">${busy?'🔴':'🟢'}</div>`;
+  }
+  const totalBusy = state.autoBusy + state.manualBusy;
+  document.getElementById('xe-dang-xu-ly').textContent = totalBusy + ' xe';
+  document.getElementById('xe-cho-label').textContent = state.xeton + ' xe';
+  const wait = state.xeton > 35 ? Math.round((state.xeton - 35) / 140 * 60 * 15) : 0;
+  const waitEl = document.getElementById('wait-time');
+  waitEl.textContent = wait > 0 ? wait + ' phút' : '< 15 phút';
+  waitEl.style.color = wait > 30 ? '#f85149' : wait > 15 ? '#d29922' : '#3fb950';
+}
+
+function renderAlerts() {
+  const alerts = [];
+  const tonPct = Math.round(state.tonkho / state.capacity * 100);
+  if (tonPct >= 80) alerts.push({type:'critical', msg:'⚠️ Tồn kho vượt 80% sức chứa! Cần xuất hàng gấp.', time: new Date().toLocaleTimeString('vi-VN')});
+  else if (tonPct >= 60) alerts.push({type:'warning', msg:'🟡 Tồn kho đạt 60%. Theo dõi sát.', time: new Date().toLocaleTimeString('vi-VN')});
+  if (state.xeton > 70) alerts.push({type:'critical', msg:'🚛 Xe tồn > 70 xe! Cổng quá tải, chờ > 30 phút.', time: new Date().toLocaleTimeString('vi-VN')});
+  else if (state.xeton > 35) alerts.push({type:'warning', msg:'🚛 Xe tồn ' + state.xeton + ' xe. Thời gian chờ tăng.', time: new Date().toLocaleTimeString('vi-VN')});
+  const sortPct = state.target > 0 ? Math.round(state.sort / state.target * 100) : 0;
+  if (sortPct < 50 && state.sort > 0) alerts.push({type:'warning', msg:'📦 Tiến độ sort chỉ đạt ' + sortPct + '%. Cần tăng tốc.', time: new Date().toLocaleTimeString('vi-VN')});
+  const list = document.getElementById('alerts-list');
+  if (alerts.length === 0) {
+    list.innerHTML = '<div style="color:#8b949e;font-size:13px;text-align:center;padding:20px">✅ Chưa có cảnh báo</div>';
+  } else {
+    list.innerHTML = alerts.map(a => `<div class="alert-item ${a.type}"><div class="alert-icon">${a.type==='critical'?'🔴':'🟡'}</div><div><div class="alert-msg">${a.msg}</div><div class="alert-time">${a.time}</div></div></div>`).join('');
+  }
+  document.getElementById('v-alert').textContent = alerts.length;
+  const kpiAlert = document.getElementById('kpi-alert');
+  kpiAlert.className = 'kpi ' + (alerts.filter(a=>a.type==='critical').length > 0 ? 'red' : alerts.length > 0 ? 'yellow' : 'green');
+}
+
+function renderKPIs() {
+  const tonPct = state.capacity > 0 ? Math.round(state.tonkho / state.capacity * 100) : 0;
+  document.getElementById('v-tonkho').textContent = tonPct + '%';
+  document.getElementById('s-tonkho').textContent = state.tonkho.toLocaleString() + ' / ' + state.capacity.toLocaleString() + ' kiện';
+  const kpiTon = document.getElementById('kpi-tonkho');
+  kpiTon.className = 'kpi ' + (tonPct >= 80 ? 'red' : tonPct >= 60 ? 'yellow' : 'green');
+
+  document.getElementById('v-xeton').textContent = state.xeton;
+  document.getElementById('s-xeton').textContent = 'Chờ ≈ ' + (state.xeton > 35 ? Math.round((state.xeton-35)/140*60*15) : '<15') + ' phút';
+  const kpiXe = document.getElementById('kpi-xeton');
+  kpiXe.className = 'kpi ' + (state.xeton > 70 ? 'red' : state.xeton > 35 ? 'yellow' : 'green');
+
+  document.getElementById('v-sort').textContent = state.sort.toLocaleString();
+  document.getElementById('s-sort').textContent = 'kiện trong ca';
+  const kpiSort = document.getElementById('kpi-sort');
+  const sp = state.target > 0 ? state.sort/state.target : 0;
+  kpiSort.className = 'kpi ' + (sp >= 0.8 ? 'green' : sp >= 0.5 ? 'yellow' : 'blue');
+
+  const sortPct = state.target > 0 ? Math.min(100, Math.round(state.sort/state.target*100)) : 0;
+  document.getElementById('pct-sort').textContent = sortPct + '%';
+  const barSort = document.getElementById('bar-sort');
+  barSort.style.width = sortPct + '%';
+  barSort.className = 'bar-fill ' + (sortPct >= 80 ? 'green' : sortPct >= 50 ? 'yellow' : 'red');
+  document.getElementById('sort-done').textContent = state.sort.toLocaleString();
+  document.getElementById('sort-remain').textContent = Math.max(0, state.target - state.sort).toLocaleString();
+  document.getElementById('sort-staff').textContent = state.staff;
+  document.getElementById('sort-per-staff').textContent = state.staff > 0 ? Math.round(state.sort / state.staff) : 0;
+}
+
+function updateDash() {
+  state.xeton = parseInt(document.getElementById('in-xeton').value) || 0;
+  state.tonkho = parseInt(document.getElementById('in-tonkho').value) || 0;
+  state.sort = parseInt(document.getElementById('in-sort').value) || 0;
+  state.target = parseInt(document.getElementById('in-target').value) || 10000;
+  state.staff = parseInt(document.getElementById('in-staff').value) || 0;
+  state.capacity = parseInt(document.getElementById('in-capacity').value) || 16000;
+  state.autoBusy = Math.min(15, Math.round(state.xeton * 0.4));
+  state.manualBusy = Math.min(20, Math.round(state.xeton * 0.35));
+  renderKPIs();
+  renderKhoBars();
+  renderGates();
+  renderAlerts();
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+renderKhoBars();
+renderGates();
+renderAlerts();
+renderKPIs();
+</script>
+</body>
+</html>
