@@ -1,461 +1,153 @@
 [
   {
-    "tuyen": "XA_S1_03",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "02:00",
-    "minutes_left": 10.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 569,
-    "ty_le_lay_day": "37.9%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Đường 25A3-Xã Đức Hòa Hạ-Long An",
-        "loai": "Giao",
-        "inventory": 569,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "HCM_GL_02",
-    "cot_type": "HCM",
-    "gio_xuat_hcm01": "02:00",
-    "minutes_left": 10.0,
-    "tai_trong_kg": 8000,
-    "suc_chua_don": 8000,
-    "tong_ton": 1071,
-    "ty_le_lay_day": "13.4%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Kho Trung Chuyển Gia Lai",
-        "loai": "Giao",
-        "inventory": 1071,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "HCM_KH_03",
-    "cot_type": "HCM",
-    "gio_xuat_hcm01": "02:00",
-    "minutes_left": 10.0,
-    "tai_trong_kg": 8000,
-    "suc_chua_don": 8000,
-    "tong_ton": 432,
-    "ty_le_lay_day": "5.4%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Kho Trung Chuyển Khánh Hòa",
-        "loai": "Giao",
-        "inventory": 432,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "DongNai_S_03",
-    "cot_type": "DongNai",
-    "gio_xuat_hcm01": "02:00",
-    "minutes_left": 10.0,
+    "tuyen": "BinhPhuoc_T_1",
+    "cot_type": "BinhPhuoc",
+    "gio_xuat_hcm01": "07:00",
+    "minutes_left": 22.7,
     "tai_trong_kg": 5000,
     "suc_chua_don": 4000,
-    "tong_ton": 1412,
-    "ty_le_lay_day": "35.3%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
+    "tong_ton": 4503,
+    "ty_le_lay_day": "112.6%",
+    "drop_risk": "🔴 RẤT CAO - Hàng chắc chắn rớt",
+    "drop_level": "critical",
     "stops": [
       {
-        "name": "Kho Chuyển Tiếp Đồng Nai",
-        "loai": "Giao",
-        "inventory": 1412,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "DongNai_S_04",
-    "cot_type": "DongNai",
-    "gio_xuat_hcm01": "02:00",
-    "minutes_left": 10.0,
-    "tai_trong_kg": 5000,
-    "suc_chua_don": 4000,
-    "tong_ton": 1412,
-    "ty_le_lay_day": "35.3%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Kho Chuyển Tiếp Đồng Nai",
-        "loai": "Giao",
-        "inventory": 1412,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "SG_CK1_112",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 179,
-    "ty_le_lay_day": "11.9%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 46 Tam Bình-Hiệp Bình Chánh-Q.Thủ Đức-HCM",
-        "loai": "Giao",
-        "inventory": 50,
+        "name": "Kho Chuyển Tiếp Bình Phước",
+        "loai": "Phân loại",
+        "inventory": 280,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Bưu Cục 53 Đường 22-Linh Đông-Thủ Đức-HCM",
+        "name": "Bưu Cục Xã Đức Liễu-Bù Đăng-Bình Phước",
         "loai": "Giao",
-        "inventory": 81,
+        "inventory": 46,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Bưu Cục 53A2 Đường 5-Linh Tây-Q.Thủ Đức-HCM",
+        "name": "Bưu Cục 305 QL14-Bù Đăng-Bình Phước",
         "loai": "Giao",
+        "inventory": 65,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Bưu Cục Xã 10-Bù Đăng-Bình Phước",
+        "loai": "Giao và lấy",
         "inventory": 48,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Bưu Cục 13 Đường Số 8-TP.Thủ Đức-HCM",
+        "name": "Bưu Cục 305 QL14-Bù Đăng-Bình Phước",
         "loai": "Lấy",
-        "inventory": 0,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "SG_CK1_113",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 95,
-    "ty_le_lay_day": "6.3%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 198 Thạnh Lộc 15-Q.12-HCM",
-        "loai": "Giao",
-        "inventory": 25,
+        "inventory": 65,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Bưu Cục 13 Đường Số 8-TP.Thủ Đức-HCM",
-        "loai": "Giao",
-        "inventory": 0,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 155 Quốc lộ 1A-Bình Chiểu-Thủ Đức-HCM",
-        "loai": "Giao và Lấy",
-        "inventory": 70,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "SG_CK1_115",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 100,
-    "ty_le_lay_day": "6.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 295F Lý Thường Kiệt-Quận 11-HCM",
-        "loai": "Giao",
-        "inventory": 24,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu cục 215 Bình Thới-Q.11-HCM",
-        "loai": "Giao",
-        "inventory": 30,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 147E Đội Cung-Q.11-HCM",
-        "loai": "Giao",
-        "inventory": 13,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 85 Cao Văn Ngọc-Phường Tân Phú-HCM",
-        "loai": "Giao",
-        "inventory": 33,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "SG_CK1_116",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 195,
-    "ty_le_lay_day": "13.0%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 59 Trương Phước Phan-Q.Bình Tân-HCM",
-        "loai": "Giao",
-        "inventory": 27,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 8F Gò Xoài-Bình Hưng Hòa A-Bình Tân-HCM",
-        "loai": "Giao",
-        "inventory": 59,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 1440/1 Tỉnh Lộ 10-Tân Tạo-Bình Tân-HCM",
-        "loai": "Giao",
-        "inventory": 23,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 59 Trương Phước Phan-Q.Bình Tân-HCM",
-        "loai": "Giao",
-        "inventory": 27,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 8F Gò Xoài-Bình Hưng Hòa A-Bình Tân-HCM",
-        "loai": "Giao và Lấy",
-        "inventory": 59,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "SG_CK1_117",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 175,
-    "ty_le_lay_day": "11.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Số 17 Đường Hoàng Văn Hợp-An Lạc A-Bình Tân-HCM",
-        "loai": "Giao",
-        "inventory": 53,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 116A Bà Hom-Phường 13-Quận 6-HCM",
-        "loai": "Giao",
-        "inventory": 39,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 119 Nguyễn Văn Luông-Q.6-HCM",
-        "loai": "Giao",
-        "inventory": 83,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "SG_CK1_118",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 163,
-    "ty_le_lay_day": "10.9%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 107 Đường 3D-Bình Hưng Hòa B-Bình Tân-HCM",
-        "loai": "Giao",
-        "inventory": 83,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục Hương Lộ 2-Bình Trị Đông A-Bình Tân",
-        "loai": "Giao",
-        "inventory": 40,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 235 Hồ Ngọc Lãm-Q.Bình Tân-HCM",
-        "loai": "Giao",
-        "inventory": 0,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục Hương Lộ 2-Bình Trị Đông A-Bình Tân",
+        "name": "Bưu Cục Xã Đức Liễu-Bù Đăng-Bình Phước",
         "loai": "Lấy",
-        "inventory": 40,
+        "inventory": 46,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Bưu Cục Tân Đồng-Đồng Xoài-Bình Phước",
+        "loai": "Lấy",
+        "inventory": 80,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Chuyển Tiếp Bình Phước",
+        "loai": "Phân loại",
+        "inventory": 280,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "loai": "Phân loại",
+        "inventory": 3593,
         "gio_den": "",
         "gio_roi": ""
       }
     ]
   },
   {
-    "tuyen": "SG_CK1_119",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 100,
-    "ty_le_lay_day": "6.7%",
+    "tuyen": "HCM_ĐL_03",
+    "cot_type": "HCM",
+    "gio_xuat_hcm01": "07:00",
+    "minutes_left": 22.7,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 4153,
+    "ty_le_lay_day": "51.9%",
     "drop_risk": "🟢 THẤP - Đủ sức chứa",
     "drop_level": "low",
     "stops": [
       {
-        "name": "Bưu Cục 608 Phan Văn Trị-Gò Vấp-HCM",
-        "loai": "Giao",
-        "inventory": 33,
+        "name": "Kho Trung Chuyển Đắk Lắk",
+        "loai": "Giao và lấy",
+        "inventory": 272,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Bưu Cục 371 Nguyễn Kiệm-Q.Gò Vấp-HCM",
+        "name": "Kho Giao Hàng Nặng - Buôn Ma Thuột - Đắk Lắk",
         "loai": "Giao",
-        "inventory": 31,
+        "inventory": 1,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Bưu Cục 104 Lương Ngọc Quyến-Q.Bình Thạnh-HCM",
-        "loai": "Giao",
-        "inventory": 36,
+        "name": "Kho Trung Chuyển Đắk Lắk",
+        "loai": "Lấy",
+        "inventory": 272,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Chuyển Tiếp Đắk Nông",
+        "loai": "Lấy",
+        "inventory": 15,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "loai": "Phân loại",
+        "inventory": 3593,
         "gio_den": "",
         "gio_roi": ""
       }
     ]
   },
   {
-    "tuyen": "SG_CK1_120",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 174,
-    "ty_le_lay_day": "11.6%",
+    "tuyen": "HCM_KH_04",
+    "cot_type": "HCM",
+    "gio_xuat_hcm01": "07:00",
+    "minutes_left": 22.7,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 294,
+    "ty_le_lay_day": "3.7%",
     "drop_risk": "🟢 THẤP - Đủ sức chứa",
     "drop_level": "low",
     "stops": [
       {
-        "name": "Bưu Cục 20/48A Bờ Bao Tân Thắng-Q.Tân Phú-HCM",
+        "name": "Kho Trung Chuyển Bình Thuận",
         "loai": "Giao",
-        "inventory": 76,
+        "inventory": 251,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Bưu Cục Phường Tây Thạnh-Tân Phú-HCM",
-        "loai": "Giao",
-        "inventory": 34,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 197 Lê Cao Lãng-Phú Thạnh-Tân Phú-HCM",
-        "loai": "Giao",
-        "inventory": 30,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 58 Lê Thúc Hoạch-Q.Tân Phú-HCM",
-        "loai": "Giao",
-        "inventory": 34,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "SG_CK1_121",
-    "cot_type": "SG",
-    "gio_xuat_hcm01": "02:10",
-    "minutes_left": 20.0,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 187,
-    "ty_le_lay_day": "12.5%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 125A Lê Lợi-Hóc Môn-HCM",
-        "loai": "Giao",
-        "inventory": 55,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 390 Nguyễn Kim Cương-Tân Thạnh Đông-Củ Chi",
-        "loai": "Giao",
-        "inventory": 90,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục 593A Tỉnh Lộ 15-Củ Chi-HCM",
-        "loai": "Giao",
-        "inventory": 42,
+        "name": "Kho Trung Chuyển Khánh Hòa",
+        "loai": "Giao và lấy",
+        "inventory": 43,
         "gio_den": "",
         "gio_roi": ""
       }

@@ -1,62 +1,26 @@
 [
   {
     "level": "critical",
-    "title": "Báo Động Đỏ: HCM_ĐN_06",
-    "desc": "Kho Chuyển Tiếp Thừa Thiên Huế(99), Kho Trung Chuyển Hà Nội 02(4,259). Có 64 đơn tồn > 24h: Ưu tiên xử lý lô hàng cũ (FIFO).",
+    "title": "Báo Động Đỏ: BinhPhuoc_T_1",
+    "desc": "Kho Chuyển Tiếp Bình Phước(280), Bưu Cục Xã Đức Liễu-Bù Đăng-Bình Phước(46), Bưu Cục 305 QL14-Bù Đăng-Bình Phước(65), Bưu Cục Xã 10-Bù Đăng-Bình Phước(48), Bưu Cục 305 QL14-Bù Đăng-Bình Phước(65), Bưu Cục Xã Đức Liễu-Bù Đăng-Bình Phước(46), Bưu Cục Tân Đồng-Đồng Xoài-Bình Phước(80), Kho Chuyển Tiếp Bình Phước(280), Kho Trung Chuyển Hồ Chí Minh 20(3,593). Tồn cao + Giờ gấp: Điều phối gấp toàn lực lượng, gọi xe tăng cường.",
     "category": "Inventory & Fleet",
     "am": "Hệ Thống",
-    "ton_hien_tai": 4358,
-    "suc_chua": 8000,
-    "ty_le": "54.5%",
-    "gio_con_lai": "4.2h",
-    "gio_xuat": "06:00"
-  },
-  {
-    "level": "critical",
-    "title": "Báo Động Đỏ: HCM_NA_05",
-    "desc": "Kho Trung Chuyển Nghệ An(2,943), Kho Trung Chuyển Nghệ An(2,943). Có 46 đơn tồn > 24h: Ưu tiên xử lý lô hàng cũ (FIFO).",
-    "category": "Inventory & Fleet",
-    "am": "Hệ Thống",
-    "ton_hien_tai": 5886,
-    "suc_chua": 8000,
-    "ty_le": "73.6%",
-    "gio_con_lai": "1.7h",
-    "gio_xuat": "03:30"
+    "ton_hien_tai": 4503,
+    "suc_chua": 4000,
+    "ty_le": "112.6%",
+    "gio_con_lai": "0.4h",
+    "gio_xuat": "07:00"
   },
   {
     "level": "critical",
     "title": "Báo Động Đỏ: MN_MB_01",
-    "desc": "Bình Dương(9,391), Kho Trung Chuyển Hưng Yên 01(5,787). Có 72 đơn tồn > 24h: Ưu tiên xử lý lô hàng cũ (FIFO).",
+    "desc": "Bình Dương(3,106), Kho Trung Chuyển Hưng Yên 01(3,714). Có 7299 đơn tồn > 24h: Ưu tiên xử lý lô hàng cũ (FIFO).",
     "category": "Inventory & Fleet",
     "am": "Hệ Thống",
-    "ton_hien_tai": 15178,
+    "ton_hien_tai": 6820,
     "suc_chua": 8000,
-    "ty_le": "189.7%",
-    "gio_con_lai": "15.2h",
+    "ty_le": "85.2%",
+    "gio_con_lai": "10.4h",
     "gio_xuat": "17:00"
-  },
-  {
-    "level": "critical",
-    "title": "Báo Động Đỏ: HCM01_HY_04",
-    "desc": "Kho Trung Chuyển Hưng Yên 01(5,787). Có 34 đơn tồn > 24h: Ưu tiên xử lý lô hàng cũ (FIFO).",
-    "category": "Inventory & Fleet",
-    "am": "Hệ Thống",
-    "ton_hien_tai": 5787,
-    "suc_chua": 8000,
-    "ty_le": "72.3%",
-    "gio_con_lai": "4.2h",
-    "gio_xuat": "06:00"
-  },
-  {
-    "level": "critical",
-    "title": "Báo Động Đỏ: HCM01_CT_03",
-    "desc": "Kho Trung Chuyển Hồ Chí Minh 01(9,576). Có 116 đơn tồn > 24h: Ưu tiên xử lý lô hàng cũ (FIFO).",
-    "category": "Inventory & Fleet",
-    "am": "Hệ Thống",
-    "ton_hien_tai": 9576,
-    "suc_chua": 8000,
-    "ty_le": "119.7%",
-    "gio_con_lai": "12.2h",
-    "gio_xuat": "14:00"
   }
 ]

@@ -1,49 +1,49 @@
 [
   {
     "name": "Kho Chuyển Tiếp",
-    "total": 13227,
-    "normal": 1,
-    "bulky": 1168,
-    "freight": 1221,
+    "total": 6140,
+    "normal": 0,
+    "bulky": 729,
+    "freight": 510,
     "children": [
       {
         "name": "Kho Chuyển Tiếp Bình Phước",
-        "total": 1514,
+        "total": 1535,
         "normal": 0,
-        "bulky": 192,
-        "freight": 206
+        "bulky": 156,
+        "freight": 124
       },
       {
         "name": "Kho Chuyển Tiếp Bình Thuận",
-        "total": 922,
+        "total": 426,
         "normal": 0,
-        "bulky": 152,
-        "freight": 200
+        "bulky": 126,
+        "freight": 125
       },
       {
         "name": "Kho Chuyển Tiếp Đắk Nông",
-        "total": 606,
+        "total": 221,
         "normal": 0,
-        "bulky": 65,
-        "freight": 48
+        "bulky": 12,
+        "freight": 3
       },
       {
         "name": "Kho Chuyển Tiếp Đồng Nai",
-        "total": 6870,
-        "normal": 1,
-        "bulky": 689,
-        "freight": 722
+        "total": 3606,
+        "normal": 0,
+        "bulky": 422,
+        "freight": 254
       },
       {
         "name": "Kho Chuyển Tiếp Quảng Ngãi",
-        "total": 554,
+        "total": 75,
         "normal": 0,
-        "bulky": 70,
-        "freight": 45
+        "bulky": 13,
+        "freight": 4
       },
       {
         "name": "Kho Chuyến Tiếp Thanh Hoá",
-        "total": 2761,
+        "total": 277,
         "normal": 0,
         "bulky": 0,
         "freight": 0
@@ -52,230 +52,230 @@
   },
   {
     "name": "Kho Giao Hàng Nặng",
-    "total": 2365,
+    "total": 1743,
     "normal": 0,
-    "bulky": 88,
-    "freight": 2225,
+    "bulky": 138,
+    "freight": 1559,
     "children": [
       {
         "name": "Kho Giao Hàng Nặng - Bến Cát - Bình Dương",
-        "total": 118,
+        "total": 12,
         "normal": 0,
-        "bulky": 0,
-        "freight": 117
+        "bulky": 1,
+        "freight": 11
       },
       {
         "name": "Kho Giao Hàng Nặng - Dĩ An - Bình Dương",
-        "total": 143,
+        "total": 37,
         "normal": 0,
-        "bulky": 1,
-        "freight": 142
+        "bulky": 0,
+        "freight": 37
       },
       {
         "name": "Kho Giao Hàng Nặng - Đức Hòa - Long An",
-        "total": 129,
+        "total": 121,
         "normal": 0,
-        "bulky": 6,
-        "freight": 109
+        "bulky": 5,
+        "freight": 112
       },
       {
         "name": "Kho Giao Hàng Nặng - Hồ Chí Minh",
-        "total": 38,
+        "total": 18,
         "normal": 0,
         "bulky": 0,
-        "freight": 38
+        "freight": 18
       },
       {
         "name": "Kho Giao Hàng Nặng - Nhà Bè - HCM",
-        "total": 255,
+        "total": 292,
         "normal": 0,
-        "bulky": 11,
-        "freight": 221
+        "bulky": 22,
+        "freight": 262
       },
       {
         "name": "Kho Giao Hàng Nặng - Tân Tạo - HCM",
-        "total": 383,
+        "total": 667,
         "normal": 0,
-        "bulky": 43,
-        "freight": 332
+        "bulky": 60,
+        "freight": 580
       },
       {
         "name": "Kho Giao Hàng Nặng - Thủ Dầu Một - Bình Dương",
-        "total": 165,
+        "total": 13,
         "normal": 0,
-        "bulky": 1,
-        "freight": 164
+        "bulky": 0,
+        "freight": 13
       },
       {
         "name": "Kho Giao Hàng Nặng - Thủ Đức - HCM",
-        "total": 395,
+        "total": 268,
         "normal": 0,
-        "bulky": 20,
-        "freight": 374
+        "bulky": 30,
+        "freight": 231
       },
       {
         "name": "Kho Giao Hàng Nặng - Thuận An - Bình Dương",
-        "total": 185,
+        "total": 134,
         "normal": 0,
-        "bulky": 0,
-        "freight": 183
+        "bulky": 12,
+        "freight": 122
       },
       {
         "name": "Kho Giao Hàng Nặng - TP Bến Tre - Bến Tre",
-        "total": 108,
+        "total": 23,
         "normal": 0,
-        "bulky": 3,
-        "freight": 105
+        "bulky": 0,
+        "freight": 23
       },
       {
         "name": "Kho Giao Hàng Nặng - TP Mỹ Tho - Tiền Giang",
-        "total": 132,
+        "total": 86,
         "normal": 0,
-        "bulky": 2,
-        "freight": 127
+        "bulky": 5,
+        "freight": 81
       },
       {
         "name": "Kho Giao Hàng Nặng - TP Tân An - Long An",
-        "total": 116,
+        "total": 41,
         "normal": 0,
-        "bulky": 1,
-        "freight": 115
+        "bulky": 2,
+        "freight": 39
       },
       {
         "name": "Kho Giao Hàng Nặng - TP Tây Ninh - Tây Ninh",
-        "total": 129,
+        "total": 20,
         "normal": 0,
         "bulky": 0,
-        "freight": 129
+        "freight": 20
       },
       {
         "name": "Kho Giao Hàng Nặng - TX Cai Lậy - Tiền Giang",
-        "total": 69,
+        "total": 11,
         "normal": 0,
-        "bulky": 0,
-        "freight": 69
+        "bulky": 1,
+        "freight": 10
       }
     ]
   },
   {
     "name": "Kho KHL",
-    "total": 204,
-    "normal": 46,
-    "bulky": 82,
-    "freight": 76,
+    "total": 1096,
+    "normal": 683,
+    "bulky": 196,
+    "freight": 217,
     "children": [
       {
         "name": "Key Account Warehouse Ho Chi Minh",
-        "total": 204,
-        "normal": 46,
-        "bulky": 82,
-        "freight": 76
+        "total": 1096,
+        "normal": 683,
+        "bulky": 196,
+        "freight": 217
       }
     ]
   },
   {
     "name": "Kho Trung Chuyển",
-    "total": 34869,
-    "normal": 14306,
-    "bulky": 2847,
-    "freight": 2193,
+    "total": 16981,
+    "normal": 7782,
+    "bulky": 1469,
+    "freight": 932,
     "children": [
       {
         "name": "Kho Trung Chuyển Bình Định",
-        "total": 906,
-        "normal": 371,
-        "bulky": 90,
-        "freight": 63
+        "total": 174,
+        "normal": 102,
+        "bulky": 25,
+        "freight": 17
       },
       {
         "name": "Kho Trung Chuyển Cần Thơ",
-        "total": 5768,
-        "normal": 30,
-        "bulky": 471,
-        "freight": 374
+        "total": 3780,
+        "normal": 112,
+        "bulky": 268,
+        "freight": 112
       },
       {
         "name": "Kho Trung Chuyển Đà Nẵng",
-        "total": 1666,
-        "normal": 1088,
-        "bulky": 237,
-        "freight": 229
+        "total": 421,
+        "normal": 237,
+        "bulky": 73,
+        "freight": 58
       },
       {
         "name": "Kho Trung Chuyển Đắk Lắk",
-        "total": 2144,
-        "normal": 0,
-        "bulky": 203,
-        "freight": 195
+        "total": 2268,
+        "normal": 36,
+        "bulky": 127,
+        "freight": 109
       },
       {
         "name": "Kho Trung Chuyển Dương Xá",
-        "total": 1522,
-        "normal": 0,
-        "bulky": 840,
-        "freight": 575
+        "total": 851,
+        "normal": 1,
+        "bulky": 505,
+        "freight": 318
       },
       {
         "name": "Kho Trung Chuyển Gia Lai",
-        "total": 1444,
-        "normal": 701,
-        "bulky": 195,
-        "freight": 175
+        "total": 181,
+        "normal": 120,
+        "bulky": 15,
+        "freight": 13
       },
       {
         "name": "Kho Trung Chuyển Hà Nội 02",
-        "total": 4401,
-        "normal": 4214,
-        "bulky": 20,
-        "freight": 25
+        "total": 540,
+        "normal": 443,
+        "bulky": 19,
+        "freight": 0
       },
       {
         "name": "Kho Trung Chuyển Hồ Chí Minh 20",
-        "total": 2831,
-        "normal": 2105,
-        "bulky": 123,
-        "freight": 97
+        "total": 4084,
+        "normal": 3181,
+        "bulky": 240,
+        "freight": 172
       },
       {
         "name": "Kho Trung Chuyển Hưng Yên 01",
-        "total": 6445,
-        "normal": 5284,
-        "bulky": 311,
-        "freight": 192
+        "total": 4058,
+        "normal": 3436,
+        "bulky": 164,
+        "freight": 114
       },
       {
         "name": "Kho Trung Chuyển Khánh Hòa",
-        "total": 3240,
+        "total": 221,
         "normal": 0,
-        "bulky": 250,
-        "freight": 182
+        "bulky": 29,
+        "freight": 14
       },
       {
         "name": "Kho Trung Chuyến Nghệ An",
-        "total": 3515,
+        "total": 258,
         "normal": 0,
         "bulky": 0,
         "freight": 0
       },
       {
         "name": "Kho Trung Chuyển Quảng Bình",
-        "total": 987,
-        "normal": 513,
-        "bulky": 107,
-        "freight": 86
+        "total": 145,
+        "normal": 114,
+        "bulky": 4,
+        "freight": 5
       }
     ]
   },
   {
     "name": "Nội Thành",
-    "total": 5122,
+    "total": 3390,
     "normal": 0,
     "bulky": 0,
     "freight": 0,
     "children": [
       {
         "name": "Hồ Chí Minh",
-        "total": 5122,
+        "total": 3390,
         "normal": 0,
         "bulky": 0,
         "freight": 0
@@ -284,42 +284,42 @@
   },
   {
     "name": "Nội vùng",
-    "total": 29170,
+    "total": 9930,
     "normal": 0,
     "bulky": 0,
     "freight": 0,
     "children": [
       {
         "name": "Bến Tre",
-        "total": 3305,
+        "total": 1454,
         "normal": 0,
         "bulky": 0,
         "freight": 0
       },
       {
         "name": "Bình Dương",
-        "total": 9391,
+        "total": 3106,
         "normal": 0,
         "bulky": 0,
         "freight": 0
       },
       {
         "name": "Long An",
-        "total": 7609,
+        "total": 2382,
         "normal": 0,
         "bulky": 0,
         "freight": 0
       },
       {
         "name": "Tây Ninh",
-        "total": 4885,
+        "total": 1539,
         "normal": 0,
         "bulky": 0,
         "freight": 0
       },
       {
         "name": "Tiền Giang",
-        "total": 3980,
+        "total": 1449,
         "normal": 0,
         "bulky": 0,
         "freight": 0
@@ -328,14 +328,14 @@
   },
   {
     "name": "Phú Quốc",
-    "total": 679,
+    "total": 1775,
     "normal": 0,
     "bulky": 0,
     "freight": 0,
     "children": [
       {
         "name": "Phú Quốc",
-        "total": 679,
+        "total": 1775,
         "normal": 0,
         "bulky": 0,
         "freight": 0
