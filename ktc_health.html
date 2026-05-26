@@ -1718,11 +1718,62 @@ renderCharts();
     </div>
     <div class="modal-footer" style="display:flex;gap:10px;padding:14px 20px;flex-wrap:wrap">
       <button onclick="resetZoneSettings()" style="flex:1;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">&#x21BA; Mặc định</button>
-      <button onclick="exportZoneCfg()" style="flex:1.5;background:#238636;border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">💾 Tải zoneCfg.js</button>
-      <button id="btn-save-settings" onclick="saveZoneSettings()" style="flex:1.5;background:linear-gradient(135deg,#388bfd,#1f6feb);border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">✔ Lưu Trên Máy Này</button>
+      <button onclick="exportZoneCfg()" style="flex:1;background:#238636;border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">💾 Tải JS</button>
+      <button id="btn-save-settings" onclick="saveZoneSettings()" style="flex:1;background:#1f6feb;border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">✔ Lưu Máy Này</button>
+      <button id="btn-sync-admin" onclick="saveSyncAdmin()" style="flex:2;background:linear-gradient(135deg,#da3633,#f85149);border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🌐 Quyền Tối Cao (Đồng Bộ)</button>
     </div>
   </div>
 </div>
+
+<script>
+function saveSyncAdmin() {
+  var pwd = prompt("Nhập mật khẩu quản trị (Quyền Tối Cao):");
+  if (!pwd) return;
+  if (pwd !== "di46991") {
+    alert("Sai mật khẩu!");
+    return;
+  }
+  
+  var encPat = "AwFEaVNOSCIsQU9XTHMQEHlSdE5rHiB+cgF6RiIrXAdRYQIDBmJYdg==";
+  var pat = atob(encPat).split('').map(function(c, i) { return String.fromCharCode(c.charCodeAt(0) ^ pwd.charCodeAt(i % pwd.length)); }).join('');
+  
+  saveZoneSettings(); 
+  
+  var content = "var GLOBAL_ZONE_CFG = " + JSON.stringify(zoneCfg, null, 2) + ";";
+  var b64Content = btoa(unescape(encodeURIComponent(content)));
+  
+  var btn = document.getElementById("btn-sync-admin");
+  btn.innerText = "⏳ Đang đồng bộ...";
+  
+  fetch("https://api.github.com/repos/ImDiDinne/ktchcm01/contents/zoneCfg.js", {
+    headers: { "Authorization": "token " + pat, "Accept": "application/vnd.github.v3+json" }
+  }).then(function(r){ return r.json(); }).then(function(data) {
+    var sha = data.sha;
+    var reqBody = {
+      message: "Admin update zoneCfg from Web UI",
+      content: b64Content
+    };
+    if(sha) reqBody.sha = sha;
+    
+    return fetch("https://api.github.com/repos/ImDiDinne/ktchcm01/contents/zoneCfg.js", {
+      method: "PUT",
+      headers: { "Authorization": "token " + pat, "Content-Type": "application/json" },
+      body: JSON.stringify(reqBody)
+    });
+  }).then(function(r){ return r.json(); }).then(function(res) {
+    if(res.content && res.content.name) {
+       btn.innerText = "🚀 Đã Đồng Bộ!";
+       alert("Đã cập nhật cấu hình lên Server thành công! Các máy khác chỉ cần tải lại trang là nhận cấu hình mới.");
+    } else {
+       alert("Lỗi đồng bộ: " + JSON.stringify(res));
+    }
+    setTimeout(function(){ btn.innerText = "🌐 Quyền Tối Cao (Đồng Bộ)"; }, 2000);
+  }).catch(function(e) {
+    alert("Lỗi đồng bộ: " + e.message);
+    btn.innerText = "🌐 Quyền Tối Cao (Đồng Bộ)";
+  });
+}
+</script>
 
 <script>
 /* ═══════════════════════════════════════
