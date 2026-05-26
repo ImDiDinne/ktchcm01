@@ -1,193 +1,1872 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHN Operations Dashboard — Vùng HCM</title>
-    <meta name="description" content="Hệ thống quản lý vận hành Giao Hàng Nhanh - Vùng Hồ Chí Minh">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KTC Health Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- TONKHO_DATA_START -->
+<script>var TONKHO_DATA={"title": "BÁO CÁO CUỐI CA KTC HCM 01", "grand_total": 41055, "routes": [{"name": "Kho Chuyển Tiếp", "total": 6140, "children": [{"name": "Kho Chuyển Tiếp Bình Phước", "short_name": "Bình Phước", "total": 1535}, {"name": "Kho Chuyển Tiếp Bình Thuận", "short_name": "Bình Thuận", "total": 426}, {"name": "Kho Chuyển Tiếp Đắk Nông", "short_name": "Đắk Nông", "total": 221}, {"name": "Kho Chuyển Tiếp Đồng Nai", "short_name": "Đồng Nai", "total": 3606}, {"name": "Kho Chuyển Tiếp Quảng Ngãi", "short_name": "Quảng Ngãi", "total": 75}, {"name": "Kho Chuyến Tiếp Thanh Hoá", "short_name": "Thanh Hoá", "total": 277}]}, {"name": "Kho Giao Hàng Nặng", "total": 1743, "children": [{"name": "Kho Giao Hàng Nặng - Bến Cát - Bình Dương", "short_name": "Bến Cát - Bình Dương", "total": 12}, {"name": "Kho Giao Hàng Nặng - Dĩ An - Bình Dương", "short_name": "Dĩ An - Bình Dương", "total": 37}, {"name": "Kho Giao Hàng Nặng - Đức Hòa - Long An", "short_name": "Đức Hòa - Long An", "total": 121}, {"name": "Kho Giao Hàng Nặng - Hồ Chí Minh", "short_name": "Hồ Chí Minh", "total": 18}, {"name": "Kho Giao Hàng Nặng - Nhà Bè - HCM", "short_name": "Nhà Bè - HCM", "total": 292}, {"name": "Kho Giao Hàng Nặng - Tân Tạo - HCM", "short_name": "Tân Tạo - HCM", "total": 667}, {"name": "Kho Giao Hàng Nặng - Thủ Dầu Một - Bình Dương", "short_name": "Thủ Dầu Một - Bình Dương", "total": 13}, {"name": "Kho Giao Hàng Nặng - Thủ Đức - HCM", "short_name": "Thủ Đức - HCM", "total": 268}, {"name": "Kho Giao Hàng Nặng - Thuận An - Bình Dương", "short_name": "Thuận An - Bình Dương", "total": 134}, {"name": "Kho Giao Hàng Nặng - TP Bến Tre - Bến Tre", "short_name": "TP Bến Tre - Bến Tre", "total": 23}, {"name": "Kho Giao Hàng Nặng - TP Mỹ Tho - Tiền Giang", "short_name": "TP Mỹ Tho - Tiền Giang", "total": 86}, {"name": "Kho Giao Hàng Nặng - TP Tân An - Long An", "short_name": "TP Tân An - Long An", "total": 41}, {"name": "Kho Giao Hàng Nặng - TP Tây Ninh - Tây Ninh", "short_name": "TP Tây Ninh - Tây Ninh", "total": 20}, {"name": "Kho Giao Hàng Nặng - TX Cai Lậy - Tiền Giang", "short_name": "TX Cai Lậy - Tiền Giang", "total": 11}]}, {"name": "Kho KHL", "total": 1096, "children": [{"name": "Key Account Warehouse Ho Chi Minh", "short_name": "Key Account Warehouse Ho Chi Minh", "total": 1096}]}, {"name": "Kho Trung Chuyển", "total": 16981, "children": [{"name": "Kho Trung Chuyển Bình Định", "short_name": "Bình Định", "total": 174}, {"name": "Kho Trung Chuyển Cần Thơ", "short_name": "Cần Thơ", "total": 3780}, {"name": "Kho Trung Chuyển Đà Nẵng", "short_name": "Đà Nẵng", "total": 421}, {"name": "Kho Trung Chuyển Đắk Lắk", "short_name": "Đắk Lắk", "total": 2268}, {"name": "Kho Trung Chuyển Dương Xá", "short_name": "Dương Xá", "total": 851}, {"name": "Kho Trung Chuyển Gia Lai", "short_name": "Gia Lai", "total": 181}, {"name": "Kho Trung Chuyển Hà Nội 02", "short_name": "Hà Nội 02", "total": 540}, {"name": "Kho Trung Chuyển Hồ Chí Minh 20", "short_name": "Hồ Chí Minh 20", "total": 4084}, {"name": "Kho Trung Chuyển Hưng Yên 01", "short_name": "Hưng Yên 01", "total": 4058}, {"name": "Kho Trung Chuyển Khánh Hòa", "short_name": "Khánh Hòa", "total": 221}, {"name": "Kho Trung Chuyến Nghệ An", "short_name": "Nghệ An", "total": 258}, {"name": "Kho Trung Chuyển Quảng Bình", "short_name": "Quảng Bình", "total": 145}]}, {"name": "Nội Thành", "total": 3390, "children": [{"name": "Hồ Chí Minh", "short_name": "Hồ Chí Minh", "total": 3390}]}, {"name": "Nội vùng", "total": 9930, "children": [{"name": "Bến Tre", "short_name": "Bến Tre", "total": 1454}, {"name": "Bình Dương", "short_name": "Bình Dương", "total": 3106}, {"name": "Long An", "short_name": "Long An", "total": 2382}, {"name": "Tây Ninh", "short_name": "Tây Ninh", "total": 1539}, {"name": "Tiền Giang", "short_name": "Tiền Giang", "total": 1449}]}, {"name": "Phú Quốc", "total": 1775, "children": [{"name": "Phú Quốc", "short_name": "Phú Quốc", "total": 1775}]}], "updated": "27/05/2026 04:07:04"};</script>
+<!-- TONKHO_DATA_END -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#161b22,#1c2128);border-bottom:1px solid #30363d;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:800;color:#fff}
+.header h1 span{color:#f85149}
+.shift-badge{background:#21262d;border:1px solid #30363d;border-radius:20px;padding:8px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.shift-badge .dot{width:8px;height:8px;border-radius:50%;background:#3fb950;display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.clock{font-size:14px;color:#8b949e;margin-top:4px}
+
+/* LAYOUT */
+.main{padding:20px 24px;display:grid;gap:20px}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.red::before{background:linear-gradient(90deg,#f85149,#ff6b6b)}
+.kpi.yellow::before{background:linear-gradient(90deg,#d29922,#f0c040)}
+.kpi.green::before{background:linear-gradient(90deg,#3fb950,#56d364)}
+.kpi.blue::before{background:linear-gradient(90deg,#388bfd,#58a6ff)}
+.kpi-label{font-size:12px;color:#8b949e;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:32px;font-weight:800;margin:8px 0 4px}
+.kpi-sub{font-size:12px;color:#8b949e}
+.kpi.red .kpi-value{color:#f85149}
+.kpi.yellow .kpi-value{color:#d29922}
+.kpi.green .kpi-value{color:#3fb950}
+.kpi.blue .kpi-value{color:#388bfd}
+
+/* MODULES */
+.modules{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
+.module{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.module h2{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bar-container{margin-bottom:12px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;color:#8b949e;margin-bottom:6px}
+.bar-track{background:#21262d;border-radius:6px;height:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;transition:width .5s ease}
+.bar-fill.green{background:linear-gradient(90deg,#3fb950,#56d364)}
+.bar-fill.yellow{background:linear-gradient(90deg,#d29922,#f0c040)}
+.bar-fill.red{background:linear-gradient(90deg,#f85149,#ff6b6b)}
+.bar-fill.blue{background:linear-gradient(90deg,#388bfd,#58a6ff)}
+
+/* GATES */
+.gate-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px}
+.gate{height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;user-select:none;transition:all .2s}
+.gate:active{transform:scale(.92)}
+.gate.free{background:#1c3a2a;color:#3fb950;border:1px solid #2ea043}
+.gate.free:hover{background:#234d30;box-shadow:0 0 8px rgba(63,185,80,.3)}
+.gate.busy{background:#3a1c1c;color:#f85149;border:1px solid #f85149}
+.gate.busy:hover{background:#4a2020}
+@keyframes gatePulse{0%,100%{border-color:#f85149}50%{border-color:#ff6b6b;box-shadow:0 0 8px rgba(248,81,73,.4)}}
+.section-title{font-size:11px;color:#8b949e;font-weight:600;text-transform:uppercase;margin-bottom:8px;margin-top:4px}
+
+/* FEEDER */
+.feeder-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px}
+.feeder{height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;user-select:none;transition:all .2s}
+.feeder:active{transform:scale(.92)}
+.feeder.free{background:#1c2a3a;color:#388bfd;border:1px solid #1f4a7a}
+.feeder.free:hover{background:#1e3450;box-shadow:0 0 8px rgba(56,139,253,.3)}
+.feeder.busy{background:#2a1c3a;color:#a371f7;border:1px solid #7c40cc}
+.feeder.busy:hover{background:#36215a}
+
+/* STATS BOX */
+.stats-box{margin-top:8px;padding:10px;background:#21262d;border-radius:8px;font-size:12px}
+.stats-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.stats-row:last-child{margin-bottom:0}
+
+/* ALERTS */
+.alerts-panel{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.alert-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:8px;margin-bottom:8px;font-size:13px}
+.alert-item.critical{background:#3a1c1c;border:1px solid #f85149}
+.alert-item.warning{background:#3a2c1c;border:1px solid #d29922}
+.alert-msg{font-weight:500}
+.alert-time{font-size:11px;color:#8b949e;margin-top:2px}
+
+/* INPUT PANEL */
+.input-panel{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.input-panel h2{font-size:14px;font-weight:700;margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group label{display:block;font-size:11px;color:#8b949e;font-weight:600;text-transform:uppercase;margin-bottom:6px}
+.form-group input{width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:14px;font-family:Inter,sans-serif;outline:none;transition:border-color .2s}
+.form-group input:focus{border-color:#388bfd}
+.btn-update{background:linear-gradient(135deg,#388bfd,#1f6feb);border:none;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:16px;transition:all .2s;width:100%}
+.btn-update:hover{background:linear-gradient(135deg,#58a6ff,#388bfd)}
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+/* ZONE CARDS */
+.zone-section{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.zone-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.zone-section-hdr h2{font-size:14px;font-weight:700}
+.zone-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.zone-card{background:#0d1117;border:1px solid #30363d;border-radius:10px;padding:14px;transition:border-color .2s}
+.zone-card.ck{border-top:3px solid #d29922}
+.zone-card.b2{border-top:3px solid #388bfd}
+.zone-card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.zone-card.ck .zone-card-title{color:#d29922}
+.zone-card.b2 .zone-card-title{color:#388bfd}
+.zone-input-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.zone-input-row .form-group label{font-size:10px}
+.zone-input-row .form-group input{padding:7px 10px;font-size:13px}
+.zone-stats-box{background:#21262d;border-radius:7px;padding:8px 10px;font-size:11px}
+.zone-stat{display:flex;justify-content:space-between;margin-bottom:4px}
+.zone-stat:last-child{margin-bottom:0}
+.zone-eta{font-size:15px;font-weight:800;text-align:center;padding:6px 0 2px;letter-spacing:.5px}
+
+/* CHARTS */
+.chart-section-hdr{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.chart-section-hdr h2{font-size:18px;font-weight:800;background:linear-gradient(135deg,#388bfd,#a371f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.chart-section-hdr .badge{background:#21262d;border:1px solid #30363d;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:#8b949e}
+.hourly-form{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:16px}
+.hourly-form h3{font-size:13px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.hourly-form-grid{display:grid;grid-template-columns:repeat(5,1fr) auto auto;gap:12px;align-items:end}
+.hourly-form-grid .form-group{margin:0}
+.btn-add{background:linear-gradient(135deg,#2ea043,#3fb950);border:none;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;height:40px;transition:all .2s}
+.btn-add:hover{transform:translateY(-1px)}
+.btn-clear{background:#21262d;border:1px solid #f85149;color:#f85149;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;height:40px;transition:all .2s}
+.btn-clear:hover{background:#3a1c1c}
+.hourly-table-wrap{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:16px;max-height:220px;overflow-y:auto}
+.hourly-table{width:100%;border-collapse:collapse;font-size:12px}
+.hourly-table th{color:#8b949e;font-weight:600;text-align:left;padding:6px 10px;border-bottom:1px solid #30363d}
+.hourly-table td{padding:7px 10px;border-bottom:1px solid #21262d}
+.hourly-table tr:hover td{background:#21262d}
+.ca-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.ca-badge.ca1{background:#1c3a2a;color:#3fb950;border:1px solid #2ea043}
+.ca-badge.ca2{background:#3a2c1c;color:#d29922;border:1px solid #d29922}
+.ca-badge.ca3{background:#1c2a3a;color:#388bfd;border:1px solid #388bfd}
+.btn-del{background:none;border:none;color:#f85149;cursor:pointer;font-size:14px;padding:0 4px}
+.charts-3col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.chart-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.chart-card h3{font-size:13px;font-weight:700;margin-bottom:14px}
+.chart-card .chart-wrap{position:relative;height:180px}
+.chart-bar-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px}
+.chart-bar-card h3{font-size:13px;font-weight:700;margin-bottom:14px}
+.chart-bar-card .chart-wrap{position:relative;height:220px}
+.empty-chart{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#8b949e;font-size:13px;gap:8px}
+.empty-chart .ei{font-size:32px;opacity:.5}
+.kho-bar-item:hover .bar-track .bar-fill{ filter:brightness(1.2); }
+.kho-bar-item:hover{ background:#1c2128; border-radius:8px; }
+
+/* MODAL */
+.modal-overlay{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000;
+  backdrop-filter:blur(4px); align-items:center; justify-content:center;
+}
+.modal-overlay.open{ display:flex; }
+.modal-box{
+  background:#161b22; border:1px solid #30363d; border-radius:16px;
+  width:min(520px,94vw); max-height:80vh; display:flex; flex-direction:column;
+  box-shadow:0 24px 64px rgba(0,0,0,.6);
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{
+  padding:20px 20px 16px; border-bottom:1px solid #30363d;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+}
+.modal-header-left h3{ font-size:17px; font-weight:800; color:#e6edf3; margin-bottom:4px; }
+.modal-header-left p{ font-size:12px; color:#8b949e; }
+.modal-close{
+  background:none; border:1px solid #30363d; color:#8b949e; width:32px; height:32px;
+  border-radius:8px; cursor:pointer; font-size:16px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; transition:all .2s;
+}
+.modal-close:hover{ background:#21262d; color:#e6edf3; }
+.modal-body{ padding:16px 20px; overflow-y:auto; flex:1; }
+.detail-row{ margin-bottom:12px; }
+.detail-name{
+  font-size:13px; font-weight:500; color:#e6edf3;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-bottom:5px;
+}
+.detail-right{ display:flex; justify-content:space-between; margin-bottom:5px; }
+.detail-num{ font-size:12px; font-weight:600; color:#8b949e; }
+.detail-pct{ font-size:12px; font-weight:700; color:#58a6ff; }
+.detail-bar-track{ background:#21262d; border-radius:4px; height:7px; overflow:hidden; }
+.detail-bar-fill{ height:100%; border-radius:4px; transition:width .4s ease; }
+.detail-bar-fill.green{ background:linear-gradient(90deg,#3fb950,#56d364); }
+.detail-bar-fill.yellow{ background:linear-gradient(90deg,#d29922,#f0c040); }
+.detail-bar-fill.red{ background:linear-gradient(90deg,#f85149,#ff6b6b); }
+.modal-footer{ padding:12px 20px; border-top:1px solid #30363d; text-align:center; }
+.modal-footer span{ font-size:11px; color:#8b949e; }
+
+/* ── LOGIN SCREEN ── */
+#login-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:#0d1117;
+  display:flex;align-items:center;justify-content:center;
+  font-family:Inter,sans-serif;
+}
+#login-screen .login-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 50%,#1a2e4a 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,#1f1a3a 0%,transparent 50%),
+             radial-gradient(ellipse at 60% 80%,#0d2a1a 0%,transparent 50%);
+}
+.login-card{
+  position:relative;z-index:1;
+  background:rgba(22,27,34,.9);backdrop-filter:blur(20px);
+  border:1px solid #30363d;border-radius:20px;
+  padding:40px 36px;width:min(420px,90vw);
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04);
+  animation:slideUp .4s ease;
+}
+.login-logo{ text-align:center;margin-bottom:28px; }
+.login-logo .logo-icon{
+  width:64px;height:64px;border-radius:16px;
+  background:linear-gradient(135deg,#f85149,#388bfd);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:30px;margin-bottom:12px;
+  box-shadow:0 8px 24px rgba(248,81,73,.35);
+}
+.login-logo h1{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px}
+.login-logo p{font-size:13px;color:#8b949e}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.login-field input{
+  width:100%;background:#21262d;border:1px solid #30363d;
+  border-radius:10px;padding:12px 14px;color:#e6edf3;
+  font-size:14px;font-family:Inter,sans-serif;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.login-field input:focus{border-color:#58a6ff;box-shadow:0 0 0 3px rgba(88,166,255,.12)}
+.login-field input::placeholder{color:#484f58}
+#login-error{
+  background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.3);
+  border-radius:8px;padding:10px 14px;
+  color:#f85149;font-size:13px;text-align:center;
+  display:none;margin-bottom:16px;
+}
+.btn-login{
+  width:100%;padding:13px;
+  background:linear-gradient(135deg,#388bfd,#1f6feb);
+  border:none;border-radius:10px;color:#fff;
+  font-size:15px;font-weight:700;font-family:Inter,sans-serif;
+  cursor:pointer;transition:opacity .2s,transform .1s;
+}
+.btn-login:hover{opacity:.9;transform:translateY(-1px)}
+.btn-login:active{transform:translateY(0)}
+.login-footer{text-align:center;margin-top:20px;font-size:11px;color:#484f58}
+
+/* ── USER BADGE ── */
+.user-badge{
+  background:#21262d;border:1px solid #30363d;border-radius:10px;
+  padding:7px 12px;display:flex;align-items:center;gap:8px;font-size:12px;
+}
+.role-tag{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 6px;border-radius:4px}
+.role-tag.admin{background:rgba(248,81,73,.15);color:#f85149}
+.role-tag.operator{background:rgba(56,139,253,.15);color:#58a6ff}
+.btn-logout{background:none;border:1px solid #30363d;color:#8b949e;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;transition:all .2s;font-family:Inter,sans-serif}
+.btn-logout:hover{border-color:#f85149;color:#f85149}
+</style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-shipping-fast"></i>
-                </div>
-                <div class="logo-text">
-                    <span class="logo-title">HCM01 HUB</span>
-                    <span class="logo-sub">KTC Hồ Chí Minh 01</span>
-                </div>
-            </div>
+
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="login-screen">
+  <div class="login-bg"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">🏭</div>
+      <h1>KTC HEALTH</h1>
+      <p>Dashboard Vận Hành — Đăng nhập để tiếp tục</p>
+    </div>
+    <div class="login-field">
+      <label>Tên đăng nhập</label>
+      <input type="text" id="login-user" placeholder="username" autocomplete="username"
+        onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
+    </div>
+    <div class="login-field">
+      <label>Mật khẩu</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-error">❌ Tên đăng nhập hoặc mật khẩu không đúng</div>
+    <button class="btn-login" onclick="doLogin()">Đăng Nhập →</button>
+    <div class="login-footer">KTC HCM 01 &nbsp;•&nbsp; Hệ thống nội bộ — Không chia sẻ mật khẩu</div>
+  </div>
+</div>
+
+<!-- ═══ USER MANAGEMENT MODAL ═══ -->
+<div class="modal-overlay" id="user-mgmt-modal" onclick="if(event.target===this)closeUserMgmt()">
+  <div class="modal-box" style="width:min(520px,94vw)">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <h3>👥 Quản Lý Người Dùng</h3>
+        <p>Chỉ Admin mới có quyền truy cập</p>
+      </div>
+      <button class="modal-close" onclick="closeUserMgmt()">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <div id="user-list-container"></div>
+      <hr style="border:none;border-top:1px solid #30363d;margin:16px 0">
+      <div style="font-size:12px;font-weight:700;color:#8b949e;text-transform:uppercase;margin-bottom:12px">➕ Thêm Người Dùng Mới</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="form-group"><label>Username</label>
+          <input type="text" id="new-username" placeholder="vd: op2"
+            style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none">
         </div>
-        <ul class="nav-menu">
-            <li class="nav-item active" data-page="overview">
-                <i class="fas fa-chart-pie"></i>
-                <span>Tổng quan</span>
-            </li>
-
-            <li class="nav-item" data-page="fleet">
-                <i class="fas fa-route"></i>
-                <span>Lịch xe tải</span>
-            </li>
-
-            <li class="nav-item" data-page="inventory">
-                <i class="fas fa-warehouse"></i>
-                <span>Tồn kho (PV)</span>
-            </li>
-            <li class="nav-item" data-page="alerts">
-                <i class="fas fa-bell"></i>
-                <span>Cảnh báo</span>
-                <span class="badge" id="alertBadge">0</span>
-            </li>
-        </ul>
-        <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar">DH</div>
-                <div class="user-details">
-                    <span class="user-name">Duy Huynh</span>
-                    <span class="user-role">Hub Manager</span>
-                </div>
-            </div>
+        <div class="form-group"><label>Họ tên hiển thị</label>
+          <input type="text" id="new-displayname" placeholder="vd: Vận Hành Ca 2"
+            style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none">
         </div>
-    </nav>
+        <div class="form-group"><label>Mật khẩu</label>
+          <input type="password" id="new-password" placeholder="Nhập mật khẩu"
+            style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none">
+        </div>
+        <div class="form-group"><label>Phân quyền</label>
+          <select id="new-role"
+            style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none">
+            <option value="operator">Operator — Nhập liệu + Xem</option>
+            <option value="admin">Admin — Toàn quyền</option>
+          </select>
+        </div>
+      </div>
+      <div id="add-user-msg" style="font-size:12px;color:#8b949e;min-height:18px"></div>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:10px;padding:14px 20px">
+      <button onclick="addUser()" style="flex:2;background:linear-gradient(135deg,#388bfd,#1f6feb);border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">➕ Thêm User</button>
+      <button onclick="closeUserMgmt()" style="flex:1;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Đóng</button>
+    </div>
+  </div>
+</div>
 
-    <!-- Main Content -->
-    <main class="main-content" id="mainContent">
-        <!-- Top Bar -->
-        <header class="topbar">
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="topbar-title">
-                <h1 id="pageTitle">KTC Hồ Chí Minh 01</h1>
-                <span class="topbar-date" id="currentDate"></span>
-            </div>
-            <div class="topbar-actions">
-                <div class="search-box" id="searchBoxWrap">
-                    <i class="fas fa-search" id="searchIcon"></i>
-                    <input type="text" placeholder="Tìm kho, tuyến, tỉnh..." id="globalSearch" autocomplete="off">
-                    <button class="search-clear" id="searchClear" style="display:none;"><i class="fas fa-times"></i></button>
-                    <div class="search-dropdown" id="searchDropdown"></div>
-                </div>
-                <button class="btn-icon" id="refreshBtn" title="Làm mới dữ liệu">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-                <button class="btn-icon notification-btn" id="notifBtn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notif-dot" id="notifDot"></span>
-                </button>
-            </div>
-        </header>
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>🏭 KTC <span>HEALTH</span> DASHBOARD</h1>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+  <div class="shift-badge"><span class="dot"></span><span id="shiftName">Ca 1</span></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <!-- USER BADGE -->
+    <div class="user-badge" id="header-user-badge" style="display:none">
+      <span style="color:#c9d1d9;font-weight:600" id="header-username">—</span>
+      <span class="role-tag" id="header-role-tag">—</span>
+      <button class="btn-logout" onclick="openUserMgmt()" id="btn-user-mgmt" style="display:none" title="Quản lý người dùng">👥</button>
+      <button class="btn-logout" onclick="doLogout()" title="Đăng xuất">⏻</button>
+    </div>
+    <button onclick="openZoneSettings()"
+      title="Cài đặt capacity khu chia hàng"
+      style="background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .2s;white-space:nowrap"
+      onmouseover="this.style.background='#388bfd22';this.style.borderColor='#58a6ff';this.style.color='#58a6ff'"
+      onmouseout="this.style.background='#21262d';this.style.borderColor='#30363d';this.style.color='#c9d1d9'">
+      ⚙️ Cài đặt
+    </button>
+  </div>
+</div>
 
-        <!-- Page: Overview -->
-        <section class="page active" id="page-overview">
-            <!-- KPI Cards -->
-            <div class="kpi-grid">
+<div class="main">
 
-                <div class="kpi-card kpi-bc">
-                    <div class="kpi-icon"><i class="fas fa-store"></i></div>
-                    <div class="kpi-body">
-                        <span class="kpi-label">Bưu cục</span>
-                        <span class="kpi-value" id="kpi-total-bc">—</span>
-                        <span class="kpi-sub">Đang hoạt động</span>
-                    </div>
-                </div>
-                <div class="kpi-card kpi-fleet">
-                    <div class="kpi-icon"><i class="fas fa-truck-moving"></i></div>
-                    <div class="kpi-body">
-                        <span class="kpi-label">Tuyến xe tải</span>
-                        <span class="kpi-value" id="kpi-total-routes">—</span>
-                        <span class="kpi-sub">Nhóm tuyến đường</span>
-                    </div>
-                </div>
-            </div>
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi green" id="kpi-tonkho">
+      <div class="kpi-label">📦 Tồn Kho</div>
+      <div class="kpi-value" id="v-tonkho">—</div>
+      <div class="kpi-sub" id="s-tonkho">đang tải...</div>
+    </div>
+    <div class="kpi green" id="kpi-xeton">
+      <div class="kpi-label">🚛 Xe Tồn (chờ nhập)</div>
+      <div class="kpi-value" id="v-xeton">0</div>
+      <div class="kpi-sub" id="s-xeton">chưa có xe chờ</div>
+    </div>
+    <div class="kpi blue" id="kpi-sort">
+      <div class="kpi-label">🔄 Đơn Chờ Sort (CBS)</div>
+      <div class="kpi-value" id="v-sort">0</div>
+      <div class="kpi-sub" id="s-sort">đơn chờ phân loại</div>
+    </div>
+    <div class="kpi yellow" id="kpi-congkenh">
+      <div class="kpi-label">📐 Hàng Cồng Kềnh</div>
+      <div class="kpi-value" id="v-congkenh">0</div>
+      <div class="kpi-sub" id="s-congkenh">pallet chờ chia</div>
+    </div>
+  </div>
 
-            <!-- Charts Row -->
-            <div class="charts-grid">
-                <div class="chart-card wide">
-                    <div class="chart-header">
-                        <h3>Top 10 Kho tồn đọng nhiều nhất</h3>
-                        <span class="chart-tag tag-danger">Cần chú ý</span>
-                    </div>
-                    <canvas id="chartInventorySummary"></canvas>
-                </div>
-            </div>
+  <!-- MODULES: Tồn Kho | Cổng Nhập | CBS | Chia Chọn -->
+  <div class="modules">
 
-            <div class="chart-card full-width" style="margin-top: 24px;">
-                <div class="chart-header">
-                    <h3>Tổng tồn kho theo từng Nhóm Tuyến</h3>
-                    <span class="chart-tag tag-info">Cập nhật realtime</span>
-                </div>
-                <div class="table-wrap scrollable" id="tableHierarchyInventory"></div>
-            </div>
-        </section>
+    <!-- TỒN KHO -->
+    <div class="module">
+      <h2>📦 Tồn Kho
+        <span id="kho-updated" style="margin-left:auto;font-size:10px;color:#8b949e;font-weight:400"></span>
+      </h2>
+      <div id="kho-report-title" style="font-size:11px;color:#58a6ff;margin-bottom:10px;font-weight:500"></div>
+      <div id="kho-bars"><div style="color:#8b949e;font-size:12px;text-align:center;padding:20px">⏳ Đang tải...</div></div>
+    </div>
+
+    <!-- CỔNG NHẬP -->
+    <div class="module">
+      <h2>🚪 Cổng Nhập</h2>
+      <div class="section-title">Cổng AUTO (15 cổng) — click để mở/đóng</div>
+      <div class="gate-grid" id="gates-auto"></div>
+      <div class="section-title">Cổng MANUAL (20 cổng) — click để mở/đóng</div>
+      <div class="gate-grid" id="gates-manual"></div>
+      <div class="stats-box">
+        <div class="stats-row"><span style="color:#8b949e">Cổng đang mở:</span><span id="xe-dang-xu-ly" style="color:#3fb950;font-weight:600">0 / 35</span></div>
+        <div class="stats-row"><span style="color:#8b949e">Năng suất nhập:</span><span id="gate-throughput" style="color:#58a6ff;font-weight:600">0 xe/giờ</span></div>
+        <div class="stats-row"><span style="color:#8b949e">Xe chờ:</span><span id="xe-cho-label" style="color:#d29922;font-weight:600">0 xe</span></div>
+        <div class="stats-row"><span style="color:#8b949e">Dự kiến hoàn thành:</span><span id="wait-time" style="font-weight:700;color:#3fb950">—</span></div>
+      </div>
+    </div>
+
+    <!-- CBS -->
+    <div class="module">
+      <h2>🔀 CBS</h2>
+      <div class="section-title">CBS 1 (12 Feeder) — click để mở/đóng</div>
+      <div class="feeder-grid" id="feeders-cbs1"></div>
+      <div class="section-title">CBS 2 (12 Feeder) — click để mở/đóng</div>
+      <div class="feeder-grid" id="feeders-cbs2"></div>
+      <div class="stats-box">
+        <div class="stats-row"><span style="color:#8b949e">CBS 1 đang chạy:</span><span id="cbs1-active" style="color:#388bfd;font-weight:600">0 / 12</span></div>
+        <div class="stats-row"><span style="color:#8b949e">CBS 2 đang chạy:</span><span id="cbs2-active" style="color:#a371f7;font-weight:600">0 / 12</span></div>
+        <div class="stats-row"><span style="color:#8b949e">Tổng Feeder:</span><span id="cbs-total" style="font-weight:700">0 / 24</span></div>
+        <div class="stats-row"><span style="color:#8b949e">Năng suất sort:</span><span id="cbs-throughput" style="color:#3fb950;font-weight:600">0 đơn/giờ</span></div>
+        <div class="stats-row"><span style="color:#8b949e">Dự kiến xong sort:</span><span id="cbs-eta" style="font-weight:700;color:#d29922">—</span></div>
+      </div>
+    </div>
+
+    <!-- CHIA CHỌN -->
+    <div class="module">
+      <h2>⚙️ Chia Chọn</h2>
+      <div class="bar-container">
+        <div class="bar-label"><span>Hiệu suất ca</span><span id="pct-sort">0%</span></div>
+        <div class="bar-track"><div class="bar-fill red" id="bar-sort" style="width:0%"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div style="background:#21262d;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#8b949e">Đã sort</div>
+          <div style="font-size:20px;font-weight:700;color:#3fb950" id="sort-done">0</div>
+        </div>
+        <div style="background:#21262d;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#8b949e">Còn lại</div>
+          <div style="font-size:20px;font-weight:700;color:#d29922" id="sort-remain">0</div>
+        </div>
+        <div style="background:#21262d;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#8b949e">Nhân sự</div>
+          <div style="font-size:20px;font-weight:700;color:#388bfd" id="sort-staff">0</div>
+        </div>
+        <div style="background:#21262d;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#8b949e">Kiện/người</div>
+          <div style="font-size:20px;font-weight:700;color:#a371f7" id="sort-per-staff">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CẬP NHẬT NHANH & AI CẢNH BÁO ═══ -->
+  <div class="two-col" style="grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: stretch; margin-bottom: 20px;">
+    
+    <!-- TRÁI: Cập Nhật Nhanh + Khu Chia -->
+    <div class="input-panel" style="display:flex; flex-direction:column; gap:16px; margin-bottom:0;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0">📝 Cập Nhật & Khu Chia Hàng</h2>
+        <button class="btn-update" onclick="updateDash()" style="width:auto; padding:8px 16px; margin:0">⚡ Cập Nhật Tất Cả</button>
+      </div>
+
+      <div class="form-grid" style="grid-template-columns:repeat(3, 1fr); gap:12px">
+        <div class="form-group"><label>🚛 Xe tồn chờ nhập</label><input type="number" id="in-xeton" placeholder="0" min="0"></div>
+        <div class="form-group"><label>📦 Đơn chờ sort (CBS)</label><input type="number" id="in-sort" placeholder="0" min="0"></div>
+        <div class="form-group"><label>📐 Pallet CK chờ chia</label><input type="number" id="in-congkenh" placeholder="0" min="0"></div>
+      </div>
+
+      <div class="zone-section-hdr" style="margin-top:4px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #30363d; padding-top:16px;">
+        <h3 style="font-size:12px; font-weight:700; color:#8b949e; text-transform:uppercase; letter-spacing:.5px;">📦 Dữ liệu khu chia hàng</h3>
+        <span id="zone-capacity-badge" style="font-size:10px; color:#8b949e">CK: 100 pal/h (50 NS) │ B2: 60 pal/h (20 NS)</span>
+      </div>
+      
+      <div class="zone-grid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; margin-bottom:0;">
+        <!-- CK1 -->
+        <div class="zone-card ck" style="padding:14px">
+          <div class="zone-card-title" style="font-size:11px; margin-bottom:10px">🟠 Cồng Kềnh 1</div>
+          <div class="zone-input-row" style="margin-bottom:10px; gap:10px"><div class="form-group"><label>Pallet</label><input type="number" id="zpal-ck1" placeholder="0" oninput="calcZone('ck1')"></div><div class="form-group"><label>Nhân sự</label><input type="number" id="zns-ck1" placeholder="0" oninput="calcZone('ck1')"></div></div>
+          <div class="zone-stats-box" style="padding:8px 10px"><div class="zone-stat"><span style="color:#8b949e">NS:</span><span id="zrate-ck1" style="color:#d29922;font-weight:600">0 pal/h</span></div><div class="zone-eta" id="zeta-ck1" style="font-size:13px;padding-top:4px">—</div></div>
+        </div>
+        <!-- CK2 -->
+        <div class="zone-card ck" style="padding:14px">
+          <div class="zone-card-title" style="font-size:11px; margin-bottom:10px">🟠 Cồng Kềnh 2</div>
+          <div class="zone-input-row" style="margin-bottom:10px; gap:10px"><div class="form-group"><label>Pallet</label><input type="number" id="zpal-ck2" placeholder="0" oninput="calcZone('ck2')"></div><div class="form-group"><label>Nhân sự</label><input type="number" id="zns-ck2" placeholder="0" oninput="calcZone('ck2')"></div></div>
+          <div class="zone-stats-box" style="padding:8px 10px"><div class="zone-stat"><span style="color:#8b949e">NS:</span><span id="zrate-ck2" style="color:#d29922;font-weight:600">0 pal/h</span></div><div class="zone-eta" id="zeta-ck2" style="font-size:13px;padding-top:4px">—</div></div>
+        </div>
+        <!-- NV -->
+        <div class="zone-card b2" style="padding:14px">
+          <div class="zone-card-title" style="font-size:11px; margin-bottom:10px">🔵 Bậc 2 Nội Vùng</div>
+          <div class="zone-input-row" style="margin-bottom:10px; gap:10px"><div class="form-group"><label>Pallet</label><input type="number" id="zpal-nv" placeholder="0" oninput="calcZone('nv')"></div><div class="form-group"><label>Nhân sự</label><input type="number" id="zns-nv" placeholder="0" oninput="calcZone('nv')"></div></div>
+          <div class="zone-stats-box" style="padding:8px 10px"><div class="zone-stat"><span style="color:#8b949e">NS:</span><span id="zrate-nv" style="color:#388bfd;font-weight:600">0 pal/h</span></div><div class="zone-eta" id="zeta-nv" style="font-size:13px;padding-top:4px">—</div></div>
+        </div>
+        <!-- HCM -->
+        <div class="zone-card b2" style="padding:14px">
+          <div class="zone-card-title" style="font-size:11px; margin-bottom:10px">🔵 Bậc 2 Hồ Chí Minh</div>
+          <div class="zone-input-row" style="margin-bottom:10px; gap:10px"><div class="form-group"><label>Pallet</label><input type="number" id="zpal-hcm" placeholder="0" oninput="calcZone('hcm')"></div><div class="form-group"><label>Nhân sự</label><input type="number" id="zns-hcm" placeholder="0" oninput="calcZone('hcm')"></div></div>
+          <div class="zone-stats-box" style="padding:8px 10px"><div class="zone-stat"><span style="color:#8b949e">NS:</span><span id="zrate-hcm" style="color:#388bfd;font-weight:600">0 pal/h</span></div><div class="zone-eta" id="zeta-hcm" style="font-size:13px;padding-top:4px">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHẢI: AI & CẢNH BÁO -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      
+      <!-- AI PANEL -->
+      <div id="ai-panel" style="background:linear-gradient(135deg,#0d1117,#161b22);border:1px solid #30363d;border-radius:14px;overflow:hidden;transition:border-color .3s;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid #21262d">
+          <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#a371f7,#388bfd);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🤖</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:#e6edf3">Gemini AI Phân Tích</div>
+            <div style="font-size:11px;color:#8b949e" id="ai-status-text">Cần API key để chạy</div>
+          </div>
+          <button id="btn-ai-analyze" onclick="runAIAnalysis()"
+            style="background:linear-gradient(135deg,#a371f7,#388bfd);border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;transition:opacity .2s;opacity:.5"
+            disabled>✨ Chạy</button>
+        </div>
+        <div id="ai-result" style="padding:14px 18px;font-size:12px;color:#8b949e;min-height:50px;line-height:1.6;max-height:220px;overflow-y:auto;">
+          <span style="color:#484f58">💡 AI sẽ đọc tồn kho, xe tồn, CBS, khu chia hàng, và đưa ra phương án xử lý ngay lập tức.</span>
+        </div>
+      </div>
+
+      <!-- ALERTS PANEL -->
+      <div class="alerts-panel" style="flex:1; display:flex; flex-direction:column; margin-bottom:0;">
+        <h2 style="font-size:14px;font-weight:700;margin-bottom:16px">🚨 Cảnh Báo Vận Hành</h2>
+        <div id="alerts-list" style="flex:1; overflow-y:auto; padding-right:4px;"><div style="color:#8b949e;font-size:13px;text-align:center;padding:20px">✅ Chưa có cảnh báo</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BIỂU ĐỒ -->
+  <div>
+    <div class="chart-section-hdr">
+      <h2>📊 Biểu Đồ Thống Kê Theo Giờ</h2>
+      <span class="badge" id="data-point-count">0 mốc</span>
+    </div>
+    <p style="font-size:12px;color:#8b949e;margin-bottom:16px">Nhập số liệu từng mốc giờ để theo dõi xu hướng vận hành</p>
+
+    <div class="hourly-form">
+      <h3>➕ Thêm Mốc Giờ</h3>
+      <div class="hourly-form-grid">
+        <div class="form-group"><label>Giờ</label><select id="h-hour" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:14px;font-family:Inter,sans-serif;outline:none"></select></div>
+        <div class="form-group"><label>Tồn kho (kiện)</label><input type="number" id="h-tonkho" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Xe nhập</label><input type="number" id="h-xe" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Sort (kiện)</label><input type="number" id="h-sort" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Ghi chú</label><input type="text" id="h-note" placeholder="Tùy chọn..."></div>
+        <button class="btn-add" onclick="addHourlyPoint()">➕ Thêm</button>
+        <button class="btn-clear" onclick="clearHourlyData()">🗑 Xoá</button>
+      </div>
+    </div>
+
+    <div class="hourly-table-wrap" id="hourly-table-wrap" style="display:none">
+      <h3 style="font-size:13px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📋 Dữ liệu đã nhập</h3>
+      <table class="hourly-table">
+        <thead><tr><th>Giờ</th><th>Ca</th><th>Tồn kho</th><th>Xe nhập</th><th>Sort</th><th>Ghi chú</th><th></th></tr></thead>
+        <tbody id="hourly-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="charts-3col">
+      <div class="chart-card"><h3>📦 <span style="color:#58a6ff">Tồn Kho</span> theo giờ</h3><div class="chart-wrap"><canvas id="chart-tonkho"></canvas><div class="empty-chart" id="empty-tonkho"><div class="ei">📦</div><div>Thêm dữ liệu để hiển thị</div></div></div></div>
+      <div class="chart-card"><h3>🚛 <span style="color:#3fb950">Xe Nhập</span> theo giờ</h3><div class="chart-wrap"><canvas id="chart-xe"></canvas><div class="empty-chart" id="empty-xe"><div class="ei">🚛</div><div>Thêm dữ liệu để hiển thị</div></div></div></div>
+      <div class="chart-card"><h3>⚙️ <span style="color:#a371f7">Sort</span> theo giờ</h3><div class="chart-wrap"><canvas id="chart-sort"></canvas><div class="empty-chart" id="empty-sort"><div class="ei">⚙️</div><div>Thêm dữ liệu để hiển thị</div></div></div></div>
+    </div>
+
+    <div class="chart-bar-card">
+      <h3>📊 So Sánh Hiệu Suất Các Ca</h3>
+      <div class="chart-wrap"><canvas id="chart-shift"></canvas><div class="empty-chart" id="empty-shift"><div class="ei">📊</div><div>Cần dữ liệu nhiều ca để so sánh</div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+var state = {
+  xeton:0, tonkho:0, capacity:0,
+  sort:0, congkenh:0
+};
+
+/* ═══════════════════════════════════════
+   CLOCK & SHIFT
+═══════════════════════════════════════ */
+function getShift(){
+  var h = new Date().getHours();
+  if(h>=7 && h<15) return 'Ca 1 — 07:00–15:00';
+  if(h>=15 && h<22) return 'Ca 2 — 15:00–22:00';
+  return 'Ca 3 — 22:00–07:00';
+}
+function updateClock(){
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('vi-VN');
+  document.getElementById('shiftName').textContent = getShift();
+}
+
+/* ═══════════════════════════════════════
+   TỒN KHO — đọc từ TONKHO_DATA inline
+═══════════════════════════════════════ */
+function initKhoData(){
+  if(typeof TONKHO_DATA === 'undefined' || TONKHO_DATA === null || !TONKHO_DATA.routes){
+    document.getElementById('kho-bars').innerHTML =
+      '<div style="color:#f85149;font-size:12px;text-align:center;padding:16px">⚠️ Chưa có dữ liệu.<br>Double-click <b>🏥 KTC Health.command</b> để tải.</div>';
+    return;
+  }
+  var data = TONKHO_DATA;
+  var gt   = data.grand_total || 0;
+  state.capacity = gt;
+  state.tonkho   = gt;
+
+  var titleEl = document.getElementById('kho-report-title');
+  if(titleEl) titleEl.textContent = data.title || '';
+  var updEl = document.getElementById('kho-updated');
+  if(updEl) updEl.textContent = data.updated ? 'Cập nhật: ' + data.updated : '';
+
+  // Render bars — có thể click để xem chi tiết
+  var html = '';
+  var routeCap = (zoneCfg && zoneCfg.routeCap) ? zoneCfg.routeCap : {};
+  (data.routes || []).forEach(function(r, ri){
+    var cap    = routeCap[r.name] || 0;
+    var hasChildren = r.children && r.children.length > 0;
+    var hint   = hasChildren ? ' 🔍' : '';
+    var pct, cls, subText;
+    if(cap > 0){
+      pct = Math.min(100, Math.round(r.total / cap * 100));
+      cls = pct >= 80 ? 'red' : pct >= 60 ? 'yellow' : 'green';
+      subText = r.total.toLocaleString('vi-VN') + ' / ' + cap.toLocaleString('vi-VN')
+              + ' kiện — <b style="color:' + (pct>=80?'#f85149':pct>=60?'#d29922':'#3fb950') + '">' + pct + '% cap</b>';
+    } else {
+      pct = gt > 0 ? Math.min(100, Math.round(r.total / gt * 100)) : 0;
+      cls = pct >= 40 ? 'red' : pct >= 20 ? 'yellow' : 'green';
+      subText = r.total.toLocaleString('vi-VN') + ' kiện (' + pct + '%)';
+    }
+    html += '<div class="bar-container kho-bar-item" '
+      + (hasChildren ? 'onclick="showKhoDetail(' + ri + ')" style="cursor:pointer"' : '')
+      + '>'
+      + '<div class="bar-label"><span>' + r.name + hint + '</span>'
+      + '<span style="font-size:11px">' + subText + '</span></div>'
+      + '<div class="bar-track"><div class="bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>'
+      + '</div>';
+  });
+  html += '<div style="margin-top:8px;padding:8px 10px;background:#21262d;border-radius:8px;display:flex;justify-content:space-between;font-size:12px;font-weight:700">'
+    + '<span style="color:#8b949e">Tổng tồn kho</span>'
+    + '<span style="color:#e6edf3">' + gt.toLocaleString('vi-VN') + ' kiện</span></div>';
+  document.getElementById('kho-bars').innerHTML = html;
+
+  renderKPIs();
+  renderAlerts();
+}
+
+/* ─── MODAL CHI TIẾT KHO ─── */
+function showKhoDetail(routeIdx){
+  var data  = TONKHO_DATA;
+  var route = data.routes[routeIdx];
+  if(!route || !route.children || !route.children.length) return;
+
+  var gt       = route.total;
+  var globalGt = data.grand_total;
+  var children = route.children.slice().sort(function(a,b){return b.total-a.total;});
+
+    var rows = children.map(function(c){
+    var pct    = gt > 0 ? Math.round(c.total / gt * 100) : 0;
+    var cls    = pct >= 50 ? 'red' : pct >= 25 ? 'yellow' : 'green';
+    var label  = c.short_name || c.name;
+    return '<div class="detail-row">'
+      + '<div class="detail-name" title="' + c.name + '">' + label + '</div>'
+      + '<div class="detail-right">'
+      + '<span class="detail-num">' + c.total.toLocaleString('vi-VN') + ' kiện</span>'
+      + '<span class="detail-pct">' + pct + '%</span>'
+      + '</div>'
+      + '<div class="detail-bar-track"><div class="detail-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>'
+      + '</div>';
+  }).join('');
+
+  document.getElementById('modal-title').textContent = route.name;
+  document.getElementById('modal-subtitle').textContent =
+    route.children.length + ' kho | ' + gt.toLocaleString('vi-VN') + ' kiện ('
+    + (globalGt>0?Math.round(gt/globalGt*100):0) + '% tổng)';
+  document.getElementById('modal-body').innerHTML = rows;
+  document.getElementById('kho-modal').classList.add('open');
+}
+
+function closeKhoModal(){
+  document.getElementById('kho-modal').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════
+   GATES — click toggle
+═══════════════════════════════════════ */
+var gateAutoState   = [];
+var gateManualState = [];
+for(var i=0;i<15;i++) gateAutoState.push(false);   // mặc định đóng
+for(var i=0;i<20;i++) gateManualState.push(false);  // mặc định đóng
+
+function toggleGate(type, idx){
+  if(type==='auto')   gateAutoState[idx]   = !gateAutoState[idx];
+  if(type==='manual') gateManualState[idx] = !gateManualState[idx];
+  renderGates();
+}
+
+function renderGates(){
+  var autoEl   = document.getElementById('gates-auto');
+  var manualEl = document.getElementById('gates-manual');
+  if(!autoEl || !manualEl) return;
+  autoEl.innerHTML   = '';
+  manualEl.innerHTML = '';
+
+  for(var i=0;i<15;i++){
+    (function(idx){
+      var div = document.createElement('div');
+      var open = gateAutoState[idx];
+      div.className = 'gate ' + (open ? 'free' : 'busy');
+      div.textContent = open ? '🟢' : '🔴';
+      div.title = 'Auto ' + (idx+1) + ': ' + (open ? 'Mở — click để đóng' : 'Đóng — click để mở');
+      div.onclick = function(){ toggleGate('auto', idx); };
+      autoEl.appendChild(div);
+    })(i);
+  }
+  for(var i=0;i<20;i++){
+    (function(idx){
+      var div = document.createElement('div');
+      var open = gateManualState[idx];
+      div.className = 'gate ' + (open ? 'free' : 'busy');
+      div.textContent = open ? '🟢' : '🔴';
+      div.title = 'Manual ' + (idx+1) + ': ' + (open ? 'Mở — click để đóng' : 'Đóng — click để mở');
+      div.onclick = function(){ toggleGate('manual', idx); };
+      manualEl.appendChild(div);
+    })(i);
+  }
+
+  var openCount = 0;
+  for(var i=0;i<15;i++) if(gateAutoState[i]) openCount++;
+  for(var i=0;i<20;i++) if(gateManualState[i]) openCount++;
+
+  // Mỗi cổng xử lý 1 xe theo cài đặt (mặc định 30 phút/xe)
+  var minPerTruck = (zoneCfg && zoneCfg.gate) ? zoneCfg.gate.minPerTruck : 30;
+  var throughputPerHour = openCount > 0 ? parseFloat((60 / minPerTruck * openCount).toFixed(1)) : 0;
+  var waitMin = openCount > 0
+    ? Math.ceil(state.xeton / openCount) * minPerTruck
+    : null;
+
+  document.getElementById('xe-dang-xu-ly').textContent  = openCount + ' / 35 cổng';
+  document.getElementById('gate-throughput').textContent = throughputPerHour + ' xe/giờ';
+  document.getElementById('xe-cho-label').textContent    = state.xeton + ' xe';
+
+  var waitEl  = document.getElementById('wait-time');
+  if(openCount === 0){
+    waitEl.textContent = state.xeton > 0 ? '⚠️ Không có cổng mở' : '—';
+    waitEl.style.color = state.xeton > 0 ? '#f85149' : '#8b949e';
+  } else if(state.xeton === 0){
+    waitEl.textContent = '✔️ Hoàn thành';
+    waitEl.style.color = '#3fb950';
+  } else {
+    var h = Math.floor(waitMin / 60), m = waitMin % 60;
+    waitEl.textContent = (h > 0 ? h + 'g' : '') + (m > 0 ? m + 'p' : '0p');
+    waitEl.style.color = waitMin > 60 ? '#f85149' : waitMin > 30 ? '#d29922' : '#3fb950';
+  }
+}
+
+/* ═══════════════════════════════════════
+   CBS FEEDERS — click toggle
+═══════════════════════════════════════ */
+var feederCBS1State = [];
+var feederCBS2State = [];
+for(var i=0;i<12;i++){ feederCBS1State.push(false); feederCBS2State.push(false); }
+
+function toggleFeeder(cbs, idx){
+  if(cbs===1) feederCBS1State[idx] = !feederCBS1State[idx];
+  if(cbs===2) feederCBS2State[idx] = !feederCBS2State[idx];
+  renderCBS();
+}
+
+function renderCBS(){
+  var cbs1El = document.getElementById('feeders-cbs1');
+  var cbs2El = document.getElementById('feeders-cbs2');
+  if(!cbs1El || !cbs2El) return;
+  cbs1El.innerHTML = '';
+  cbs2El.innerHTML = '';
+
+  for(var i=0;i<12;i++){
+    (function(idx){
+      var div = document.createElement('div');
+      var on  = feederCBS1State[idx];
+      div.className = 'feeder ' + (on ? 'busy' : 'free');
+      div.textContent = 'F' + (idx+1);
+      div.title = 'CBS1 F' + (idx+1) + ': ' + (on ? 'Chạy — click để dừng' : 'Dừng — click để chạy');
+      div.onclick = function(){ toggleFeeder(1, idx); };
+      cbs1El.appendChild(div);
+    })(i);
+  }
+  for(var i=0;i<12;i++){
+    (function(idx){
+      var div = document.createElement('div');
+      var on  = feederCBS2State[idx];
+      div.className = 'feeder ' + (on ? 'busy' : 'free');
+      div.textContent = 'F' + (idx+1);
+      div.title = 'CBS2 F' + (idx+1) + ': ' + (on ? 'Chạy — click để dừng' : 'Dừng — click để chạy');
+      div.onclick = function(){ toggleFeeder(2, idx); };
+      cbs2El.appendChild(div);
+    })(i);
+  }
+
+  var c1=0, c2=0;
+  for(var i=0;i<12;i++){ if(feederCBS1State[i]) c1++; if(feederCBS2State[i]) c2++; }
+  var totalFeeder = c1 + c2;
+
+  // Mỗi CBS sort theo cài đặt (mặc định 24.000 đơn/giờ)
+  var CBS_PER_MACHINE = (zoneCfg && zoneCfg.cbs) ? zoneCfg.cbs.orderPerHour : 24000;
+  var activeCBS  = (c1 > 0 ? 1 : 0) + (c2 > 0 ? 1 : 0);  // 0, 1 hoặc 2 CBS đang chạy
+  var sortPerHour = activeCBS * CBS_PER_MACHINE;            // max 48.000 đơn/giờ
+  var remaining   = state.sort;
+
+  document.getElementById('cbs1-active').textContent   = c1 + ' / 12';
+  document.getElementById('cbs2-active').textContent   = c2 + ' / 12';
+  document.getElementById('cbs-total').textContent     = totalFeeder + ' / 24';
+  document.getElementById('cbs-throughput').textContent =
+    totalFeeder > 0 ? sortPerHour.toLocaleString('vi-VN') + ' đơn/giờ' : '0 đơn/giờ';
+
+  var etaEl = document.getElementById('cbs-eta');
+  if(activeCBS === 0){
+    etaEl.textContent = remaining > 0 ? '⚠️ Chưa có CBS chạy' : '—';
+    etaEl.style.color = remaining > 0 ? '#f85149' : '#8b949e';
+  } else if(remaining === 0){
+    etaEl.textContent = '✔️ Hoàn thành';
+    etaEl.style.color = '#3fb950';
+  } else {
+    var etaMin = Math.ceil(remaining / sortPerHour * 60);
+    var h = Math.floor(etaMin / 60), m = etaMin % 60;
+    etaEl.textContent = (h > 0 ? h + ' giờ ' : '') + (m > 0 ? m + ' phút' : '< 1 phút');
+    etaEl.style.color = etaMin > 120 ? '#f85149' : etaMin > 60 ? '#d29922' : '#3fb950';
+  }
+}
+
+/* ═══════════════════════════════════════
+   KPIs & ALERTS
+═══════════════════════════════════════ */
+function renderKPIs(){
+  // Tồn kho
+  var tonPct = state.capacity > 0 ? Math.round(state.tonkho / state.capacity * 100) : 0;
+  document.getElementById('v-tonkho').textContent = tonPct > 0 ? tonPct + '%' : '—';
+  document.getElementById('s-tonkho').textContent = state.tonkho.toLocaleString('vi-VN') + ' kiện tồn';
+  document.getElementById('kpi-tonkho').className = 'kpi ' + (tonPct>=80?'red':tonPct>=60?'yellow':'green');
+
+  // Xe tồn
+  document.getElementById('v-xeton').textContent = state.xeton;
+  document.getElementById('s-xeton').textContent = state.xeton > 0 ? 'xe đang chờ nhập' : 'chưa có xe chờ';
+  document.getElementById('kpi-xeton').className = 'kpi ' + (state.xeton>50?'red':state.xeton>20?'yellow':'green');
+
+  // Đơn chờ sort CBS
+  document.getElementById('v-sort').textContent = state.sort.toLocaleString('vi-VN');
+  document.getElementById('s-sort').textContent = state.sort > 0 ? 'đơn chờ phân loại' : 'không có đơn chờ';
+  document.getElementById('kpi-sort').className = 'kpi ' + (state.sort>50000?'red':state.sort>20000?'yellow':'blue');
+
+  // Hàng Cồng Kềnh — đơn vị: Pallet (1 pallet ≈ 20 đơn)
+  var DONPERPAL = 20;
+  var ckDon = state.congkenh * DONPERPAL;
+  document.getElementById('v-congkenh').textContent = state.congkenh;
+  document.getElementById('s-congkenh').textContent =
+    state.congkenh > 0
+      ? 'pallet (≈ ' + ckDon.toLocaleString('vi-VN') + ' đơn)'
+      : 'không có hàng chờ';
+  document.getElementById('kpi-congkenh').className = 'kpi ' + (state.congkenh>25?'red':state.congkenh>10?'yellow':'green');
+}
+
+function renderAlerts(){
+  var alerts = [];
+  var tonPct  = state.capacity>0 ? Math.round(state.tonkho/state.capacity*100) : 0;
+  if(tonPct>=80)   alerts.push({type:'critical', msg:'⚠️ Tồn kho vượt 80% sức chứa! Cần xuất hàng gấp.'});
+  else if(tonPct>=60) alerts.push({type:'warning',  msg:'🟡 Tồn kho đạt 60%. Theo dõi sát.'});
+  if(state.xeton>50)  alerts.push({type:'critical', msg:'🚛 Xe tồn '+state.xeton+' xe! Cổng quá tải — cần mở thêm cổng.'});
+  else if(state.xeton>20) alerts.push({type:'warning', msg:'🚛 Xe tồn '+state.xeton+' xe. Thời gian chờ tăng.'});
+  if(state.sort>50000) alerts.push({type:'critical', msg:'📦 Hơn 50.000 đơn chờ sort — kiểm tra CBS.'});
+  else if(state.sort>20000) alerts.push({type:'warning', msg:'📦 '+state.sort.toLocaleString('vi-VN')+' đơn chờ sort. Đảm bảo Feeder hoạt động.'});
+  // Cồng kềnh: ngưỡng theo pallet (>25 = đỏ, >10 = vàng)
+  if(state.congkenh>25)  alerts.push({type:'critical', msg:'📐 Cồng kềnh: '+state.congkenh+' pallet (≈'+(state.congkenh*20).toLocaleString('vi-VN')+' đơn)! Cần điều động nhân sự.'});
+  else if(state.congkenh>10) alerts.push({type:'warning', msg:'📐 '+state.congkenh+' pallet cồng kềnh chờ chia (≈'+(state.congkenh*20)+' đơn).'});
+
+  // Kiểm tra capacity từng tuyến xuất (đơn vị Pallet → quy ra kiện)
+  if(typeof TONKHO_DATA !== 'undefined' && TONKHO_DATA && TONKHO_DATA.routes){
+    var rcap = (zoneCfg && zoneCfg.routeCap) ? zoneCfg.routeCap : {};
+    var kpp2 = (zoneCfg && zoneCfg.kienPerPallet) ? zoneCfg.kienPerPallet : ZONE_DEFAULTS.kienPerPallet;
+    TONKHO_DATA.routes.forEach(function(r){
+      var pallets = rcap[r.name] || 0;
+      if(pallets <= 0) return;  // không cài đặt thì bỏ qua
+      var cap = pallets * kpp2;
+      var pct = Math.round(r.total / cap * 100);
+      var tons = r.total.toLocaleString('vi-VN');
+      var caps = cap.toLocaleString('vi-VN');
+      var pals = pallets.toLocaleString('vi-VN');
+      if(pct >= 100)
+        alerts.push({type:'critical', msg:'🏗️ Đầy kho! '+r.name+': '+tons+' kiện / '+pals+' pal ('+pct+'%) — Cần xuất hàng ngay!'});
+      else if(pct >= 80)
+        alerts.push({type:'critical', msg:'⚠️ '+r.name+' gần đầy: '+pct+'% — '+tons+'/'+caps+' kiện ('+pals+' pal).'});
+      else if(pct >= 60)
+        alerts.push({type:'warning',  msg:'🟡 '+r.name+': '+pct+'% capacity — '+tons+'/'+caps+' kiện ('+pals+' pal). Theo dõi sát.'});
+    });
+  }
+
+  var list = document.getElementById('alerts-list');
+  var time = new Date().toLocaleTimeString('vi-VN');
+  if(alerts.length===0){
+    list.innerHTML = '<div style="color:#8b949e;font-size:13px;text-align:center;padding:20px">✅ Chưa có cảnh báo</div>';
+  } else {
+    list.innerHTML = alerts.map(function(a){
+      return '<div class="alert-item '+a.type+'">'
+        +'<div style="font-size:16px">'+(a.type==='critical'?'🔴':'🟡')+'</div>'
+        +'<div><div class="alert-msg">'+a.msg+'</div><div class="alert-time">'+time+'</div></div></div>';
+    }).join('');
+  }
+  var critCount = alerts.filter(function(a){return a.type==='critical';}).length;
+  var alertEl = document.getElementById('v-alert');
+  if(alertEl) alertEl.textContent = alerts.length;
+  var kpiAlertEl = document.getElementById('kpi-alert');
+  if(kpiAlertEl) kpiAlertEl.className = 'kpi ' + (critCount>0?'red':alerts.length>0?'yellow':'green');
+}
 
 
-        <section class="page" id="page-fleet">
-            <div class="page-toolbar">
-                <div class="filter-group">
-                    <label>Nhóm tuyến:</label>
-                    <select id="filterFleetGroup" class="filter-select"><option value="">Tất cả</option></select>
-                </div>
-                <div class="filter-group">
-                    <label>Tìm tuyến:</label>
-                    <input type="text" placeholder="VD: SG_CK1_101..." id="searchFleet" class="filter-input">
-                </div>
-            </div>
-            <div class="fleet-summary" id="fleetSummary"></div>
-            <div class="chart-card full-width">
-                <div class="chart-header">
-                    <h3>Lịch trình xe tải</h3>
-                </div>
-                <div class="table-wrap scrollable" id="tableFleet"></div>
-            </div>
-        </section>
+/* ═══════════════════════════════════════
+   KHU CHIA HÀNG — capacity có thể cài đặt
+═══════════════════════════════════════ */
+var ROUTE_SLUGS = [
+  { slug:'kct',  name:'Kho Chuyển Tiếp' },
+  { slug:'kghn', name:'Kho Giao Hàng Nặng' },
+  { slug:'kkhl', name:'Kho KHL' },
+  { slug:'ktc',  name:'Kho Trung Chuyển' },
+  { slug:'nt',   name:'Nội Thành' },
+  { slug:'nv2',  name:'Nội vùng' },
+  { slug:'pq',   name:'Phú Quốc' },
+];
+
+var ZONE_DEFAULTS = {
+  gate: { minPerTruck: 30 },
+  cbs:  { orderPerHour: 24000 },
+  ck1:  { pal: 100, ns: 50 },
+  ck2:  { pal: 100, ns: 50 },
+  nv:   { pal: 60,  ns: 20 },
+  hcm:  { pal: 60,  ns: 20 },
+  kienPerPallet: 50,           // quy ước: 1 Pallet = X kiện/đơn
+  routeCap: {},   // key: tên tuyến, value: sức chứa (Pallet), 0 = không giới hạn
+};
+
+/* Trả về sức chứa (kiện) = pallet × kienPerPallet */
+function capKien(pallets){
+  var kpp = (zoneCfg && zoneCfg.kienPerPallet) ? zoneCfg.kienPerPallet : ZONE_DEFAULTS.kienPerPallet;
+  return pallets * kpp;
+}
+
+function loadZoneCfg(){
+  try{
+    var s = JSON.parse(localStorage.getItem('zoneCfg') || '{}');
+    var D = ZONE_DEFAULTS;
+    var rc = {};
+    ROUTE_SLUGS.forEach(function(rs){ rc[rs.name] = (s.routeCap && s.routeCap[rs.name]) || 0; });
+    return {
+      gate: { minPerTruck:  s.gate ? (s.gate.minPerTruck  || D.gate.minPerTruck)  : D.gate.minPerTruck  },
+      cbs:  { orderPerHour: s.cbs  ? (s.cbs.orderPerHour  || D.cbs.orderPerHour)  : D.cbs.orderPerHour  },
+      ck1:  { pal: s.ck1 ? (s.ck1.pal || D.ck1.pal) : D.ck1.pal, ns: s.ck1 ? (s.ck1.ns || D.ck1.ns) : D.ck1.ns },
+      ck2:  { pal: s.ck2 ? (s.ck2.pal || D.ck2.pal) : D.ck2.pal, ns: s.ck2 ? (s.ck2.ns || D.ck2.ns) : D.ck2.ns },
+      nv:   { pal: s.nv  ? (s.nv.pal  || D.nv.pal)  : D.nv.pal,  ns: s.nv  ? (s.nv.ns  || D.nv.ns)  : D.nv.ns  },
+      hcm:  { pal: s.hcm ? (s.hcm.pal || D.hcm.pal) : D.hcm.pal, ns: s.hcm ? (s.hcm.ns || D.hcm.ns) : D.hcm.ns },
+      kienPerPallet: s.kienPerPallet || D.kienPerPallet,
+      routeCap: rc,
+    };
+  } catch(e){ return JSON.parse(JSON.stringify(ZONE_DEFAULTS)); }
+}
+
+var zoneCfg = loadZoneCfg();
+
+var ZONE_CFG = { ck1:'ck1', ck2:'ck2', nv:'nv', hcm:'hcm' };
+
+function updateZoneBadge(){
+  var el = document.getElementById('zone-capacity-badge');
+  if(!el) return;
+  el.textContent =
+    'CK1:'+(zoneCfg.ck1.pal/zoneCfg.ck1.ns).toFixed(1)+' | '
+   +'CK2:'+(zoneCfg.ck2.pal/zoneCfg.ck2.ns).toFixed(1)+' | '
+   +'NV:'+(zoneCfg.nv.pal/zoneCfg.nv.ns).toFixed(1)+' | '
+   +'HCM:'+(zoneCfg.hcm.pal/zoneCfg.hcm.ns).toFixed(1);
+}
+
+function renderRouteDetail(slug, routeName){
+  var el = document.getElementById('detail-'+slug);
+  if(!el) return;
+  var children = getRouteChildren(routeName);
+  if(!children.length){
+    el.innerHTML = '<div style="font-size:11px;color:#8b949e;padding:6px 0">⚠️ Chưa có dữ liệu kho con (cần tải data tồn kho trước)</div>';
+    return;
+  }
+  var kpp = parseFloat(document.getElementById('cfg-kien-per-pal').value) || ZONE_DEFAULTS.kienPerPallet;
+  var savedCC = (zoneCfg.childCap && zoneCfg.childCap[routeName]) || {};
+  var INPSTYLE = 'width:80px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 8px;color:#e6edf3;font-size:12px;outline:none;text-align:right';
+  var html = '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px">';
+  children.forEach(function(child, idx){
+    var savedPal = savedCC[child.name] || 0;
+    var capK = savedPal * kpp;
+    var pct = (savedPal > 0 && capK > 0) ? Math.round(child.total / capK * 100) : 0;
+    var pctColor = pct>=80?'#f85149':pct>=60?'#d29922':'#3fb950';
+    html += '<div style="display:flex;align-items:center;gap:7px;background:#161b22;border-radius:7px;padding:6px 10px;border-left:2px solid #30363d">'
+      + '<div style="flex:1;font-size:11px;color:#8b949e">↳ ' + child.name + '</div>'
+      + '<span style="font-size:10px;color:#484f58">' + child.total.toLocaleString('vi-VN') + ' kiện</span>'
+      + '<input type="number" id="cc-'+slug+'-'+idx+'" value="'+(savedPal||'')+'" min="0" step="1" placeholder="pal"'
+      + '  oninput="onChildCapInput(\''+slug+'\',\''+routeName+'\')"'
+      + '  style="'+INPSTYLE+'">'
+      + '<span id="cckien-'+slug+'-'+idx+'" style="font-size:9px;color:#484f58;white-space:nowrap;min-width:65px;display:inline-block;text-align:left">'+(capK>0 ? '(= '+capK.toLocaleString('vi-VN')+' k)' : 'pal')+'</span>'
+      + '<span id="ccpt-'+slug+'-'+idx+'" style="font-size:10px;font-weight:700;color:'+(pct>0?pctColor:'#8b949e')+';min-width:34px;text-align:right">'+(pct>0?pct+'%':'—')+'</span>'
+      + '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function updateSettingsPreview(){
+  var ids = ['ck1','ck2','nv','hcm'];
+  ids.forEach(function(z){
+    var p=_v('cfg-'+z+'-pal'), n=_v('cfg-'+z+'-ns');
+    var rEl=document.getElementById('cfg-'+z+'-rate');
+    if(rEl) rEl.textContent = n>0?(p/n).toFixed(2):'—';
+  });
+  // refresh route cap previews
+  ROUTE_SLUGS.forEach(function(rs){ previewRouteCap(rs.slug, rs.name); });
+}
+
+function previewRouteCap(slug, routeName){
+  var pallets = parseInt(document.getElementById('cap-'+slug).value) || 0;
+  var el      = document.getElementById('cappt-'+slug);
+  var el2     = document.getElementById('capkien-'+slug);
+  if(!el) return;
+  if(pallets <= 0){
+    el.textContent='—'; el.style.color='#8b949e';
+    if(el2) el2.textContent='';
+    return;
+  }
+  var kpp = parseFloat(document.getElementById('cfg-kien-per-pal').value) || ZONE_DEFAULTS.kienPerPallet;
+  var capK = pallets * kpp;
+  var current = 0;
+  if(typeof TONKHO_DATA !== 'undefined' && TONKHO_DATA && TONKHO_DATA.routes){
+    var found = TONKHO_DATA.routes.filter(function(r){ return r.name === routeName; });
+    if(found.length) current = found[0].total;
+  }
+  var pct = Math.round(current / capK * 100);
+  el.textContent = pct + '%';
+  el.style.color = pct>=80?'#f85149':pct>=60?'#d29922':'#3fb950';
+  if(el2) el2.textContent = '= ' + capK.toLocaleString('vi-VN') + ' kiện';
+}
+
+/* ── Route detail expand / collapse ── */
+var ROUTE_DETAIL_OPEN = {};   // slug → bool
+
+function getRouteChildren(routeName){
+  if(typeof TONKHO_DATA === 'undefined' || !TONKHO_DATA || !TONKHO_DATA.routes) return [];
+  var r = TONKHO_DATA.routes.filter(function(x){ return x.name === routeName; });
+  return (r.length && r[0].children) ? r[0].children : [];
+}
 
 
+function toggleRouteDetail(slug, routeName){
+  var el = document.getElementById('detail-'+slug);
+  if(!el) return;
+  var isOpen = ROUTE_DETAIL_OPEN[slug];
+  if(!isOpen){
+    renderRouteDetail(slug, routeName);
+    el.style.display = 'block';
+    ROUTE_DETAIL_OPEN[slug] = true;
+    var btn = document.getElementById('toggle-'+slug);
+    if(btn) btn.textContent = '▼';
+  } else {
+    el.style.display = 'none';
+    ROUTE_DETAIL_OPEN[slug] = false;
+    var btn = document.getElementById('toggle-'+slug);
+    if(btn) btn.textContent = '▶';
+  }
+}
 
-        <!-- Page: Inventory -->
-        <section class="page" id="page-inventory">
-            <div class="page-toolbar">
-                <div class="filter-group">
-                    <label>Tìm kiếm kho/tuyến:</label>
-                    <input type="text" placeholder="VD: Gia Lai, HN02..." id="searchInventory" class="filter-input">
-                </div>
-            </div>
-            <div class="chart-card full-width">
-                <div class="chart-header">
-                    <h3>Dữ liệu Tồn kho phân vùng (PV)</h3>
-                    <span class="chart-tag tag-warning">Cập nhật lúc: 20:00</span>
-                </div>
-                <div class="table-wrap scrollable" id="tableInventory"></div>
-            </div>
-        </section>
+function onChildCapInput(slug, routeName){
+  var kpp = parseFloat(document.getElementById('cfg-kien-per-pal').value) || ZONE_DEFAULTS.kienPerPallet;
+  var children = getRouteChildren(routeName);
+  var total = 0;
+  children.forEach(function(child, idx){
+    var inp = document.getElementById('cc-'+slug+'-'+idx);
+    var pallets = inp ? (parseInt(inp.value)||0) : 0;
+    var capK = pallets * kpp;
+    total += pallets;
+    var kEl = document.getElementById('cckien-'+slug+'-'+idx);
+    // update child pct preview
+    if(pallets > 0){
+      if(kEl) kEl.textContent = '(= '+capK.toLocaleString('vi-VN')+' k)';
+      var pct = Math.round(child.total / capK * 100);
+      var pEl = document.getElementById('ccpt-'+slug+'-'+idx);
+      if(pEl){
+        pEl.textContent = pct + '%';
+        pEl.style.color = pct>=80?'#f85149':pct>=60?'#d29922':'#3fb950';
+      }
+    } else {
+      if(kEl) kEl.textContent = 'pal';
+      var pEl = document.getElementById('ccpt-'+slug+'-'+idx);
+      if(pEl){ pEl.textContent='—'; pEl.style.color='#8b949e'; }
+    }
+  });
+  // Cập nhật tổng (pallet) vào parent
+  var parentInp = document.getElementById('cap-'+slug);
+  if(parentInp){ parentInp.value = total; previewRouteCap(slug, routeName); }
+}
 
-        <!-- Page: Alerts -->
-        <section class="page" id="page-alerts">
-            <div class="alerts-header">
-                <h2><i class="fas fa-exclamation-triangle"></i> Hệ thống Cảnh báo Vận hành</h2>
-                <p>Tự động phát hiện các chỉ số bất thường cần xử lý ngay.</p>
-            </div>
-            <div class="alerts-controls">
-                <div class="filter-group">
-                    <label>Mức độ:</label>
-                    <select id="filterAlertLevel" class="filter-select">
-                        <option value="">Tất cả</option>
-                        <option value="critical">Nghiêm trọng</option>
-                        <option value="warning">Cảnh báo</option>
-                        <option value="info">Thông tin</option>
-                    </select>
-                </div>
-            </div>
-            <div class="alerts-list" id="alertsList"></div>
-        </section>
-    </main>
+function getChildCapFromForm(slug, routeName){
+  var children = getRouteChildren(routeName);
+  var obj = {};
+  children.forEach(function(child, idx){
+    var inp = document.getElementById('cc-'+slug+'-'+idx);
+    obj[child.name] = inp ? (parseInt(inp.value)||0) : 0;
+  });
+  return obj;
+}
 
-    <script src="app.js"></script>
+function _v(id){ var e = document.getElementById(id); return e ? e.value : ''; }
+function _set(id, val){ var e = document.getElementById(id); if(e) e.value = val; }
+
+function openZoneSettings(){
+  _set('cfg-gate-min',   zoneCfg.gate.minPerTruck);
+  _set('cfg-cbs-order',  zoneCfg.cbs.orderPerHour);
+  _set('cfg-ck1-pal', zoneCfg.ck1.pal); _set('cfg-ck1-ns', zoneCfg.ck1.ns);
+  _set('cfg-ck2-pal', zoneCfg.ck2.pal); _set('cfg-ck2-ns', zoneCfg.ck2.ns);
+  _set('cfg-nv-pal',  zoneCfg.nv.pal);  _set('cfg-nv-ns',  zoneCfg.nv.ns);
+  _set('cfg-hcm-pal', zoneCfg.hcm.pal); _set('cfg-hcm-ns', zoneCfg.hcm.ns);
+  _set('cfg-kien-per-pal', zoneCfg.kienPerPallet || ZONE_DEFAULTS.kienPerPallet);
+  // route capacities (Pallet)
+  ROUTE_SLUGS.forEach(function(rs){
+    _set('cap-'+rs.slug, (zoneCfg.routeCap && zoneCfg.routeCap[rs.name]) || 0);
+  });
+  updateSettingsPreview();
+  document.getElementById('zone-settings-modal').classList.add('open');
+}
+
+function closeZoneSettings(){
+  document.getElementById('zone-settings-modal').classList.remove('open');
+}
+
+function saveZoneSettings(){
+  var D = ZONE_DEFAULTS;
+  var rc = {};
+  ROUTE_SLUGS.forEach(function(rs){ rc[rs.name] = parseInt(_v('cap-'+rs.slug)) || 0; });
+  // collect child caps (KCT & KTC) — đơn vị Pallet
+  var childCap = {};
+  [['kct','Kho Chuyển Tiếp'],['ktc','Kho Trung Chuyển']].forEach(function(pair){
+    if(ROUTE_DETAIL_OPEN[pair[0]]){
+      childCap[pair[1]] = getChildCapFromForm(pair[0], pair[1]);
+    } else if(zoneCfg.childCap && zoneCfg.childCap[pair[1]]){
+      childCap[pair[1]] = zoneCfg.childCap[pair[1]];
+    }
+  });
+  zoneCfg = {
+    gate: { minPerTruck:  _v('cfg-gate-min')   || D.gate.minPerTruck  },
+    cbs:  { orderPerHour: _v('cfg-cbs-order')  || D.cbs.orderPerHour  },
+    ck1:  { pal: _v('cfg-ck1-pal')||D.ck1.pal, ns: _v('cfg-ck1-ns')||D.ck1.ns },
+    ck2:  { pal: _v('cfg-ck2-pal')||D.ck2.pal, ns: _v('cfg-ck2-ns')||D.ck2.ns },
+    nv:   { pal: _v('cfg-nv-pal') ||D.nv.pal,  ns: _v('cfg-nv-ns') ||D.nv.ns  },
+    hcm:  { pal: _v('cfg-hcm-pal')||D.hcm.pal, ns: _v('cfg-hcm-ns')||D.hcm.ns },
+    kienPerPallet: parseFloat(_v('cfg-kien-per-pal')) || D.kienPerPallet,
+    routeCap: rc,
+    childCap:  childCap,
+  };
+  localStorage.setItem('zoneCfg', JSON.stringify(zoneCfg));
+  updateZoneBadge();
+  recalcAllZones();
+  renderGates();
+  renderCBS();
+  initKhoData();   // refresh bars với cap mới
+  closeZoneSettings();
+  var btn = document.getElementById('btn-save-settings');
+  if(btn){ btn.textContent='✅ Đã lưu!'; setTimeout(function(){btn.textContent='✔ Lưu Cài Đặt';},1500); }
+}
+
+function resetZoneSettings(){
+  zoneCfg = JSON.parse(JSON.stringify(ZONE_DEFAULTS));
+  localStorage.removeItem('zoneCfg');
+  openZoneSettings();
+  updateZoneBadge();
+  recalcAllZones();
+}
+
+window.addEventListener('load', function(){
+  updateZoneBadge();
+  CFG_FIELDS.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.addEventListener('input', updateSettingsPreview);
+  });
+});
+
+/* ═══════════════════════════════════════
+   GEMINI AI INTEGRATION
+═══════════════════════════════════════ */
+var GEMINI_KEY = localStorage.getItem('geminiApiKey') || '';
+
+function onApiKeyInput(){
+  var val = document.getElementById('cfg-gemini-key').value.trim();
+  var statusEl = document.getElementById('api-key-status');
+  var btn = document.getElementById('btn-ai-analyze');
+  if(val.length > 20){
+    localStorage.setItem('geminiApiKey', val);
+    GEMINI_KEY = val;
+    if(statusEl){ statusEl.textContent='✅ Đã lưu API key — Nút Phân Tích đã sẵn sàng'; statusEl.style.color='#3fb950'; }
+    if(btn){ btn.disabled=false; btn.style.opacity='1'; }
+    document.getElementById('ai-status-text').textContent='Gemini AI sẵn sàng';
+  } else {
+    GEMINI_KEY='';
+    localStorage.removeItem('geminiApiKey');
+    if(statusEl){ statusEl.textContent='Key không hợp lệ (cần ít nhất 20 ký tự)'; statusEl.style.color='#f85149'; }
+    if(btn){ btn.disabled=true; btn.style.opacity='.5'; }
+  }
+}
+
+function toggleKeyVisibility(){
+  var inp = document.getElementById('cfg-gemini-key');
+  var btnEl = event.currentTarget || event.target;
+  if(inp.type==='password'){ inp.type='text'; btnEl.textContent='🙈 Ẩn'; }
+  else { inp.type='password'; btnEl.textContent='👁 Hiện'; }
+}
+
+function buildAIPrompt(){
+  var lines = [];
+  lines.push('Bạn là chuyên gia vận hành kho bưu chính. Phân tích tình trạng kho KTC và đưa ra PHƯƠNG ÁN HÀNH ĐỘNG cụ thể theo thứ tự ưu tiên.');
+  lines.push('\n## DỮ LIỆU HIỆN TẠI ('+new Date().toLocaleString('vi-VN')+')');
+
+  if(typeof TONKHO_DATA !== 'undefined' && TONKHO_DATA && TONKHO_DATA.routes){
+    lines.push('\n### Tồn kho tuyến xuất:');
+    var rc = (zoneCfg && zoneCfg.routeCap) || {};
+    TONKHO_DATA.routes.forEach(function(r){
+      var cap = rc[r.name] || 0;
+      var pctStr = cap>0 ? ' ('+Math.round(r.total/cap*100)+'% capacity)' : '';
+      lines.push('- '+r.name+': '+r.total.toLocaleString('vi-VN')+' kiện'+pctStr);
+    });
+    lines.push('- **Tổng: '+TONKHO_DATA.grand_total.toLocaleString('vi-VN')+' kiện**');
+  }
+
+  var openGates=0;
+  for(var i=0;i<15;i++) if(gateAutoState[i]) openGates++;
+  for(var i=0;i<20;i++) if(gateManualState[i]) openGates++;
+  var minPT = zoneCfg.gate ? zoneCfg.gate.minPerTruck : 30;
+  var spd = openGates>0 ? parseFloat((60/minPT*openGates).toFixed(1)) : 0;
+  lines.push('\n### Cổng nhập:');
+  lines.push('- Xe tồn chờ nhập: **'+state.xeton+' xe**, cổng mở: '+openGates+'/35, tốc độ: '+spd+' xe/giờ');
+  if(spd>0 && state.xeton>0) lines.push('- ETA giải tỏa xe: ~'+Math.ceil(state.xeton/spd*60)+' phút');
+
+  var c1=0,c2=0;
+  for(var i=0;i<12;i++){ if(feederCBS1State[i]) c1++; if(feederCBS2State[i]) c2++; }
+  var cbsOPH = zoneCfg.cbs ? zoneCfg.cbs.orderPerHour : 24000;
+  var activeCBS=(c1>0?1:0)+(c2>0?1:0);
+  lines.push('\n### CBS Feeder:');
+  lines.push('- Đơn chờ sort: **'+state.sort.toLocaleString('vi-VN')+'**, CBS active: '+activeCBS+'/2, capacity: '+(activeCBS*cbsOPH).toLocaleString('vi-VN')+'/giờ');
+  if(activeCBS>0 && state.sort>0) lines.push('- ETA sort xong: ~'+Math.ceil(state.sort/(activeCBS*cbsOPH)*60)+' phút');
+
+  lines.push('\n### Cồng kềnh & khu chia:');
+  lines.push('- Pallet CK chờ: **'+state.congkenh+'** (~'+(state.congkenh*20).toLocaleString('vi-VN')+' đơn)');
+  ['ck1','ck2','nv','hcm'].forEach(function(id){
+    var cfg=zoneCfg[id]; if(!cfg) return;
+    var pal=parseInt((document.getElementById('zpal-'+id)||{}).value)||0;
+    var ns=parseInt((document.getElementById('zns-'+id)||{}).value)||0;
+    var eta=(document.getElementById('zeta-'+id)||{}).textContent||'—';
+    var nm={ck1:'CK1',ck2:'CK2',nv:'B2 NV',hcm:'B2 HCM'};
+    lines.push('- '+nm[id]+': '+pal+' pal / '+ns+' NS / ETA '+eta);
+  });
+
+  lines.push('\n## YÊU CẦU');
+  lines.push('1. Đánh giá mức độ: OK / Cần chú ý / Khẩn cấp');
+  lines.push('2. TOP 3-5 hành động ưu tiên ngay (cụ thể, có số liệu)');
+  lines.push('3. Cảnh báo: nếu không can thiệp, điều gì xảy ra trong 1-2h tới?');
+  lines.push('4. Gợi ý phân bổ nhân sự nếu cần');
+  lines.push('\nTiếng Việt, ngắn gọn, dùng emoji và bullet. Tối đa 300 từ.');
+  return lines.join('\n');
+}
+
+function mdToHtml(text){
+  return text
+    .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+    .replace(/^### (.+)/gm,'<div style="font-size:12px;font-weight:700;color:#58a6ff;margin:10px 0 4px">$1</div>')
+    .replace(/^## (.+)/gm,'<div style="font-size:13px;font-weight:700;color:#e6edf3;margin:12px 0 4px">$1</div>')
+    .replace(/^- (.+)/gm,'<div style="margin:2px 0 2px 8px">• $1</div>')
+    .replace(/^\d+\. (.+)/gm,'<div style="margin:2px 0 2px 8px">$1</div>')
+    .replace(/\n/g,'<br>');
+}
+
+async function runAIAnalysis(){
+  if(!GEMINI_KEY){ alert('Chưa có API key! Vào ⚙️ Cài đặt để nhập.'); return; }
+  var btn=document.getElementById('btn-ai-analyze');
+  var resultEl=document.getElementById('ai-result');
+  var panel=document.getElementById('ai-panel');
+  var statusEl=document.getElementById('ai-status-text');
+  btn.disabled=true; btn.textContent='⏳ Đang phân tích...';
+  panel.style.borderColor='#a371f7'; panel.style.boxShadow='0 0 24px #a371f733';
+  statusEl.textContent='Đang kết nối Gemini AI...';
+  resultEl.innerHTML='<div style="color:#8b949e">🤖 AI đang đọc dữ liệu và phân tích tình huống...</div>';
+  var prompt=buildAIPrompt();
+  var url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY;
+  var body=JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:900,temperature:0.35}});
+  try{
+    var resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:body});
+    if(!resp.ok){ 
+      var err=await resp.json(); 
+      var errMsg = (err.error&&err.error.message)||'HTTP '+resp.status;
+      if(resp.status === 429 || errMsg.toLowerCase().includes('quota')) {
+        throw new Error('API key đã hết hạn mức sử dụng (Quota Exceeded) hoặc bị giới hạn tốc độ. Vui lòng tạo/dùng API key khác.');
+      }
+      throw new Error(errMsg); 
+    }
+    var data=await resp.json();
+    var text=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0].text;
+    if(!text) throw new Error('Không có phản hồi từ AI');
+    resultEl.innerHTML='<div style="color:#e6edf3">'+mdToHtml(text)+'</div>'
+      +'<div style="margin-top:12px;padding-top:8px;border-top:1px solid #21262d;font-size:10px;color:#484f58">🕐 Phân tích lúc '+new Date().toLocaleTimeString('vi-VN')+' — Gemini 2.0 Flash</div>';
+    statusEl.textContent='✅ Hoàn thành — '+new Date().toLocaleTimeString('vi-VN');
+    panel.style.borderColor='#3fb950'; panel.style.boxShadow='0 0 16px #3fb95022';
+    setTimeout(function(){ panel.style.borderColor='#30363d'; panel.style.boxShadow='none'; },6000);
+  } catch(e){
+    resultEl.innerHTML='<div style="color:#f85149">❌ Lỗi: '+e.message+'<br><span style="font-size:11px;color:#8b949e;margin-top:4px;display:block">Để khắc phục, hãy vào ⚙️ Cài đặt để cập nhật lại API key.</span></div>';
+    statusEl.textContent='❌ Lỗi'; panel.style.borderColor='#f85149';
+    setTimeout(function(){ panel.style.borderColor='#30363d'; },3000);
+
+  } finally { btn.disabled=false; btn.textContent='✨ Phân Tích'; }
+}
+
+window.addEventListener('load', function(){
+  if(GEMINI_KEY){
+    var inp=document.getElementById('cfg-gemini-key');
+    if(inp) inp.value=GEMINI_KEY;
+    document.getElementById('ai-status-text').textContent='Gemini AI sẵn sàng';
+    var btn=document.getElementById('btn-ai-analyze');
+    if(btn){ btn.disabled=false; btn.style.opacity='1'; }
+  }
+});
+
+function updateDash(){
+  state.xeton     = parseInt(document.getElementById('in-xeton').value)     || 0;
+  state.sort      = parseInt(document.getElementById('in-sort').value)      || 0;
+  state.congkenh  = parseInt(document.getElementById('in-congkenh').value)  || 0;
+  renderKPIs();
+  renderGates();
+  renderCBS();
+  renderAlerts();
+}
+
+/* ═══════════════════════════════════════
+   HOURLY CHARTS
+═══════════════════════════════════════ */
+var hourlyData = [];
+var chartTonkho=null, chartXe=null, chartSort=null, chartShift=null;
+
+(function buildHourSelect(){
+  var sel = document.getElementById('h-hour');
+  for(var h=0;h<24;h++){
+    var opt = document.createElement('option');
+    opt.value = h;
+    opt.textContent = String(h).padStart(2,'0') + ':00';
+    sel.appendChild(opt);
+  }
+  sel.value = new Date().getHours();
+})();
+
+function shiftForHour(h){ return h>=7&&h<15?{l:'Ca 1',c:'ca1'}:h>=15&&h<22?{l:'Ca 2',c:'ca2'}:{l:'Ca 3',c:'ca3'}; }
+
+function addHourlyPoint(){
+  var hour   = parseInt(document.getElementById('h-hour').value);
+  var tonkho = parseInt(document.getElementById('h-tonkho').value)||0;
+  var xe     = parseInt(document.getElementById('h-xe').value)||0;
+  var sort   = parseInt(document.getElementById('h-sort').value)||0;
+  var note   = document.getElementById('h-note').value.trim();
+  var idx    = hourlyData.findIndex(function(d){return d.hour===hour;});
+  var entry  = {hour:hour,tonkho:tonkho,xe:xe,sort:sort,note:note};
+  if(idx>=0) hourlyData[idx]=entry; else hourlyData.push(entry);
+  hourlyData.sort(function(a,b){return a.hour-b.hour;});
+  renderHourlyTable(); renderCharts(); updateBadge();
+  ['h-tonkho','h-xe','h-sort','h-note'].forEach(function(id){document.getElementById(id).value='';});
+}
+
+function deleteHourlyPoint(h){
+  hourlyData = hourlyData.filter(function(d){return d.hour!==h;});
+  renderHourlyTable(); renderCharts(); updateBadge();
+}
+
+function clearHourlyData(){
+  if(!hourlyData.length||!confirm('Xoá tất cả dữ liệu biểu đồ?')) return;
+  hourlyData=[]; renderHourlyTable(); renderCharts(); updateBadge();
+}
+
+function updateBadge(){ document.getElementById('data-point-count').textContent = hourlyData.length+' mốc'; }
+
+function renderHourlyTable(){
+  var wrap = document.getElementById('hourly-table-wrap');
+  if(!hourlyData.length){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  document.getElementById('hourly-tbody').innerHTML = hourlyData.map(function(d){
+    var sh = shiftForHour(d.hour);
+    return '<tr>'
+      +'<td style="font-weight:600">'+String(d.hour).padStart(2,'0')+':00</td>'
+      +'<td><span class="ca-badge '+sh.c+'">'+sh.l+'</span></td>'
+      +'<td>'+d.tonkho.toLocaleString('vi-VN')+'</td>'
+      +'<td>'+d.xe.toLocaleString('vi-VN')+'</td>'
+      +'<td>'+d.sort.toLocaleString('vi-VN')+'</td>'
+      +'<td style="color:#8b949e;font-size:11px">'+(d.note||'—')+'</td>'
+      +'<td><button class="btn-del" onclick="deleteHourlyPoint('+d.hour+')">✕</button></td>'
+      +'</tr>';
+  }).join('');
+}
+
+var CDEFS = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2128',borderColor:'#30363d',borderWidth:1,titleColor:'#e6edf3',bodyColor:'#8b949e',padding:10}},
+  scales:{x:{grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:11}}},y:{grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:11}},beginAtZero:true}}
+};
+
+function mkGrad(ctx,c1,c2){ var g=ctx.createLinearGradient(0,0,0,180); g.addColorStop(0,c1); g.addColorStop(1,c2); return g; }
+
+function renderCharts(){
+  var n = hourlyData.length;
+  var labels = hourlyData.map(function(d){return String(d.hour).padStart(2,'0');});
+
+  function doLine(id, emptyId, dataArr, color, alphaColor, chartRef, unit){
+    var canvas = document.getElementById(id);
+    var emptyEl= document.getElementById(emptyId);
+    if(n===0){ emptyEl.style.display='flex'; if(chartRef){ chartRef.destroy(); } return null; }
+    emptyEl.style.display='none';
+    var grad = mkGrad(canvas.getContext('2d'), alphaColor.replace('X','.35'), alphaColor.replace('X','.02'));
+    var ds = {data:dataArr, borderColor:color, backgroundColor:grad, borderWidth:2, pointBackgroundColor:color, pointRadius:4, pointHoverRadius:6, fill:true, tension:.4};
+    if(chartRef){ chartRef.data={labels:labels,datasets:[ds]}; chartRef.update('active'); return chartRef; }
+    return new Chart(canvas, {type:'line', data:{labels:labels,datasets:[ds]}, options:JSON.parse(JSON.stringify(CDEFS))});
+  }
+
+  chartTonkho = doLine('chart-tonkho','empty-tonkho', hourlyData.map(function(d){return d.tonkho;}), '#388bfd', 'rgba(56,139,253,X)', chartTonkho, 'kiện');
+  chartXe     = doLine('chart-xe',    'empty-xe',     hourlyData.map(function(d){return d.xe;}),     '#3fb950', 'rgba(63,185,80,X)',  chartXe,     'xe');
+  chartSort   = doLine('chart-sort',  'empty-sort',   hourlyData.map(function(d){return d.sort;}),   '#a371f7', 'rgba(163,113,247,X)',chartSort,   'kiện');
+
+  // Shift comparison bar
+  var emShift = document.getElementById('empty-shift');
+  if(n===0){ emShift.style.display='flex'; if(chartShift){chartShift.destroy();chartShift=null;} return; }
+  var shifts = [
+    {label:'Ca 1 (07–15h)', hours:[7,8,9,10,11,12,13,14], bc:'rgba(63,185,80,.75)',  border:'#3fb950'},
+    {label:'Ca 2 (15–22h)', hours:[15,16,17,18,19,20,21],  bc:'rgba(210,153,34,.75)', border:'#d29922'},
+    {label:'Ca 3 (22–07h)', hours:[22,23,0,1,2,3,4,5,6],   bc:'rgba(56,139,253,.75)', border:'#388bfd'},
+  ];
+  var totals = shifts.map(function(sh){
+    var pts = hourlyData.filter(function(d){return sh.hours.indexOf(d.hour)>=0;});
+    return {xe:pts.reduce(function(s,d){return s+d.xe;},0), sort:pts.reduce(function(s,d){return s+d.sort;},0), count:pts.length};
+  });
+  if(!totals.some(function(t){return t.count>0;})){emShift.style.display='flex'; if(chartShift){chartShift.destroy();chartShift=null;} return;}
+  emShift.style.display='none';
+  var shiftData = {
+    labels:shifts.map(function(s){return s.label;}),
+    datasets:[
+      {label:'Xe nhập', data:totals.map(function(t){return t.xe;}), backgroundColor:shifts.map(function(s){return s.bc;}), borderColor:shifts.map(function(s){return s.border;}), borderWidth:2, borderRadius:6},
+      {label:'Sort (kiện)', data:totals.map(function(t){return t.sort;}), backgroundColor:shifts.map(function(s){return s.bc.replace('.75','.3');}), borderColor:shifts.map(function(s){return s.border;}), borderWidth:2, borderRadius:6}
+    ]
+  };
+  var shiftOpts = JSON.parse(JSON.stringify(CDEFS));
+  shiftOpts.plugins.legend = {display:true, labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:16}};
+  if(chartShift){chartShift.data=shiftData; chartShift.update('active');}
+  else chartShift = new Chart(document.getElementById('chart-shift'),{type:'bar',data:shiftData,options:shiftOpts});
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+setInterval(updateClock, 1000);
+updateClock();
+initKhoData();   // Đọc TONKHO_DATA đã inject sẵn trong HTML
+renderGates();
+renderCBS();
+renderKPIs();
+renderAlerts();
+renderCharts();
+</script>
+<!-- MODAL CHI TIẾT TỒN KHO -->
+<div class="modal-overlay" id="kho-modal" onclick="if(event.target===this)closeKhoModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <h3 id="modal-title">Chi tiết</h3>
+        <p id="modal-subtitle"></p>
+      </div>
+      <button class="modal-close" onclick="closeKhoModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer"><span>🔍 Click vào từng mục trong bảng tồn kho để xem chi tiết kho con</span></div>
+  </div>
+</div>
+
+<!-- MODAL CÀI ĐẶT CAPACITY -->
+<div class="modal-overlay" id="zone-settings-modal" onclick="if(event.target===this)closeZoneSettings()">
+  <div class="modal-box" style="width:min(560px,96vw);max-height:88vh">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <h3>⚙️ Cài Đặt Capacity</h3>
+        <p>Thay đổi → đồng bộ ngay vào tất cả các khu</p>
+      </div>
+      <button class="modal-close" onclick="closeZoneSettings()">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+
+      <!-- GEMINI API KEY -->
+      <div style="margin-bottom:16px;padding:14px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-left:3px solid #a371f7">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#a371f7;text-transform:uppercase;letter-spacing:.5px">🤖 Gemini AI — API Key</div>
+          <a href="https://aistudio.google.com/apikey" target="_blank" style="font-size:10px;color:#58a6ff;text-decoration:none;margin-left:auto">🔑 Lấy key miễn phí →</a>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="password" id="cfg-gemini-key" placeholder="AIzaSy..." autocomplete="off"
+            style="flex:1;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 12px;color:#e6edf3;font-size:13px;font-family:monospace;outline:none"
+            oninput="onApiKeyInput()">
+          <button onclick="toggleKeyVisibility()" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap">👁 Hiện</button>
+        </div>
+        <div id="api-key-status" style="margin-top:8px;font-size:11px;color:#8b949e">
+          Dán API key vào đây → Nút "✨ Phân Tích" sẽ được kích hoạt
+        </div>
+      </div>
+
+      <!-- CỔNG NHẬP -->
+      <div style="margin-bottom:16px;padding:14px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-left:3px solid #3fb950">
+        <div style="font-size:11px;font-weight:700;color:#3fb950;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🚚 Cổng Nhập</div>
+        <div style="display:grid;grid-template-columns:1fr;gap:8px">
+          <div class="form-group">
+            <label>Thời gian xử lý / xe / cổng (phút)</label>
+            <input type="number" id="cfg-gate-min" value="30" min="1" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 12px;color:#e6edf3;font-size:14px;font-family:Inter,sans-serif;outline:none">
+          </div>
+        </div>
+        <div style="margin-top:8px;padding:6px 10px;background:#21262d;border-radius:6px;font-size:11px;color:#8b949e">
+          1 xe / cổng = <b id="cfg-gate-preview" style="color:#3fb950">30</b> phút &nbsp;│&nbsp; N cổng = N × <b style="color:#3fb950">2</b> xe/giờ
+        </div>
+      </div>
+
+      <!-- CBS FEEDER -->
+      <div style="margin-bottom:16px;padding:14px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-left:3px solid #a371f7">
+        <div style="font-size:11px;font-weight:700;color:#a371f7;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🔀 CBS Feeder</div>
+        <div class="form-group">
+          <label>Đơn sort / giờ / CBS machine</label>
+          <input type="number" id="cfg-cbs-order" value="24000" min="1000" step="1000" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 12px;color:#e6edf3;font-size:14px;font-family:Inter,sans-serif;outline:none">
+        </div>
+        <div style="margin-top:8px;padding:6px 10px;background:#21262d;border-radius:6px;font-size:11px;color:#8b949e">
+          2 CBS đang chạy = <b id="cfg-cbs-preview" style="color:#a371f7">48.000</b> đơn/giờ
+        </div>
+      </div>
+
+      <!-- 4 KHU riêng -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+
+        <!-- CK1 -->
+        <div style="padding:12px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-top:3px solid #d29922">
+          <div style="font-size:11px;font-weight:700;color:#d29922;text-transform:uppercase;margin-bottom:9px">🟠 Cồng Kềnh 1</div>
+          <div class="form-group" style="margin-bottom:7px"><label>Pallet / giờ</label>
+            <input type="number" id="cfg-ck1-pal" value="100" min="1" oninput="updateSettingsPreview()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:7px;padding:8px 10px;color:#e6edf3;font-size:13px;outline:none">
+          </div>
+          <div class="form-group" style="margin-bottom:7px"><label>Nhân sự chuẩn</label>
+            <input type="number" id="cfg-ck1-ns" value="50" min="1" oninput="updateSettingsPreview()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:7px;padding:8px 10px;color:#e6edf3;font-size:13px;outline:none">
+          </div>
+          <div style="font-size:11px;color:#8b949e">Tỷ lệ: <b id="cfg-ck1-rate" style="color:#d29922">2.00</b> pal/NS/g</div>
+        </div>
+
+        <!-- CK2 -->
+        <div style="padding:12px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-top:3px solid #d29922">
+          <div style="font-size:11px;font-weight:700;color:#d29922;text-transform:uppercase;margin-bottom:9px">🟠 Cồng Kềnh 2</div>
+          <div class="form-group" style="margin-bottom:7px"><label>Pallet / giờ</label>
+            <input type="number" id="cfg-ck2-pal" value="100" min="1" oninput="updateSettingsPreview()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:7px;padding:8px 10px;color:#e6edf3;font-size:13px;outline:none">
+          </div>
+          <div class="form-group" style="margin-bottom:7px"><label>Nhân sự chuẩn</label>
+            <input type="number" id="cfg-ck2-ns" value="50" min="1" oninput="updateSettingsPreview()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:7px;padding:8px 10px;color:#e6edf3;font-size:13px;outline:none">
+          </div>
+          <div style="font-size:11px;color:#8b949e">Tỷ lệ: <b id="cfg-ck2-rate" style="color:#d29922">2.00</b> pal/NS/g</div>
+        </div>
+
+        <!-- NV -->
+        <div style="padding:12px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-top:3px solid #388bfd">
+          <div style="font-size:11px;font-weight:700;color:#388bfd;text-transform:uppercase;margin-bottom:9px">🔵 Bậc 2 Nội Vùng</div>
+          <div class="form-group" style="margin-bottom:7px"><label>Pallet / giờ</label>
+            <input type="number" id="cfg-nv-pal" value="60" min="1" oninput="updateSettingsPreview()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:7px;padding:8px 10px;color:#e6edf3;font-size:13px;outline:none">
+          </div>
+          <div class="form-group" style="margin-bottom:7px"><label>Nhân sự chuẩn</label>
+            <input type="number" id="cfg-nv-ns" value="20" min="1" oninput="updateSettingsPreview()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:7px;padding:8px 10px;color:#e6edf3;font-size:13px;outline:none">
+          </div>
+          <div style="font-size:11px;color:#8b949e">Tỷ lệ: <b id="cfg-nv-rate" style="color:#388bfd">3.00</b> pal/NS/g</div>
+        </div>
+
+        <!-- HCM -->
+        <div style="padding:12px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-top:3px solid #388bfd">
+          <div style="font-size:11px;font-weight:700;color:#388bfd;text-transform:uppercase;margin-bottom:9px">🔵 Bậc 2 Hồ Chí Minh</div>
+          <div class="form-group" style="margin-bottom:7px"><label>Pallet / giờ</label>
+            <input type="number" id="cfg-hcm-pal" value="60" min="1" oninput="updateSettingsPreview()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:7px;padding:8px 10px;color:#e6edf3;font-size:13px;outline:none">
+          </div>
+          <div class="form-group" style="margin-bottom:7px"><label>Nhân sự chuẩn</label>
+            <input type="number" id="cfg-hcm-ns" value="20" min="1" oninput="updateSettingsPreview()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:7px;padding:8px 10px;color:#e6edf3;font-size:13px;outline:none">
+          </div>
+          <div style="font-size:11px;color:#8b949e">Tỷ lệ: <b id="cfg-hcm-rate" style="color:#388bfd">3.00</b> pal/NS/g</div>
+        </div>
+
+      </div>
+
+      <!-- TUYẾN XUẤT CAPACITY -->
+      <div style="margin-top:14px;padding:14px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-left:3px solid #58a6ff">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#58a6ff;text-transform:uppercase;letter-spacing:.5px">🏭 Giới Hạn Lưu Trữ Tuyến Xuất</div>
+          <span style="font-size:10px;color:#8b949e">Nhập số Pallet &nbsp;│&nbsp; 🟡 ≥60% &nbsp;│&nbsp; 🔴 ≥80%</span>
+        </div>
+        <!-- QUY ĐỔI PALLET → KIỆN -->
+        <div style="display:flex;align-items:center;gap:10px;background:#21262d;border-radius:8px;padding:10px 12px;margin-bottom:10px;border:1px solid #388bfd44">
+          <span style="font-size:20px">📦</span>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:#58a6ff;margin-bottom:2px">Quy đổi: 1 Pallet = ? kiện/đơn</div>
+            <div style="font-size:10px;color:#8b949e">Hệ số dùng để tính sức chứa thực tế (kiện) từ số Pallet nhập vào</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="cfg-kien-per-pal" value="50" min="1" max="9999" step="1"
+              oninput="updateSettingsPreview()"
+              style="width:70px;background:#0d1117;border:1px solid #388bfd;border-radius:7px;padding:7px 10px;color:#58a6ff;font-size:14px;font-weight:700;outline:none;text-align:center">
+            <span style="font-size:11px;color:#8b949e">kiện/pal</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="route-cap-grid">
+
+          <!-- KCT — có thể mở rộng -->
+          <div style="display:flex;align-items:center;gap:7px;background:#21262d;border-radius:7px;padding:7px 10px;grid-column:span 2;cursor:pointer" onclick="toggleRouteDetail('kct','Kho Chuyển Tiếp')">
+            <span id="toggle-kct" style="font-size:10px;color:#58a6ff;min-width:12px">▶</span>
+            <div style="flex:1;font-size:11px;color:#58a6ff;font-weight:600">Kho Chuyển Tiếp <span style="font-size:10px;color:#8b949e;font-weight:400">(click để xem kho con)</span></div>
+            <input type="number" id="cap-kct" value="0" min="0" step="1" readonly
+              onclick="event.stopPropagation()" oninput="previewRouteCap('kct','Kho Chuyển Tiếp')"
+              style="width:75px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 8px;color:#e6edf3;font-size:12px;outline:none;text-align:right;cursor:default">
+            <span style="font-size:9px;color:#484f58">pal</span>
+            <span id="capkien-kct" style="font-size:9px;color:#484f58;white-space:nowrap"></span>
+            <span id="cappt-kct" style="font-size:10px;font-weight:700;color:#8b949e;min-width:34px;text-align:right">—</span>
+          </div>
+          <div id="detail-kct" style="display:none;grid-column:span 2;padding-left:12px"></div>
+
+          <!-- KGHN + KKHL -->
+          <div style="display:flex;align-items:center;gap:7px;background:#21262d;border-radius:7px;padding:7px 10px">
+            <div style="flex:1;font-size:11px;color:#c9d1d9;white-space:nowrap">Kho Giao Hàng Nặng</div>
+            <input type="number" id="cap-kghn" value="0" min="0" step="1" oninput="previewRouteCap('kghn','Kho Giao Hàng Nặng')"
+              style="width:75px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 8px;color:#e6edf3;font-size:12px;outline:none;text-align:right">
+            <span style="font-size:9px;color:#484f58">pal</span>
+            <span id="capkien-kghn" style="font-size:9px;color:#484f58;white-space:nowrap"></span>
+            <span id="cappt-kghn" style="font-size:10px;font-weight:700;color:#8b949e;min-width:34px;text-align:right">—</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;background:#21262d;border-radius:7px;padding:7px 10px">
+            <div style="flex:1;font-size:11px;color:#c9d1d9;white-space:nowrap">Kho KHL</div>
+            <input type="number" id="cap-kkhl" value="0" min="0" step="1" oninput="previewRouteCap('kkhl','Kho KHL')"
+              style="width:75px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 8px;color:#e6edf3;font-size:12px;outline:none;text-align:right">
+            <span style="font-size:9px;color:#484f58">pal</span>
+            <span id="capkien-kkhl" style="font-size:9px;color:#484f58;white-space:nowrap"></span>
+            <span id="cappt-kkhl" style="font-size:10px;font-weight:700;color:#8b949e;min-width:34px;text-align:right">—</span>
+          </div>
+
+          <!-- KTC — có thể mở rộng -->
+          <div style="display:flex;align-items:center;gap:7px;background:#21262d;border-radius:7px;padding:7px 10px;grid-column:span 2;cursor:pointer" onclick="toggleRouteDetail('ktc','Kho Trung Chuyển')">
+            <span id="toggle-ktc" style="font-size:10px;color:#58a6ff;min-width:12px">▶</span>
+            <div style="flex:1;font-size:11px;color:#58a6ff;font-weight:600">Kho Trung Chuyển <span style="font-size:10px;color:#8b949e;font-weight:400">(click để xem kho con)</span></div>
+            <input type="number" id="cap-ktc" value="0" min="0" step="1" readonly
+              onclick="event.stopPropagation()" oninput="previewRouteCap('ktc','Kho Trung Chuyển')"
+              style="width:75px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 8px;color:#e6edf3;font-size:12px;outline:none;text-align:right;cursor:default">
+            <span style="font-size:9px;color:#484f58">pal</span>
+            <span id="capkien-ktc" style="font-size:9px;color:#484f58;white-space:nowrap"></span>
+            <span id="cappt-ktc" style="font-size:10px;font-weight:700;color:#8b949e;min-width:34px;text-align:right">—</span>
+          </div>
+          <div id="detail-ktc" style="display:none;grid-column:span 2;padding-left:12px"></div>
+
+          <!-- NT + NV2 -->
+          <div style="display:flex;align-items:center;gap:7px;background:#21262d;border-radius:7px;padding:7px 10px">
+            <div style="flex:1;font-size:11px;color:#c9d1d9;white-space:nowrap">Nội Thành</div>
+            <input type="number" id="cap-nt" value="0" min="0" step="1" oninput="previewRouteCap('nt','Nội Thành')"
+              style="width:75px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 8px;color:#e6edf3;font-size:12px;outline:none;text-align:right">
+            <span style="font-size:9px;color:#484f58">pal</span>
+            <span id="capkien-nt" style="font-size:9px;color:#484f58;white-space:nowrap"></span>
+            <span id="cappt-nt" style="font-size:10px;font-weight:700;color:#8b949e;min-width:34px;text-align:right">—</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;background:#21262d;border-radius:7px;padding:7px 10px">
+            <div style="flex:1;font-size:11px;color:#c9d1d9;white-space:nowrap">Nội vùng</div>
+            <input type="number" id="cap-nv2" value="0" min="0" step="1" oninput="previewRouteCap('nv2','Nội vùng')"
+              style="width:75px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 8px;color:#e6edf3;font-size:12px;outline:none;text-align:right">
+            <span style="font-size:9px;color:#484f58">pal</span>
+            <span id="capkien-nv2" style="font-size:9px;color:#484f58;white-space:nowrap"></span>
+            <span id="cappt-nv2" style="font-size:10px;font-weight:700;color:#8b949e;min-width:34px;text-align:right">—</span>
+          </div>
+
+          <!-- PQ — span 2 -->
+          <div style="display:flex;align-items:center;gap:7px;background:#21262d;border-radius:7px;padding:7px 10px;grid-column:span 2">
+            <div style="flex:1;font-size:11px;color:#c9d1d9;white-space:nowrap">Phú Quốc</div>
+            <input type="number" id="cap-pq" value="0" min="0" step="1" oninput="previewRouteCap('pq','Phú Quốc')"
+              style="width:75px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:5px 8px;color:#e6edf3;font-size:12px;outline:none;text-align:right">
+            <span style="font-size:9px;color:#484f58">pal</span>
+            <span id="capkien-pq" style="font-size:9px;color:#484f58;white-space:nowrap"></span>
+            <span id="cappt-pq" style="font-size:10px;font-weight:700;color:#8b949e;min-width:34px;text-align:right">—</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer" style="display:flex;gap:10px;padding:14px 20px">
+      <button onclick="resetZoneSettings()" style="flex:1;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">&#x21BA; Mặc định</button>
+      <button id="btn-save-settings" onclick="saveZoneSettings()" style="flex:2;background:linear-gradient(135deg,#388bfd,#1f6feb);border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">✔ Lưu Cài Đặt</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   AUTH SYSTEM
+═══════════════════════════════════════ */
+var AUTH_KEY     = 'ktc_users';
+var SESSION_KEY  = 'ktc_session';
+
+// Default accounts (khởi tạo lần đầu)
+var DEFAULT_USERS = [
+  { username:'admin',  password:'admin123', name:'Quản Trị Viên', role:'admin'    },
+  { username:'op1',    password:'1234',     name:'Vận Hành Ca 1', role:'operator' },
+];
+
+function getUsers(){
+  try{
+    var stored = JSON.parse(localStorage.getItem(AUTH_KEY));
+    if(stored && stored.length) return stored;
+  } catch(e){}
+  localStorage.setItem(AUTH_KEY, JSON.stringify(DEFAULT_USERS));
+  return DEFAULT_USERS.slice();
+}
+
+function saveUsers(users){
+  localStorage.setItem(AUTH_KEY, JSON.stringify(users));
+}
+
+function getSession(){
+  try{ return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e){ return null; }
+}
+
+function setSession(user){
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({username:user.username, name:user.name, role:user.role}));
+}
+
+function clearSession(){
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+/* ── Login / Logout ── */
+function doLogin(){
+  var uname = (document.getElementById('login-user').value||'').trim();
+  var pass  = (document.getElementById('login-pass').value||'');
+  var errEl = document.getElementById('login-error');
+  var users = getUsers();
+  var found = users.filter(function(u){ return u.username===uname && u.password===pass; });
+  if(!found.length){
+    errEl.style.display='block';
+    var card = document.querySelector('.login-card');
+    card.style.animation='none';
+    card.style.transform='translateX(-8px)';
+    setTimeout(function(){ card.style.transform='translateX(8px)'; },80);
+    setTimeout(function(){ card.style.transform='translateX(-5px)'; },160);
+    setTimeout(function(){ card.style.transform='translateX(0)'; card.style.animation=''; },240);
+    document.getElementById('login-pass').value='';
+    return;
+  }
+  var user = found[0];
+  setSession(user);
+  errEl.style.display='none';
+  // Ẩn login, hiện dashboard
+  var screen = document.getElementById('login-screen');
+  screen.style.transition='opacity .4s';
+  screen.style.opacity='0';
+  setTimeout(function(){ screen.style.display='none'; }, 400);
+  updateHeaderBadge(user);
+}
+
+function doLogout(){
+  if(!confirm('Bạn có chắc muốn đăng xuất?')) return;
+  clearSession();
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  var screen = document.getElementById('login-screen');
+  screen.style.opacity='0';
+  screen.style.display='flex';
+  requestAnimationFrame(function(){ screen.style.transition='opacity .3s'; screen.style.opacity='1'; });
+  document.getElementById('header-user-badge').style.display='none';
+}
+
+function updateHeaderBadge(user){
+  document.getElementById('header-user-badge').style.display='flex';
+  document.getElementById('header-username').textContent = user.name;
+  var roleTag = document.getElementById('header-role-tag');
+  roleTag.textContent = user.role==='admin' ? 'Admin' : 'Operator';
+  roleTag.className = 'role-tag ' + user.role;
+  // Admin mới thấy nút 👥
+  var mgmtBtn = document.getElementById('btn-user-mgmt');
+  if(mgmtBtn) mgmtBtn.style.display = user.role==='admin' ? 'inline-block' : 'none';
+  // Operator không dùng được ⚙️ Cài đặt
+  var settingsBtn = document.querySelector('button[title="Cài đặt capacity khu chia hàng"]');
+  if(settingsBtn && user.role==='operator'){
+    settingsBtn.style.opacity='.4';
+    settingsBtn.style.cursor='not-allowed';
+    settingsBtn.onclick=function(){ alert('Chỉ Admin mới có thể thay đổi cài đặt.'); };
+  }
+}
+
+/* ── User Management ── */
+function openUserMgmt(){
+  var s = getSession();
+  if(!s || s.role!=='admin'){ alert('Chỉ Admin mới có quyền này.'); return; }
+  renderUserList();
+  document.getElementById('user-mgmt-modal').classList.add('open');
+}
+
+function closeUserMgmt(){
+  document.getElementById('user-mgmt-modal').classList.remove('open');
+}
+
+function renderUserList(){
+  var users = getUsers();
+  var s = getSession();
+  var html = '<div style="font-size:12px;font-weight:700;color:#8b949e;text-transform:uppercase;margin-bottom:10px">Danh sách người dùng ('+users.length+')</div>';
+  users.forEach(function(u, idx){
+    var isSelf = s && s.username===u.username;
+    html += '<div style="display:flex;align-items:center;gap:10px;background:#21262d;border-radius:8px;padding:10px 12px;margin-bottom:8px">'
+      + '<div style="flex:1">'
+      + '<div style="font-size:13px;font-weight:600;color:#e6edf3">'+u.name+' <span style="color:#8b949e;font-weight:400;font-size:11px">@'+u.username+'</span>'+(isSelf?' <span style="font-size:10px;color:#3fb950">(bạn)</span>':'')+'</div>'
+      + '</div>'
+      + '<span class="role-tag '+u.role+'" style="font-size:9px">'+(u.role==='admin'?'Admin':'Operator')+'</span>'
+      + (!isSelf ? '<button onclick="deleteUser('+idx+')" style="background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:#f85149;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:11px">🗑</button>' : '<span style="width:32px"></span>')
+      + '</div>';
+  });
+  document.getElementById('user-list-container').innerHTML = html;
+}
+
+function addUser(){
+  var uname = (document.getElementById('new-username').value||'').trim();
+  var dname = (document.getElementById('new-displayname').value||'').trim();
+  var pass  = (document.getElementById('new-password').value||'').trim();
+  var role  = document.getElementById('new-role').value;
+  var msgEl = document.getElementById('add-user-msg');
+  if(!uname||!dname||!pass){ msgEl.textContent='⚠️ Vui lòng điền đầy đủ tất cả các trường.'; msgEl.style.color='#f85149'; return; }
+  var users = getUsers();
+  if(users.some(function(u){ return u.username===uname; })){ msgEl.textContent='❌ Username đã tồn tại.'; msgEl.style.color='#f85149'; return; }
+  users.push({username:uname, password:pass, name:dname, role:role});
+  saveUsers(users);
+  document.getElementById('new-username').value='';
+  document.getElementById('new-displayname').value='';
+  document.getElementById('new-password').value='';
+  msgEl.textContent='✅ Đã thêm user "'+uname+'" thành công!'; msgEl.style.color='#3fb950';
+  setTimeout(function(){ msgEl.textContent=''; },3000);
+  renderUserList();
+}
+
+function deleteUser(idx){
+  var users = getUsers();
+  if(!confirm('Xóa user "'+users[idx].username+'"?')) return;
+  users.splice(idx,1);
+  saveUsers(users);
+  renderUserList();
+}
+
+/* ── Init auth on page load ── */
+window.addEventListener('load', function(){
+  var session = getSession();
+  if(session){
+    // Đã login từ trước trong session này
+    document.getElementById('login-screen').style.display='none';
+    updateHeaderBadge(session);
+  } else {
+    // Hiện login screen
+    setTimeout(function(){ document.getElementById('login-user').focus(); }, 300);
+  }
+});
+</script>
+
 </body>
 </html>
