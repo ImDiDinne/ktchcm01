@@ -1,18 +1,6 @@
 [
   {
     "level": "critical",
-    "title": "Báo Động Đỏ: BinhPhuoc_T_1",
-    "desc": "Kho Chuyển Tiếp Bình Phước(280), Bưu Cục Xã Đức Liễu-Bù Đăng-Bình Phước(46), Bưu Cục 305 QL14-Bù Đăng-Bình Phước(65), Bưu Cục Xã 10-Bù Đăng-Bình Phước(48), Bưu Cục 305 QL14-Bù Đăng-Bình Phước(65), Bưu Cục Xã Đức Liễu-Bù Đăng-Bình Phước(46), Bưu Cục Tân Đồng-Đồng Xoài-Bình Phước(80), Kho Chuyển Tiếp Bình Phước(280), Kho Trung Chuyển Hồ Chí Minh 20(3,593). Tồn cao + Giờ gấp: Điều phối gấp toàn lực lượng, gọi xe tăng cường.",
-    "category": "Inventory & Fleet",
-    "am": "Hệ Thống",
-    "ton_hien_tai": 4503,
-    "suc_chua": 4000,
-    "ty_le": "112.6%",
-    "gio_con_lai": "0.4h",
-    "gio_xuat": "07:00"
-  },
-  {
-    "level": "critical",
     "title": "Báo Động Đỏ: MN_MB_01",
     "desc": "Bình Dương(3,106), Kho Trung Chuyển Hưng Yên 01(3,714). Có 7299 đơn tồn > 24h: Ưu tiên xử lý lô hàng cũ (FIFO).",
     "category": "Inventory & Fleet",
@@ -20,7 +8,7 @@
     "ton_hien_tai": 6820,
     "suc_chua": 8000,
     "ty_le": "85.2%",
-    "gio_con_lai": "10.4h",
+    "gio_con_lai": "15.1h",
     "gio_xuat": "17:00"
   }
 ]
