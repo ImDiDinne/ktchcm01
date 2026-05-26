@@ -1254,23 +1254,39 @@ window.addEventListener('load', function(){
 });
 
 /* ═══════════════════════════════════════
-   GEMINI AI INTEGRATION
+   AI INTEGRATION (Gemini / Groq / OpenAI)
 ═══════════════════════════════════════ */
-var GEMINI_KEY = localStorage.getItem('geminiApiKey') || '';
+var AI_PROVIDER = localStorage.getItem('aiProvider') || 'gemini';
+var AI_KEY = localStorage.getItem('aiApiKey') || localStorage.getItem('geminiApiKey') || '';
+
+function onApiProviderChange(){
+  AI_PROVIDER = document.getElementById('cfg-ai-provider').value;
+  localStorage.setItem('aiProvider', AI_PROVIDER);
+  var linkEl = document.getElementById('ai-key-link');
+  if(linkEl){
+    if(AI_PROVIDER === 'gemini') linkEl.href = 'https://aistudio.google.com/apikey';
+    else if(AI_PROVIDER === 'groq') linkEl.href = 'https://console.groq.com/keys';
+    else if(AI_PROVIDER === 'openai') linkEl.href = 'https://platform.openai.com/api-keys';
+  }
+  
+  var statusEl = document.getElementById('api-key-status');
+  if(statusEl) { statusEl.textContent='Đã đổi Nền tảng. Vui lòng nhập API Key tương ứng.'; statusEl.style.color='#8b949e'; }
+}
 
 function onApiKeyInput(){
   var val = document.getElementById('cfg-gemini-key').value.trim();
   var statusEl = document.getElementById('api-key-status');
   var btn = document.getElementById('btn-ai-analyze');
   if(val.length > 20){
-    localStorage.setItem('geminiApiKey', val);
-    GEMINI_KEY = val;
+    localStorage.setItem('aiApiKey', val);
+    AI_KEY = val;
     if(statusEl){ statusEl.textContent='✅ Đã lưu API key — Nút Phân Tích đã sẵn sàng'; statusEl.style.color='#3fb950'; }
     if(btn){ btn.disabled=false; btn.style.opacity='1'; }
-    document.getElementById('ai-status-text').textContent='Gemini AI sẵn sàng';
+    var pName = AI_PROVIDER==='openai'?'OpenAI':(AI_PROVIDER==='groq'?'Groq AI':'Gemini AI');
+    document.getElementById('ai-status-text').textContent= pName + ' sẵn sàng';
   } else {
-    GEMINI_KEY='';
-    localStorage.removeItem('geminiApiKey');
+    AI_KEY='';
+    localStorage.removeItem('aiApiKey');
     if(statusEl){ statusEl.textContent='Key không hợp lệ (cần ít nhất 20 ký tự)'; statusEl.style.color='#f85149'; }
     if(btn){ btn.disabled=true; btn.style.opacity='.5'; }
   }
@@ -1308,10 +1324,10 @@ function buildAIPrompt(){
   lines.push('- Xe tồn chờ nhập: **'+state.xeton+' xe**, cổng mở: '+openGates+'/35, tốc độ: '+spd+' xe/giờ');
   if(spd>0 && state.xeton>0) lines.push('- ETA giải tỏa xe: ~'+Math.ceil(state.xeton/spd*60)+' phút');
 
-  var c1=0,c2=0;
-  for(var i=0;i<12;i++){ if(feederCBS1State[i]) c1++; if(feederCBS2State[i]) c2++; }
+  var cbs1=0, cbs2=0;
+  for(var i=0;i<12;i++){ if(feederCBS1State[i]) cbs1++; if(feederCBS2State[i]) cbs2++; }
+  var activeCBS = (cbs1>0?1:0) + (cbs2>0?1:0);
   var cbsOPH = zoneCfg.cbs ? zoneCfg.cbs.orderPerHour : 24000;
-  var activeCBS=(c1>0?1:0)+(c2>0?1:0);
   lines.push('\n### CBS Feeder:');
   lines.push('- Đơn chờ sort: **'+state.sort.toLocaleString('vi-VN')+'**, CBS active: '+activeCBS+'/2, capacity: '+(activeCBS*cbsOPH).toLocaleString('vi-VN')+'/giờ');
   if(activeCBS>0 && state.sort>0) lines.push('- ETA sort xong: ~'+Math.ceil(state.sort/(activeCBS*cbsOPH)*60)+' phút');
@@ -1347,7 +1363,7 @@ function mdToHtml(text){
 }
 
 async function runAIAnalysis(){
-  if(!GEMINI_KEY){ alert('Chưa có API key! Vào ⚙️ Cài đặt để nhập.'); return; }
+  if(!AI_KEY){ alert('Chưa có API key! Vào ⚙️ Cài đặt để nhập.'); return; }
   var btn=document.getElementById('btn-ai-analyze');
   var resultEl=document.getElementById('ai-result');
   var panel=document.getElementById('ai-panel');
@@ -1574,11 +1590,19 @@ renderCharts();
     </div>
     <div class="modal-body" style="padding:16px 20px">
 
-      <!-- GEMINI API KEY -->
+      <!-- AI API KEY -->
       <div style="margin-bottom:16px;padding:14px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-left:3px solid #a371f7">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <div style="font-size:11px;font-weight:700;color:#a371f7;text-transform:uppercase;letter-spacing:.5px">🤖 Gemini AI — API Key</div>
-          <a href="https://aistudio.google.com/apikey" target="_blank" style="font-size:10px;color:#58a6ff;text-decoration:none;margin-left:auto">🔑 Lấy key miễn phí →</a>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#a371f7;text-transform:uppercase;letter-spacing:.5px">🤖 NỀN TẢNG AI</div>
+          <select id="cfg-ai-provider" onchange="onApiProviderChange()" style="background:#21262d;border:1px solid #30363d;color:#e6edf3;font-size:12px;border-radius:6px;padding:4px 8px;outline:none;font-weight:600;cursor:pointer">
+            <option value="gemini">Google Gemini (Khuyên Dùng)</option>
+            <option value="groq">Groq Llama 3 (Miễn phí, Siêu tốc)</option>
+            <option value="openai">OpenAI (ChatGPT)</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">🔑 API Key</div>
+          <a href="https://aistudio.google.com/apikey" id="ai-key-link" target="_blank" style="font-size:10px;color:#58a6ff;text-decoration:none;margin-left:auto">🔗 Bấm vào đây để lấy Key mới →</a>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="password" id="cfg-gemini-key" placeholder="AIzaSy..." autocomplete="off"
