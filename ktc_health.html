@@ -6,8 +6,9 @@
 <title>KTC Health Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="zoneCfg.js"></script>
 <!-- TONKHO_DATA_START -->
-<script>var TONKHO_DATA={"title": "BÁO CÁO CUỐI CA KTC HCM 01", "grand_total": 41055, "routes": [{"name": "Kho Chuyển Tiếp", "total": 6140, "children": [{"name": "Kho Chuyển Tiếp Bình Phước", "short_name": "Bình Phước", "total": 1535}, {"name": "Kho Chuyển Tiếp Bình Thuận", "short_name": "Bình Thuận", "total": 426}, {"name": "Kho Chuyển Tiếp Đắk Nông", "short_name": "Đắk Nông", "total": 221}, {"name": "Kho Chuyển Tiếp Đồng Nai", "short_name": "Đồng Nai", "total": 3606}, {"name": "Kho Chuyển Tiếp Quảng Ngãi", "short_name": "Quảng Ngãi", "total": 75}, {"name": "Kho Chuyến Tiếp Thanh Hoá", "short_name": "Thanh Hoá", "total": 277}]}, {"name": "Kho Giao Hàng Nặng", "total": 1743, "children": [{"name": "Kho Giao Hàng Nặng - Bến Cát - Bình Dương", "short_name": "Bến Cát - Bình Dương", "total": 12}, {"name": "Kho Giao Hàng Nặng - Dĩ An - Bình Dương", "short_name": "Dĩ An - Bình Dương", "total": 37}, {"name": "Kho Giao Hàng Nặng - Đức Hòa - Long An", "short_name": "Đức Hòa - Long An", "total": 121}, {"name": "Kho Giao Hàng Nặng - Hồ Chí Minh", "short_name": "Hồ Chí Minh", "total": 18}, {"name": "Kho Giao Hàng Nặng - Nhà Bè - HCM", "short_name": "Nhà Bè - HCM", "total": 292}, {"name": "Kho Giao Hàng Nặng - Tân Tạo - HCM", "short_name": "Tân Tạo - HCM", "total": 667}, {"name": "Kho Giao Hàng Nặng - Thủ Dầu Một - Bình Dương", "short_name": "Thủ Dầu Một - Bình Dương", "total": 13}, {"name": "Kho Giao Hàng Nặng - Thủ Đức - HCM", "short_name": "Thủ Đức - HCM", "total": 268}, {"name": "Kho Giao Hàng Nặng - Thuận An - Bình Dương", "short_name": "Thuận An - Bình Dương", "total": 134}, {"name": "Kho Giao Hàng Nặng - TP Bến Tre - Bến Tre", "short_name": "TP Bến Tre - Bến Tre", "total": 23}, {"name": "Kho Giao Hàng Nặng - TP Mỹ Tho - Tiền Giang", "short_name": "TP Mỹ Tho - Tiền Giang", "total": 86}, {"name": "Kho Giao Hàng Nặng - TP Tân An - Long An", "short_name": "TP Tân An - Long An", "total": 41}, {"name": "Kho Giao Hàng Nặng - TP Tây Ninh - Tây Ninh", "short_name": "TP Tây Ninh - Tây Ninh", "total": 20}, {"name": "Kho Giao Hàng Nặng - TX Cai Lậy - Tiền Giang", "short_name": "TX Cai Lậy - Tiền Giang", "total": 11}]}, {"name": "Kho KHL", "total": 1096, "children": [{"name": "Key Account Warehouse Ho Chi Minh", "short_name": "Key Account Warehouse Ho Chi Minh", "total": 1096}]}, {"name": "Kho Trung Chuyển", "total": 16981, "children": [{"name": "Kho Trung Chuyển Bình Định", "short_name": "Bình Định", "total": 174}, {"name": "Kho Trung Chuyển Cần Thơ", "short_name": "Cần Thơ", "total": 3780}, {"name": "Kho Trung Chuyển Đà Nẵng", "short_name": "Đà Nẵng", "total": 421}, {"name": "Kho Trung Chuyển Đắk Lắk", "short_name": "Đắk Lắk", "total": 2268}, {"name": "Kho Trung Chuyển Dương Xá", "short_name": "Dương Xá", "total": 851}, {"name": "Kho Trung Chuyển Gia Lai", "short_name": "Gia Lai", "total": 181}, {"name": "Kho Trung Chuyển Hà Nội 02", "short_name": "Hà Nội 02", "total": 540}, {"name": "Kho Trung Chuyển Hồ Chí Minh 20", "short_name": "Hồ Chí Minh 20", "total": 4084}, {"name": "Kho Trung Chuyển Hưng Yên 01", "short_name": "Hưng Yên 01", "total": 4058}, {"name": "Kho Trung Chuyển Khánh Hòa", "short_name": "Khánh Hòa", "total": 221}, {"name": "Kho Trung Chuyến Nghệ An", "short_name": "Nghệ An", "total": 258}, {"name": "Kho Trung Chuyển Quảng Bình", "short_name": "Quảng Bình", "total": 145}]}, {"name": "Nội Thành", "total": 3390, "children": [{"name": "Hồ Chí Minh", "short_name": "Hồ Chí Minh", "total": 3390}]}, {"name": "Nội vùng", "total": 9930, "children": [{"name": "Bến Tre", "short_name": "Bến Tre", "total": 1454}, {"name": "Bình Dương", "short_name": "Bình Dương", "total": 3106}, {"name": "Long An", "short_name": "Long An", "total": 2382}, {"name": "Tây Ninh", "short_name": "Tây Ninh", "total": 1539}, {"name": "Tiền Giang", "short_name": "Tiền Giang", "total": 1449}]}, {"name": "Phú Quốc", "total": 1775, "children": [{"name": "Phú Quốc", "short_name": "Phú Quốc", "total": 1775}]}], "updated": "27/05/2026 04:17:50"};</script>
+<script>var TONKHO_DATA={"title": "BÁO CÁO CUỐI CA KTC HCM 01", "grand_total": 41055, "routes": [{"name": "Kho Chuyển Tiếp", "total": 6140, "children": [{"name": "Kho Chuyển Tiếp Bình Phước", "short_name": "Bình Phước", "total": 1535}, {"name": "Kho Chuyển Tiếp Bình Thuận", "short_name": "Bình Thuận", "total": 426}, {"name": "Kho Chuyển Tiếp Đắk Nông", "short_name": "Đắk Nông", "total": 221}, {"name": "Kho Chuyển Tiếp Đồng Nai", "short_name": "Đồng Nai", "total": 3606}, {"name": "Kho Chuyển Tiếp Quảng Ngãi", "short_name": "Quảng Ngãi", "total": 75}, {"name": "Kho Chuyến Tiếp Thanh Hoá", "short_name": "Thanh Hoá", "total": 277}]}, {"name": "Kho Giao Hàng Nặng", "total": 1743, "children": [{"name": "Kho Giao Hàng Nặng - Bến Cát - Bình Dương", "short_name": "Bến Cát - Bình Dương", "total": 12}, {"name": "Kho Giao Hàng Nặng - Dĩ An - Bình Dương", "short_name": "Dĩ An - Bình Dương", "total": 37}, {"name": "Kho Giao Hàng Nặng - Đức Hòa - Long An", "short_name": "Đức Hòa - Long An", "total": 121}, {"name": "Kho Giao Hàng Nặng - Hồ Chí Minh", "short_name": "Hồ Chí Minh", "total": 18}, {"name": "Kho Giao Hàng Nặng - Nhà Bè - HCM", "short_name": "Nhà Bè - HCM", "total": 292}, {"name": "Kho Giao Hàng Nặng - Tân Tạo - HCM", "short_name": "Tân Tạo - HCM", "total": 667}, {"name": "Kho Giao Hàng Nặng - Thủ Dầu Một - Bình Dương", "short_name": "Thủ Dầu Một - Bình Dương", "total": 13}, {"name": "Kho Giao Hàng Nặng - Thủ Đức - HCM", "short_name": "Thủ Đức - HCM", "total": 268}, {"name": "Kho Giao Hàng Nặng - Thuận An - Bình Dương", "short_name": "Thuận An - Bình Dương", "total": 134}, {"name": "Kho Giao Hàng Nặng - TP Bến Tre - Bến Tre", "short_name": "TP Bến Tre - Bến Tre", "total": 23}, {"name": "Kho Giao Hàng Nặng - TP Mỹ Tho - Tiền Giang", "short_name": "TP Mỹ Tho - Tiền Giang", "total": 86}, {"name": "Kho Giao Hàng Nặng - TP Tân An - Long An", "short_name": "TP Tân An - Long An", "total": 41}, {"name": "Kho Giao Hàng Nặng - TP Tây Ninh - Tây Ninh", "short_name": "TP Tây Ninh - Tây Ninh", "total": 20}, {"name": "Kho Giao Hàng Nặng - TX Cai Lậy - Tiền Giang", "short_name": "TX Cai Lậy - Tiền Giang", "total": 11}]}, {"name": "Kho KHL", "total": 1096, "children": [{"name": "Key Account Warehouse Ho Chi Minh", "short_name": "Key Account Warehouse Ho Chi Minh", "total": 1096}]}, {"name": "Kho Trung Chuyển", "total": 16981, "children": [{"name": "Kho Trung Chuyển Bình Định", "short_name": "Bình Định", "total": 174}, {"name": "Kho Trung Chuyển Cần Thơ", "short_name": "Cần Thơ", "total": 3780}, {"name": "Kho Trung Chuyển Đà Nẵng", "short_name": "Đà Nẵng", "total": 421}, {"name": "Kho Trung Chuyển Đắk Lắk", "short_name": "Đắk Lắk", "total": 2268}, {"name": "Kho Trung Chuyển Dương Xá", "short_name": "Dương Xá", "total": 851}, {"name": "Kho Trung Chuyển Gia Lai", "short_name": "Gia Lai", "total": 181}, {"name": "Kho Trung Chuyển Hà Nội 02", "short_name": "Hà Nội 02", "total": 540}, {"name": "Kho Trung Chuyển Hồ Chí Minh 20", "short_name": "Hồ Chí Minh 20", "total": 4084}, {"name": "Kho Trung Chuyển Hưng Yên 01", "short_name": "Hưng Yên 01", "total": 4058}, {"name": "Kho Trung Chuyển Khánh Hòa", "short_name": "Khánh Hòa", "total": 221}, {"name": "Kho Trung Chuyến Nghệ An", "short_name": "Nghệ An", "total": 258}, {"name": "Kho Trung Chuyển Quảng Bình", "short_name": "Quảng Bình", "total": 145}]}, {"name": "Nội Thành", "total": 3390, "children": [{"name": "Hồ Chí Minh", "short_name": "Hồ Chí Minh", "total": 3390}]}, {"name": "Nội vùng", "total": 9930, "children": [{"name": "Bến Tre", "short_name": "Bến Tre", "total": 1454}, {"name": "Bình Dương", "short_name": "Bình Dương", "total": 3106}, {"name": "Long An", "short_name": "Long An", "total": 2382}, {"name": "Tây Ninh", "short_name": "Tây Ninh", "total": 1539}, {"name": "Tiền Giang", "short_name": "Tiền Giang", "total": 1449}]}, {"name": "Phú Quốc", "total": 1775, "children": [{"name": "Phú Quốc", "short_name": "Phú Quốc", "total": 1775}]}], "updated": "27/05/2026 05:05:29"};</script>
 <!-- TONKHO_DATA_END -->
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -954,7 +955,12 @@ function capKien(pallets){
 
 function loadZoneCfg(){
   try{
-    var s = JSON.parse(localStorage.getItem('zoneCfg') || '{}');
+    var s;
+    if (typeof GLOBAL_ZONE_CFG !== 'undefined' && Object.keys(GLOBAL_ZONE_CFG).length > 0) {
+      s = GLOBAL_ZONE_CFG;
+    } else {
+      s = JSON.parse(localStorage.getItem('zoneCfg') || '{}');
+    }
     var D = ZONE_DEFAULTS;
     var rc = {};
     ROUTE_SLUGS.forEach(function(rs){ rc[rs.name] = (s.routeCap && s.routeCap[rs.name]) || 0; });
@@ -1182,6 +1188,22 @@ function resetZoneSettings(){
   openZoneSettings();
   updateZoneBadge();
   recalcAllZones();
+}
+
+function exportZoneCfg(){
+  // Ensure we save current form state first
+  saveZoneSettings();
+  var content = "var GLOBAL_ZONE_CFG = " + JSON.stringify(zoneCfg, null, 2) + ";";
+  var blob = new Blob([content], {type: "text/javascript"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "zoneCfg.js";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert("Vui lòng copy file zoneCfg.js đè vào thư mục 'AI dashboard', sau đó chạy Cập_Nhật_Web.command để đồng bộ cho toàn bộ hệ thống!");
 }
 
 window.addEventListener('load', function(){
@@ -1694,9 +1716,10 @@ renderCharts();
       </div>
 
     </div>
-    <div class="modal-footer" style="display:flex;gap:10px;padding:14px 20px">
+    <div class="modal-footer" style="display:flex;gap:10px;padding:14px 20px;flex-wrap:wrap">
       <button onclick="resetZoneSettings()" style="flex:1;background:#21262d;border:1px solid #30363d;color:#8b949e;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">&#x21BA; Mặc định</button>
-      <button id="btn-save-settings" onclick="saveZoneSettings()" style="flex:2;background:linear-gradient(135deg,#388bfd,#1f6feb);border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">✔ Lưu Cài Đặt</button>
+      <button onclick="exportZoneCfg()" style="flex:1.5;background:#238636;border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">💾 Tải zoneCfg.js</button>
+      <button id="btn-save-settings" onclick="saveZoneSettings()" style="flex:1.5;background:linear-gradient(135deg,#388bfd,#1f6feb);border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">✔ Lưu Trên Máy Này</button>
     </div>
   </div>
 </div>
