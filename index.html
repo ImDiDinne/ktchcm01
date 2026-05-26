@@ -889,13 +889,50 @@ function renderKPIs(){
   document.getElementById('kpi-tonkho').className = 'kpi ' + (tonPct>=80?'red':tonPct>=60?'yellow':'green');
 
   // Xe tồn
+  var openGates=0;
+  for(var i=0;i<15;i++) if(gateAutoState[i]) openGates++;
+  for(var i=0;i<20;i++) if(gateManualState[i]) openGates++;
+  var minPT = (zoneCfg && zoneCfg.gate) ? zoneCfg.gate.minPerTruck : 30;
+  
+  var xeText = state.xeton > 0 ? 'xe đang chờ nhập' : 'chưa có xe chờ';
+  if (state.xeton > 0) {
+    if (openGates === 0) {
+      xeText += ' — ⚠️ Chưa mở cổng nào';
+    } else {
+      var waitMin = Math.ceil(state.xeton / openGates) * minPT;
+      var h = Math.floor(waitMin / 60);
+      var m = waitMin % 60;
+      var eta = (h > 0 ? h + 'g ' : '') + m + 'p';
+      xeText += ' — Xong sau: ' + eta;
+    }
+  }
+
   document.getElementById('v-xeton').textContent = state.xeton;
-  document.getElementById('s-xeton').textContent = state.xeton > 0 ? 'xe đang chờ nhập' : 'chưa có xe chờ';
+  document.getElementById('s-xeton').textContent = xeText;
   document.getElementById('kpi-xeton').className = 'kpi ' + (state.xeton>50?'red':state.xeton>20?'yellow':'green');
 
   // Đơn chờ sort CBS
+  var c1=0,c2=0;
+  for(var i=0;i<12;i++){ if(feederCBS1State[i]) c1++; if(feederCBS2State[i]) c2++; }
+  var activeCBS=(c1>0?1:0)+(c2>0?1:0);
+  var cbsOPH = (zoneCfg && zoneCfg.cbs) ? zoneCfg.cbs.orderPerHour : 24000;
+  var sortText = state.sort > 0 ? 'đơn chờ phân loại' : 'không có đơn chờ';
+  
+  if (state.sort > 0) {
+    if (activeCBS === 0) {
+      sortText += ' — ⚠️ Chưa bật CBS';
+    } else {
+      var sortHours = state.sort / (activeCBS * cbsOPH);
+      var h2 = Math.floor(sortHours);
+      var m2 = Math.round((sortHours - h2) * 60);
+      if (m2 === 60) { h2++; m2 = 0; }
+      var etaSort = (h2 > 0 ? h2 + 'g ' : '') + m2 + 'p';
+      sortText += ' — Xong sau: ' + etaSort;
+    }
+  }
+
   document.getElementById('v-sort').textContent = state.sort.toLocaleString('vi-VN');
-  document.getElementById('s-sort').textContent = state.sort > 0 ? 'đơn chờ phân loại' : 'không có đơn chờ';
+  document.getElementById('s-sort').textContent = sortText;
   document.getElementById('kpi-sort').className = 'kpi ' + (state.sort>50000?'red':state.sort>20000?'yellow':'blue');
 
   // Hàng Cồng Kềnh — đơn vị: Pallet (1 pallet ≈ 20 đơn)
