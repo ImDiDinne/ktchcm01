@@ -1419,9 +1419,11 @@ function buildAIPrompt(){
   if(typeof TONKHO_DATA !== 'undefined' && TONKHO_DATA && TONKHO_DATA.routes){
     lines.push('\n### Tồn kho tuyến xuất:');
     var rc = (zoneCfg && zoneCfg.routeCap) || {};
+    var kpp = (zoneCfg && zoneCfg.kienPerPallet) ? zoneCfg.kienPerPallet : 50;
     TONKHO_DATA.routes.forEach(function(r){
-      var cap = rc[r.name] || 0;
-      var pctStr = cap>0 ? ' ('+Math.round(r.total/cap*100)+'% capacity)' : '';
+      var capPallet = rc[r.name] || 0;
+      var capKien = capPallet * kpp;
+      var pctStr = capKien>0 ? ' ('+Math.round(r.total/capKien*100)+'% capacity)' : '';
       lines.push('- '+r.name+': '+r.total.toLocaleString('vi-VN')+' kiện'+pctStr);
     });
     lines.push('- **Tổng: '+TONKHO_DATA.grand_total.toLocaleString('vi-VN')+' kiện**');
