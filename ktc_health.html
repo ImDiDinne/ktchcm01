@@ -774,6 +774,36 @@ function renderGates(){
   }
 }
 
+function calcZone(id) {
+  var palInp = parseInt(document.getElementById('zpal-'+id).value) || 0;
+  var nsInp  = parseInt(document.getElementById('zns-'+id).value) || 0;
+  var rateEl = document.getElementById('zrate-'+id);
+  var etaEl  = document.getElementById('zeta-'+id);
+
+  var D = ZONE_DEFAULTS || {};
+  var basePal = (zoneCfg && zoneCfg[id] && zoneCfg[id].pal) ? parseFloat(zoneCfg[id].pal) : (D[id] ? D[id].pal : 100);
+  var baseNs  = (zoneCfg && zoneCfg[id] && zoneCfg[id].ns) ? parseFloat(zoneCfg[id].ns) : (D[id] ? D[id].ns : 50);
+  var palPerNs = baseNs > 0 ? (basePal / baseNs) : 2.0;
+
+  var currentRate = nsInp * palPerNs;
+  if(rateEl) rateEl.textContent = parseFloat(currentRate.toFixed(1)).toLocaleString('vi-VN') + ' pal/h';
+
+  if(etaEl) {
+    if(currentRate > 0 && palInp > 0) {
+      var hours = palInp / currentRate;
+      var h = Math.floor(hours);
+      var m = Math.round((hours - h) * 60);
+      if (m === 60) { h++; m = 0; }
+      var eta = (h>0 ? h+'g ' : '') + m+'p';
+      etaEl.textContent = 'Hoàn thành sau: ' + eta;
+      etaEl.style.color = hours > 4 ? '#f85149' : hours > 2 ? '#d29922' : '#3fb950';
+    } else {
+      etaEl.textContent = '—';
+      etaEl.style.color = '#8b949e';
+    }
+  }
+}
+
 /* ═══════════════════════════════════════
    CBS FEEDERS — click toggle
 ═══════════════════════════════════════ */
