@@ -625,7 +625,9 @@ function initKhoData(){
   var html = '';
   var routeCap = (zoneCfg && zoneCfg.routeCap) ? zoneCfg.routeCap : {};
   (data.routes || []).forEach(function(r, ri){
-    var cap    = routeCap[r.name] || 0;
+    var pallets = routeCap[r.name] || 0;
+    var kpp     = zoneCfg.kienPerPallet || 30;
+    var cap     = pallets * kpp;
     var hasChildren = r.children && r.children.length > 0;
     var hint   = hasChildren ? ' 🔍' : '';
     var pct, cls, subText;
