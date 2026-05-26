@@ -1493,8 +1493,21 @@ function renderCharts(){
 }
 
 /* ═══════════════════════════════════════
-   INIT
+   INIT & AUTO REFRESH
 ═══════════════════════════════════════ */
+function autoFetchData() {
+  fetch('tonkho_tuyen.json?v=' + new Date().getTime())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (typeof TONKHO_DATA !== 'undefined' && TONKHO_DATA && TONKHO_DATA.updated === data.updated) return;
+      TONKHO_DATA = data;
+      initKhoData();
+      renderAlerts();
+      renderKPIs();
+    })
+    .catch(function(e) { console.log('Auto fetch error:', e); });
+}
+setInterval(autoFetchData, 30000);
 setInterval(updateClock, 1000);
 updateClock();
 initKhoData();   // Đọc TONKHO_DATA đã inject sẵn trong HTML
