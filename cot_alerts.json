@@ -1,79 +1,9 @@
 [
   {
-    "tuyen": "XA_S2_73",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:30",
-    "minutes_left": 4.7,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 71,
-    "ty_le_lay_day": "4.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 270 Phan Văn Mãng- Bến Lức-Long An",
-        "loai": "Giao",
-        "inventory": 71,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_74",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:30",
-    "minutes_left": 4.7,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 67,
-    "ty_le_lay_day": "4.5%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 257 Bùi Ngọc Thu-Chánh Hiệp-Bình Dương",
-        "loai": "Giao",
-        "inventory": 67,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_75",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:30",
-    "minutes_left": 4.7,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 83,
-    "ty_le_lay_day": "5.5%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Ấp 1 Nguyễn Văn Dương-Xã Mỹ Hạnh-Long An",
-        "loai": "Giao",
-        "inventory": 50,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục Đường Tỉnh 830-Xã Lương Bình-Long An",
-        "loai": "Giao",
-        "inventory": 33,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
     "tuyen": "XA_S2_76",
     "cot_type": "XA",
     "gio_xuat_hcm01": "05:40",
-    "minutes_left": 14.7,
+    "minutes_left": 6.9,
     "tai_trong_kg": 1900,
     "suc_chua_don": 1500,
     "tong_ton": 63,
@@ -85,6 +15,188 @@
         "name": "Bưu Cục 4B Khu B-Xã Hậu Nghĩa-Long An",
         "loai": "Giao",
         "inventory": 63,
+        "gio_den": "",
+        "gio_roi": ""
+      }
+    ]
+  },
+  {
+    "tuyen": "HCM_BĐ_03",
+    "cot_type": "HCM",
+    "gio_xuat_hcm01": "06:00",
+    "minutes_left": 26.9,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 3737,
+    "ty_le_lay_day": "46.7%",
+    "drop_risk": "🟢 THẤP - Đủ sức chứa",
+    "drop_level": "low",
+    "stops": [
+      {
+        "name": "Kho Trung Chuyển Bình Định",
+        "loai": "Giao và lấy",
+        "inventory": 144,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "loai": "Phân loại",
+        "inventory": 3593,
+        "gio_den": "",
+        "gio_roi": ""
+      }
+    ]
+  },
+  {
+    "tuyen": "HCM_ĐN_06",
+    "cot_type": "HCM",
+    "gio_xuat_hcm01": "06:00",
+    "minutes_left": 26.9,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 862,
+    "ty_le_lay_day": "10.8%",
+    "drop_risk": "🟢 THẤP - Đủ sức chứa",
+    "drop_level": "low",
+    "stops": [
+      {
+        "name": "B2B - Đức Hòa - Long An",
+        "loai": "Lấy",
+        "inventory": 0,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Đà Nẵng",
+        "loai": "Giao và lấy",
+        "inventory": 368,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Chuyển Tiếp Thừa Thiên Huế",
+        "loai": "Giao và lấy",
+        "inventory": 32,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Hà Nội 02",
+        "loai": "Phân loại",
+        "inventory": 462,
+        "gio_den": "",
+        "gio_roi": ""
+      }
+    ]
+  },
+  {
+    "tuyen": "HCM_QB_02",
+    "cot_type": "HCM",
+    "gio_xuat_hcm01": "06:00",
+    "minutes_left": 26.9,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 648,
+    "ty_le_lay_day": "8.1%",
+    "drop_risk": "🟢 THẤP - Đủ sức chứa",
+    "drop_level": "low",
+    "stops": [
+      {
+        "name": "B2B - Đức Hòa - Long An",
+        "loai": "Lấy",
+        "inventory": 0,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Chuyển Tiếp Quảng Ngãi",
+        "loai": "Giao",
+        "inventory": 17,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Quảng Bình",
+        "loai": "Giao",
+        "inventory": 123,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Chuyển Tiếp Thanh Hoá",
+        "loai": "Lấy",
+        "inventory": 46,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Hà Nội 02",
+        "loai": "Phân loại",
+        "inventory": 462,
+        "gio_den": "",
+        "gio_roi": ""
+      }
+    ]
+  },
+  {
+    "tuyen": "HCM_DX_05",
+    "cot_type": "HCM",
+    "gio_xuat_hcm01": "06:00",
+    "minutes_left": 26.9,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 824,
+    "ty_le_lay_day": "10.3%",
+    "drop_risk": "🟢 THẤP - Đủ sức chứa",
+    "drop_level": "low",
+    "stops": [
+      {
+        "name": "Kho Trung Chuyển Dương Xá",
+        "loai": "Giao",
+        "inventory": 824,
+        "gio_den": "",
+        "gio_roi": ""
+      }
+    ]
+  },
+  {
+    "tuyen": "HCM01_HN_08",
+    "cot_type": "HCM01",
+    "gio_xuat_hcm01": "06:00",
+    "minutes_left": 26.9,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 462,
+    "ty_le_lay_day": "5.8%",
+    "drop_risk": "🟢 THẤP - Đủ sức chứa",
+    "drop_level": "low",
+    "stops": [
+      {
+        "name": "Kho Trung Chuyển Hà Nội 02",
+        "loai": "Giao",
+        "inventory": 462,
+        "gio_den": "",
+        "gio_roi": ""
+      }
+    ]
+  },
+  {
+    "tuyen": "HCM01_HY_04",
+    "cot_type": "HCM01",
+    "gio_xuat_hcm01": "06:00",
+    "minutes_left": 26.9,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 3714,
+    "ty_le_lay_day": "46.4%",
+    "drop_risk": "🟢 THẤP - Đủ sức chứa",
+    "drop_level": "low",
+    "stops": [
+      {
+        "name": "Kho Trung Chuyển Hưng Yên 01",
+        "loai": "Giao",
+        "inventory": 3714,
         "gio_den": "",
         "gio_roi": ""
       }
