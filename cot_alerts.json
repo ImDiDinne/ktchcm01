@@ -1,289 +1,9 @@
 [
   {
-    "tuyen": "XA_S2_61",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 116,
-    "ty_le_lay_day": "7.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Ấp Ngoài-Xã Phước Lý-Long An",
-        "loai": "Giao",
-        "inventory": 116,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_62",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 40,
-    "ty_le_lay_day": "2.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 600 DT782 Bàu Đồn-Gò Dầu-Tây Ninh",
-        "loai": "Giao",
-        "inventory": 40,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_63",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 176,
-    "ty_le_lay_day": "11.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Đường 25A3-Xã Đức Hòa Hạ-Long An",
-        "loai": "Giao",
-        "inventory": 137,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Bưu Cục Chánh Hội-Tân Mỹ-Đức Hòa-Long An",
-        "loai": "Giao",
-        "inventory": 39,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_64",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 82,
-    "ty_le_lay_day": "5.5%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục A4/18 Đường D10-Thuận An-Bình Dương",
-        "loai": "Giao",
-        "inventory": 82,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_65",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 60,
-    "ty_le_lay_day": "4.0%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Ấp Cầu Xây-Xã Thủ Thừa-Long An",
-        "loai": "Giao",
-        "inventory": 60,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_66",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 83,
-    "ty_le_lay_day": "5.5%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Số 8 Lê Chí Dân-Thủ Dầu Một-Bình Dương",
-        "loai": "Giao",
-        "inventory": 83,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_67",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 56,
-    "ty_le_lay_day": "3.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 870 Huỳnh Văn Lũy-Thủ Dầu Một-Bình Dương",
-        "loai": "Giao",
-        "inventory": 56,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_68",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 76,
-    "ty_le_lay_day": "5.1%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Đường Ba Mươi Tháng Tư-Trảng Bàng-Tây Ninh",
-        "loai": "Giao",
-        "inventory": 76,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_69",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 38,
-    "ty_le_lay_day": "2.5%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục An Lợi-Trảng Bàng-Tây Ninh",
-        "loai": "Giao",
-        "inventory": 38,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_70",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 75,
-    "ty_le_lay_day": "5.0%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục Phú Lợi-TP.Thủ Dầu Một-Bình Dương",
-        "loai": "Giao",
-        "inventory": 75,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_71",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 71,
-    "ty_le_lay_day": "4.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 265 Lào Cai-Chánh Nghĩa-Thủ Dầu Một-Bình Dương",
-        "loai": "Giao",
-        "inventory": 71,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "XA_S2_72",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:10",
-    "minutes_left": 4.5,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 117,
-    "ty_le_lay_day": "7.8%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Bưu Cục 108 Khu Phố 2-Đức Huệ-Long An",
-        "loai": "Giao",
-        "inventory": 117,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "HCM01_CT_18",
-    "cot_type": "HCM01",
-    "gio_xuat_hcm01": "05:15",
-    "minutes_left": 9.5,
-    "tai_trong_kg": 8000,
-    "suc_chua_don": 8000,
-    "tong_ton": 492,
-    "ty_le_lay_day": "6.2%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Kho Trung Chuyển Cần Thơ",
-        "loai": "Phân loại",
-        "inventory": 492,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
     "tuyen": "XA_S2_73",
     "cot_type": "XA",
     "gio_xuat_hcm01": "05:30",
-    "minutes_left": 24.5,
+    "minutes_left": 4.7,
     "tai_trong_kg": 1900,
     "suc_chua_don": 1500,
     "tong_ton": 71,
@@ -304,7 +24,7 @@
     "tuyen": "XA_S2_74",
     "cot_type": "XA",
     "gio_xuat_hcm01": "05:30",
-    "minutes_left": 24.5,
+    "minutes_left": 4.7,
     "tai_trong_kg": 1900,
     "suc_chua_don": 1500,
     "tong_ton": 67,
@@ -325,7 +45,7 @@
     "tuyen": "XA_S2_75",
     "cot_type": "XA",
     "gio_xuat_hcm01": "05:30",
-    "minutes_left": 24.5,
+    "minutes_left": 4.7,
     "tai_trong_kg": 1900,
     "suc_chua_don": 1500,
     "tong_ton": 83,
@@ -344,6 +64,27 @@
         "name": "Bưu Cục Đường Tỉnh 830-Xã Lương Bình-Long An",
         "loai": "Giao",
         "inventory": 33,
+        "gio_den": "",
+        "gio_roi": ""
+      }
+    ]
+  },
+  {
+    "tuyen": "XA_S2_76",
+    "cot_type": "XA",
+    "gio_xuat_hcm01": "05:40",
+    "minutes_left": 14.7,
+    "tai_trong_kg": 1900,
+    "suc_chua_don": 1500,
+    "tong_ton": 63,
+    "ty_le_lay_day": "4.2%",
+    "drop_risk": "🟢 THẤP - Đủ sức chứa",
+    "drop_level": "low",
+    "stops": [
+      {
+        "name": "Bưu Cục 4B Khu B-Xã Hậu Nghĩa-Long An",
+        "loai": "Giao",
+        "inventory": 63,
         "gio_den": "",
         "gio_roi": ""
       }
