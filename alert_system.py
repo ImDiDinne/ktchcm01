@@ -10,33 +10,68 @@ output_file = os.path.join(base_dir, 'Datatonkho_CanhBao.xlsx')
 # Sử dụng thời gian thực tế để tính toán cảnh báo
 CURRENT_TIME_SIMULATION = datetime.datetime.now().time()
 
+# Tải cấu hình định mức sức chứa từ file zoneCfg.js (đồng bộ từ giao diện)
+def load_route_type_capacities():
+    default_caps = {
+        'heavy': 400,
+        'city': 250,
+        'regional': 2000,
+        'inter': 8000
+    }
+    cfg_file = os.path.join(base_dir, 'zoneCfg.js')
+    if os.path.exists(cfg_file):
+        try:
+            with open(cfg_file, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+            # Trích xuất JSON từ "var GLOBAL_ZONE_CFG = {...};"
+            if 'GLOBAL_ZONE_CFG =' in content:
+                json_str = content.split('GLOBAL_ZONE_CFG =', 1)[1].strip()
+                if json_str.endswith(';'):
+                    json_str = json_str[:-1].strip()
+                cfg = json.loads(json_str)
+                if 'routeTypeCap' in cfg:
+                    rtc = cfg['routeTypeCap']
+                    return {
+                        'heavy': int(rtc.get('heavy', 400)),
+                        'city': int(rtc.get('city', 250)),
+                        'regional': int(rtc.get('regional', 2000)),
+                        'inter': int(rtc.get('inter', 8000))
+                    }
+        except Exception as e:
+            print(f"⚠️ Không thể đọc zoneCfg.js ({e}). Sử dụng định mức mặc định.")
+    return default_caps
+
+# Đọc định mức sức chứa hiện tại
+ROUTE_TYPE_CAPACITIES = load_route_type_capacities()
+print(f"Loaded Route capacities from zoneCfg.js: {ROUTE_TYPE_CAPACITIES}")
+
 # Quy đổi tải trọng → sức chứa đơn hàng dựa trên phân loại tuyến
 def get_order_capacity(route_name, dests):
     name_lower = route_name.lower()
     
     # 1. Tuyến giao hàng nặng: 400 đơn đầy xe.
     if 'ghn' in name_lower or 'gxt' in name_lower or any('giao hàng nặng' in d['name'].lower() or 'ghn' in d['name'].lower() for d in dests):
-        return 400
+        return ROUTE_TYPE_CAPACITIES['heavy']
         
     # 2. Tuyến nội thành: 250 đơn
     if 'nội thành' in name_lower or 'noi thanh' in name_lower or any('nội thành' in d['name'].lower() or 'noi thanh' in d['name'].lower() for d in dests):
-        return 250
+        return ROUTE_TYPE_CAPACITIES['city']
     if name_lower.startswith('sg'):
-        return 250
+        return ROUTE_TYPE_CAPACITIES['city']
         
     # 3. Tuyến nội vùng: 2000 đơn
     noi_vung_keywords = ['nội vùng', 'noi vung', 'long an', 'bình dương', 'binh duong', 'tây ninh', 'tay ninh', 
                          'tiền giang', 'tien giang', 'bến tre', 'ben tre', 'đồng nai', 'dong nai', 
                          'bình phước', 'binh phuoc', 'phú quốc', 'phu quoc', 'vũng tàu', 'vung tau']
     if name_lower.startswith('xa') or 'nội vùng' in name_lower or 'noi vung' in name_lower:
-        return 2000
+        return ROUTE_TYPE_CAPACITIES['regional']
     if any(p in name_lower for p in ['dongnai', 'đnai', 'pq', 'binhphuoc']):
-        return 2000
+        return ROUTE_TYPE_CAPACITIES['regional']
     if any(any(kw in d['name'].lower() for kw in noi_vung_keywords) for d in dests):
-        return 2000
+        return ROUTE_TYPE_CAPACITIES['regional']
         
     # 4. Tuyến liên vùng: 8000 đơn
-    return 8000
+    return ROUTE_TYPE_CAPACITIES['inter']
 
 # --- 1. Load Data ---
 print("Reading data...")
