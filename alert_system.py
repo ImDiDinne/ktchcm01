@@ -4,8 +4,9 @@ import json
 import os
 
 # --- Configuration ---
-input_file = '/Users/duyhuynh/Desktop/AI dashboard/Datatonkho.xlsx'
-output_file = '/Users/duyhuynh/Desktop/AI dashboard/Datatonkho_CanhBao.xlsx'
+base_dir = os.path.dirname(os.path.abspath(__file__))
+input_file = os.path.join(base_dir, 'Datatonkho.xlsx')
+output_file = os.path.join(base_dir, 'Datatonkho_CanhBao.xlsx')
 # Sử dụng thời gian thực tế để tính toán cảnh báo
 CURRENT_TIME_SIMULATION = datetime.datetime.now().time()
 
@@ -250,13 +251,13 @@ for _, row in df_pv.iterrows():
         'h_120_plus': safe_int(row.iloc[9]), 'total': safe_int(row['Grand Total'])
     })
 
-with open('/Users/duyhuynh/Desktop/AI dashboard/inventory_data.json', 'w', encoding='utf-8') as f:
+with open(os.path.join(base_dir, 'inventory_data.json'), 'w', encoding='utf-8') as f:
     json.dump(inventory_data, f, ensure_ascii=False, indent=2)
 print(f"Exported {len(inventory_data)} inventory rows.")
 
 # --- 6. Export Route Inventory to JSON ---
 print("\nExporting route inventory to JSON...")
-with open('/Users/duyhuynh/Desktop/AI dashboard/route_inventory.json', 'w', encoding='utf-8') as f:
+with open(os.path.join(base_dir, 'route_inventory.json'), 'w', encoding='utf-8') as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 print(f"Exported {len(results)} route summaries.")
 
@@ -284,7 +285,7 @@ for _, row in df_lich.iterrows():
         'gio_roi': format_time(row['Rời điểm'])
     })
 
-with open('/Users/duyhuynh/Desktop/AI dashboard/fleet.json', 'w', encoding='utf-8') as f:
+with open(os.path.join(base_dir, 'fleet.json'), 'w', encoding='utf-8') as f:
     json.dump(fleet_data, f, ensure_ascii=False, indent=2)
 print(f"Exported {sum(len(v) for v in fleet_data.values())} fleet routes into {len(fleet_data)} groups.")
 
@@ -308,7 +309,7 @@ for row in results:
             'gio_xuat': row['Giờ xuất']
         })
 
-with open('/Users/duyhuynh/Desktop/AI dashboard/inventory_alerts.json', 'w', encoding='utf-8') as f:
+with open(os.path.join(base_dir, 'inventory_alerts.json'), 'w', encoding='utf-8') as f:
     json.dump(alerts, f, ensure_ascii=False, indent=2)
 print(f"Generated {len(alerts)} alerts.")
 # --- 8. Export Hierarchical Inventory to JSON ---
@@ -406,7 +407,7 @@ for group in hierarchy_data:
         for child in group.get('children', []):
             child['normal'] = 0
 
-with open('/Users/duyhuynh/Desktop/AI dashboard/hierarchy_inventory.json', 'w', encoding='utf-8') as f:
+with open(os.path.join(base_dir, 'hierarchy_inventory.json'), 'w', encoding='utf-8') as f:
     json.dump(hierarchy_data, f, ensure_ascii=False, indent=2)
 print(f"Exported hierarchical inventory with Normal/Bulky/Freight breakdown.")
 
@@ -503,7 +504,7 @@ for route_name, info in route_groups.items():
 # Sort by nearest departure first
 cot_alerts.sort(key=lambda x: x['minutes_left'])
 
-with open('/Users/duyhuynh/Desktop/AI dashboard/cot_alerts.json', 'w', encoding='utf-8') as f:
+with open(os.path.join(base_dir, 'cot_alerts.json'), 'w', encoding='utf-8') as f:
     json.dump(cot_alerts, f, ensure_ascii=False, indent=2)
 print(f"Exported {len(cot_alerts)} COT departure alerts (within {ALERT_WINDOW_MINUTES} minutes).")
 

@@ -79,7 +79,7 @@
   <button class="btn" id="btnTop">🔝 Top View</button>
   <button class="btn" id="btnIso">📐 Iso View</button>
   <button class="btn" id="btnReset">🔄 Reset</button>
-  <button class="btn" id="btnToggleRoof" id="btnRoof">🏠 Mái</button>
+  <button class="btn" id="btnToggleRoof">🏠 Mái</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -215,7 +215,8 @@ label3D('CBS 1800m²', 0, 3.5, -2, '#ffd699');
 
 // CBS belt conveyor lines
 for (let i = 0; i < 5; i++) {
-  box(30, 0.3, 0.4, 0xff6b35, 0, 3.1, -4.5 + i * 1.5, null, null);
+  const b = box(30, 0.3, 0.4, 0xff6b35, 0, 3.1, -4.5 + i * 1.5, null, null);
+  b.userData.belt = true;
 }
 
 // === LINE SORT / XUẤT HÀNG (left side, lanes 49-55)
@@ -279,7 +280,8 @@ for (let i = 0; i < 10; i++) {
 
 // === SORTING LANES in center (1-5)
 for (let i = 0; i < 5; i++) {
-  box(28, 0.2, 0.6, 0xff4d6d, 0, 3, -5 + i * 2, null, null);
+  const b = box(28, 0.2, 0.6, 0xff4d6d, 0, 3, -5 + i * 2, null, null);
+  b.userData.belt = true;
   label3D(`Belt ${i + 1}`, 14, 3.5, -5 + i * 2, '#ff8899', 0.5);
 }
 
@@ -368,15 +370,21 @@ canvas.addEventListener('wheel', e => {
 });
 
 // Touch
-canvas.addEventListener('touchstart', e => { isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; });
+canvas.addEventListener('touchstart', e => {
+  isDragging = true;
+  lastX = e.touches[0].clientX;
+  lastY = e.touches[0].clientY;
+  if (e.cancelable) e.preventDefault();
+}, { passive: false });
 canvas.addEventListener('touchend', () => isDragging = false);
 canvas.addEventListener('touchmove', e => {
   if (!isDragging) return;
+  if (e.cancelable) e.preventDefault();
   targetTheta -= (e.touches[0].clientX - lastX) * 0.005;
   targetPhi -= (e.touches[0].clientY - lastY) * 0.005;
   targetPhi = Math.max(0.1, Math.min(Math.PI / 2.05, targetPhi));
   lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
-});
+}, { passive: false });
 
 // ─── BUTTONS ────────────────────────────────────────────────────────────
 document.getElementById('btnTop').addEventListener('click', () => {

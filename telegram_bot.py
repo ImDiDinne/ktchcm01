@@ -8,12 +8,30 @@ import datetime
 # ==========================================
 # CẤU HÌNH TELEGRAM BOT
 # ==========================================
-TELEGRAM_BOT_TOKEN = '8603830788:AAG_jRHHLx6VzwRWr9fA2M9XhSuw2aU-KaE'
-TELEGRAM_CHAT_ID = '-5253055024'
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+def load_env(env_path):
+    env_vars = {}
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, val = line.split('=', 1)
+                        env_vars[key.strip()] = val.strip().strip('"').strip("'")
+        except Exception as e:
+            print(f"⚠️ Không thể đọc file .env: {e}")
+    return env_vars
+
+env_vars = load_env(os.path.join(base_dir, '.env'))
+
+TELEGRAM_BOT_TOKEN = env_vars.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN') or '8603830788:AAG_jRHHLx6VzwRWr9fA2M9XhSuw2aU-KaE'
+TELEGRAM_CHAT_ID = env_vars.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID') or '-5253055024'
 
 # File paths
-COT_ALERTS_FILE = '/Users/duyhuynh/Desktop/AI dashboard/cot_alerts.json'
-ALERTS_FILE     = '/Users/duyhuynh/Desktop/AI dashboard/inventory_alerts.json'
+COT_ALERTS_FILE = os.path.join(base_dir, 'cot_alerts.json')
+ALERTS_FILE     = os.path.join(base_dir, 'inventory_alerts.json')
 
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"

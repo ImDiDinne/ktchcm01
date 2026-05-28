@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Đang khởi động Dashboard GHN..."
-cd "/Users/duyhuynh/Desktop/AI dashboard"
+cd "$(dirname "$0")"
 
 # Mở trình duyệt trỏ tới localhost
 sleep 1 && open "http://localhost:8080" &

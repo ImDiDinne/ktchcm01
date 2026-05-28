@@ -497,14 +497,18 @@ function populateFilters() {
         const pageEl = document.getElementById(`page-${page}`);
         if (pageEl) pageEl.classList.add('active');
         const titles = { overview: 'KTC Hồ Chí Minh 01', fleet: 'Lịch xe tải', inventory: 'Tồn kho (PV)', alerts: 'Cảnh báo Vận hành' };
-        document.getElementById('pageTitle').textContent = titles[page] || '';
+        const pageTitleEl = document.getElementById('pageTitle');
+        if (pageTitleEl) pageTitleEl.textContent = titles[page] || '';
 
         if (page === 'fleet') {
-            if (group) document.getElementById('filterFleetGroup').value = group;
-            if (search) document.getElementById('searchFleet').value = search;
-            renderFleetPage(group || document.getElementById('filterFleetGroup').value, search || '');
+            const fGroup = document.getElementById('filterFleetGroup');
+            const sFleet = document.getElementById('searchFleet');
+            if (fGroup && group) fGroup.value = group;
+            if (sFleet && search) sFleet.value = search;
+            renderFleetPage(group || (fGroup ? fGroup.value : ''), search || '');
         } else if (page === 'inventory') {
-            if (search) { document.getElementById('searchInventory').value = search; renderInventoryPage(search); }
+            const sInv = document.getElementById('searchInventory');
+            if (search) { if (sInv) sInv.value = search; renderInventoryPage(search); }
             else renderInventoryPage();
         } else if (page === 'alerts') {
             renderAlertsPage();
@@ -514,6 +518,7 @@ function populateFilters() {
     }
 
     function runSearch(q) {
+        if (!searchDropdown) return;
         searchDropdown.innerHTML = '';
         if (!q || q.length < 2) { searchDropdown.style.display = 'none'; return; }
 
@@ -554,46 +559,54 @@ function populateFilters() {
             el.addEventListener('click', () => {
                 const item = flatHits[i];
                 searchDropdown.style.display = 'none';
-                searchInput.value = item.label;
+                if (searchInput) searchInput.value = item.label;
                 navigateTo(item.page, item.group, item.type === 'fleet' ? item.label : (item.type === 'stop' ? item.label : (item.type === 'inventory' ? item.label : '')));
             });
         });
     }
 
-    searchInput.addEventListener('input', e => {
-        const q = e.target.value.trim();
-        searchClear.style.display = q ? 'flex' : 'none';
-        runSearch(q);
-    });
+    if (searchInput && searchDropdown && searchClear) {
+        searchInput.addEventListener('input', e => {
+            const q = e.target.value.trim();
+            searchClear.style.display = q ? 'flex' : 'none';
+            runSearch(q);
+        });
 
-    searchInput.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { searchDropdown.style.display = 'none'; searchInput.blur(); }
-    });
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { searchDropdown.style.display = 'none'; searchInput.blur(); }
+        });
 
-    searchClear.addEventListener('click', () => {
-        searchInput.value = '';
-        searchClear.style.display = 'none';
-        searchDropdown.style.display = 'none';
-        searchInput.focus();
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', e => {
-        if (!document.getElementById('searchBoxWrap').contains(e.target)) {
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            searchClear.style.display = 'none';
             searchDropdown.style.display = 'none';
-        }
-    });
+            searchInput.focus();
+        });
 
+        // Close dropdown when clicking outside
+        document.addEventListener('click', e => {
+            const searchBoxWrap = document.getElementById('searchBoxWrap');
+            if (searchBoxWrap && !searchBoxWrap.contains(e.target)) {
+                searchDropdown.style.display = 'none';
+            }
+        });
+    }
 
     // Notification bell
-    document.getElementById('notifBtn').addEventListener('click', () => {
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelector('[data-page="alerts"]').classList.add('active');
-        document.getElementById('page-alerts').classList.add('active');
-        document.getElementById('pageTitle').textContent = 'Cảnh báo Vận hành';
-        renderAlertsPage();
-    });
+    const notifBtn = document.getElementById('notifBtn');
+    if (notifBtn) {
+        notifBtn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const alertNavItem = document.querySelector('[data-page="alerts"]');
+            if (alertNavItem) alertNavItem.classList.add('active');
+            const pageAlerts = document.getElementById('page-alerts');
+            if (pageAlerts) pageAlerts.classList.add('active');
+            const pageTitleEl = document.getElementById('pageTitle');
+            if (pageTitleEl) pageTitleEl.textContent = 'Cảnh báo Vận hành';
+            renderAlertsPage();
+        });
+    }
 }
 
 function fillSelect(id, options) {

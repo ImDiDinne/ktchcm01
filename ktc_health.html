@@ -263,6 +263,25 @@ body{font-family:Inter,sans-serif;background:linear-gradient(rgba(13,17,23,0.88)
 .role-tag.operator{background:rgba(56,139,253,.15);color:#58a6ff}
 .btn-logout{background:none;border:1px solid #30363d;color:#8b949e;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;transition:all .2s;font-family:Inter,sans-serif}
 .btn-logout:hover{border-color:#f85149;color:#f85149}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1024px) {
+  .kpi-row { grid-template-columns: repeat(2,1fr) !important; }
+  .modules { grid-template-columns: 1fr 1fr !important; }
+  .charts-3col { grid-template-columns: 1fr 1fr !important; }
+  .two-col { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 768px) {
+  .header { flex-direction: column; gap: 10px; text-align: center; }
+  .header h1 { font-size: 18px; }
+  .kpi-row { grid-template-columns: 1fr !important; }
+  .modules { grid-template-columns: 1fr !important; }
+  .charts-3col { grid-template-columns: 1fr !important; }
+  .hourly-form-grid { grid-template-columns: 1fr 1fr !important; align-items: stretch; }
+  .hourly-form-grid .btn-add, .hourly-form-grid .btn-clear { grid-column: span 2; height: 36px; }
+  .zone-grid { grid-template-columns: 1fr !important; }
+}
 </style>
 </head>
 <body>
@@ -744,7 +763,7 @@ function renderGates(){
       var div = document.createElement('div');
       var open = gateAutoState[idx];
       div.className = 'gate ' + (open ? 'free' : 'busy');
-      div.textContent = open ? '🟢' : '🔴';
+      div.textContent = 'A' + (idx+1);
       div.title = 'Auto ' + (idx+1) + ': ' + (open ? 'Mở — click để đóng' : 'Đóng — click để mở');
       div.onclick = function(){ toggleGate('auto', idx); };
       autoEl.appendChild(div);
@@ -755,7 +774,7 @@ function renderGates(){
       var div = document.createElement('div');
       var open = gateManualState[idx];
       div.className = 'gate ' + (open ? 'free' : 'busy');
-      div.textContent = open ? '🟢' : '🔴';
+      div.textContent = 'M' + (idx+1);
       div.title = 'Manual ' + (idx+1) + ': ' + (open ? 'Mở — click để đóng' : 'Đóng — click để mở');
       div.onclick = function(){ toggleGate('manual', idx); };
       manualEl.appendChild(div);
@@ -792,8 +811,15 @@ function renderGates(){
 }
 
 function calcZone(id) {
-  var palInp = parseInt(document.getElementById('zpal-'+id).value) || 0;
-  var nsInp  = parseInt(document.getElementById('zns-'+id).value) || 0;
+  var palInp = Math.max(0, parseInt(document.getElementById('zpal-'+id).value) || 0);
+  var nsInp  = Math.max(0, parseInt(document.getElementById('zns-'+id).value) || 0);
+  
+  // Set cleaned values back to elements
+  var elPal = document.getElementById('zpal-'+id);
+  var elNs = document.getElementById('zns-'+id);
+  if(elPal && elPal.value !== '') elPal.value = palInp;
+  if(elNs && elNs.value !== '') elNs.value = nsInp;
+
   var rateEl = document.getElementById('zrate-'+id);
   var etaEl  = document.getElementById('zeta-'+id);
 
@@ -1290,6 +1316,14 @@ function openZoneSettings(){
   ROUTE_SLUGS.forEach(function(rs){
     _set('cap-'+rs.slug, (zoneCfg.routeCap && zoneCfg.routeCap[rs.name]) || 0);
   });
+  
+  // Populate GitHub PAT
+  var savedPat = localStorage.getItem('githubPat') || '';
+  _set('cfg-github-pat', savedPat);
+  var gStatus = document.getElementById('github-pat-status');
+  if(savedPat && gStatus) { gStatus.textContent = '✅ Đã lưu GitHub PAT'; gStatus.style.color = '#3fb950'; }
+  else if(gStatus) { gStatus.textContent = 'Nhập Token GitHub của bạn để đồng bộ lên Server.'; gStatus.style.color = '#8b949e'; }
+
   updateSettingsPreview();
   document.getElementById('zone-settings-modal').classList.add('open');
 }
@@ -1298,10 +1332,14 @@ function closeZoneSettings(){
   document.getElementById('zone-settings-modal').classList.remove('open');
 }
 
+function recalcAllZones() {
+  ['ck1', 'ck2', 'nv', 'hcm'].forEach(calcZone);
+}
+
 function saveZoneSettings(){
   var D = ZONE_DEFAULTS;
   var rc = {};
-  ROUTE_SLUGS.forEach(function(rs){ rc[rs.name] = parseInt(_v('cap-'+rs.slug)) || 0; });
+  ROUTE_SLUGS.forEach(function(rs){ rc[rs.name] = Math.max(0, parseInt(_v('cap-'+rs.slug)) || 0); });
   // collect child caps (KCT & KTC) — đơn vị Pallet
   var childCap = {};
   [['kct','Kho Chuyển Tiếp'],['ktc','Kho Trung Chuyển']].forEach(function(pair){
@@ -1312,13 +1350,13 @@ function saveZoneSettings(){
     }
   });
   zoneCfg = {
-    gate: { minPerTruck:  _v('cfg-gate-min')   || D.gate.minPerTruck  },
-    cbs:  { orderPerHour: _v('cfg-cbs-order')  || D.cbs.orderPerHour  },
-    ck1:  { pal: _v('cfg-ck1-pal')||D.ck1.pal, ns: _v('cfg-ck1-ns')||D.ck1.ns },
-    ck2:  { pal: _v('cfg-ck2-pal')||D.ck2.pal, ns: _v('cfg-ck2-ns')||D.ck2.ns },
-    nv:   { pal: _v('cfg-nv-pal') ||D.nv.pal,  ns: _v('cfg-nv-ns') ||D.nv.ns  },
-    hcm:  { pal: _v('cfg-hcm-pal')||D.hcm.pal, ns: _v('cfg-hcm-ns')||D.hcm.ns },
-    kienPerPallet: parseFloat(_v('cfg-kien-per-pal')) || D.kienPerPallet,
+    gate: { minPerTruck:  Math.max(1, parseInt(_v('cfg-gate-min')) || D.gate.minPerTruck) },
+    cbs:  { orderPerHour: Math.max(1, parseInt(_v('cfg-cbs-order')) || D.cbs.orderPerHour) },
+    ck1:  { pal: Math.max(0, parseInt(_v('cfg-ck1-pal'))||D.ck1.pal), ns: Math.max(1, parseInt(_v('cfg-ck1-ns'))||D.ck1.ns) },
+    ck2:  { pal: Math.max(0, parseInt(_v('cfg-ck2-pal'))||D.ck2.pal), ns: Math.max(1, parseInt(_v('cfg-ck2-ns'))||D.ck2.ns) },
+    nv:   { pal: Math.max(0, parseInt(_v('cfg-nv-pal')) ||D.nv.pal),  ns: Math.max(1, parseInt(_v('cfg-nv-ns')) ||D.nv.ns)  },
+    hcm:  { pal: Math.max(0, parseInt(_v('cfg-hcm-pal'))||D.hcm.pal), ns: Math.max(1, parseInt(_v('cfg-hcm-ns'))||D.hcm.ns) },
+    kienPerPallet: Math.max(1, parseFloat(_v('cfg-kien-per-pal')) || D.kienPerPallet),
     routeCap: rc,
     childCap:  childCap,
   };
@@ -1356,6 +1394,28 @@ function exportZoneCfg(){
   URL.revokeObjectURL(url);
   alert("Vui lòng copy file zoneCfg.js đè vào thư mục 'AI dashboard', sau đó chạy Cập_Nhật_Web.command để đồng bộ cho toàn bộ hệ thống!");
 }
+
+function onGithubPatInput(){
+  var val = document.getElementById('cfg-github-pat').value.trim();
+  var statusEl = document.getElementById('github-pat-status');
+  if(val.startsWith('ghp_') || val.length > 20){
+    localStorage.setItem('githubPat', val);
+    if(statusEl){ statusEl.textContent='✅ Đã lưu GitHub PAT'; statusEl.style.color='#3fb950'; }
+  } else {
+    localStorage.removeItem('githubPat');
+    if(statusEl){ statusEl.textContent='Token không hợp lệ (cần bắt đầu bằng ghp_ hoặc dài hơn 20 ký tự)'; statusEl.style.color='#f85149'; }
+  }
+}
+
+function toggleGithubPatVisibility(event){
+  if(event) event.preventDefault();
+  var inp = document.getElementById('cfg-github-pat');
+  var btnEl = event.currentTarget || event.target;
+  if(inp.type==='password'){ inp.type='text'; btnEl.textContent='🙈 Ẩn'; }
+  else { inp.type='password'; btnEl.textContent='👁 Hiện'; }
+}
+
+var CFG_FIELDS = ['cfg-gate-min', 'cfg-cbs-order', 'cfg-ck1-pal', 'cfg-ck1-ns', 'cfg-ck2-pal', 'cfg-ck2-ns', 'cfg-nv-pal', 'cfg-nv-ns', 'cfg-hcm-pal', 'cfg-hcm-ns', 'cfg-kien-per-pal'];
 
 window.addEventListener('load', function(){
   updateZoneBadge();
@@ -1548,9 +1608,18 @@ window.addEventListener('load', function(){
 });
 
 function updateDash(){
-  state.xeton     = parseInt(document.getElementById('in-xeton').value)     || 0;
-  state.sort      = parseInt(document.getElementById('in-sort').value)      || 0;
-  state.congkenh  = parseInt(document.getElementById('in-congkenh').value)  || 0;
+  state.xeton     = Math.max(0, parseInt(document.getElementById('in-xeton').value)     || 0);
+  state.sort      = Math.max(0, parseInt(document.getElementById('in-sort').value)      || 0);
+  state.congkenh  = Math.max(0, parseInt(document.getElementById('in-congkenh').value)  || 0);
+  
+  // Set cleaned values back to inputs
+  var elXe = document.getElementById('in-xeton');
+  var elSort = document.getElementById('in-sort');
+  var elCk = document.getElementById('in-congkenh');
+  if(elXe && elXe.value !== '') elXe.value = state.xeton;
+  if(elSort && elSort.value !== '') elSort.value = state.sort;
+  if(elCk && elCk.value !== '') elCk.value = state.congkenh;
+
   renderKPIs();
   renderGates();
   renderCBS();
@@ -1578,9 +1647,9 @@ function shiftForHour(h){ return h>=7&&h<15?{l:'Ca 1',c:'ca1'}:h>=15&&h<22?{l:'C
 
 function addHourlyPoint(){
   var hour   = parseInt(document.getElementById('h-hour').value);
-  var tonkho = parseInt(document.getElementById('h-tonkho').value)||0;
-  var xe     = parseInt(document.getElementById('h-xe').value)||0;
-  var sort   = parseInt(document.getElementById('h-sort').value)||0;
+  var tonkho = Math.max(0, parseInt(document.getElementById('h-tonkho').value)||0);
+  var xe     = Math.max(0, parseInt(document.getElementById('h-xe').value)||0);
+  var sort   = Math.max(0, parseInt(document.getElementById('h-sort').value)||0);
   var note   = document.getElementById('h-note').value.trim();
   var idx    = hourlyData.findIndex(function(d){return d.hour===hour;});
   var entry  = {hour:hour,tonkho:tonkho,xe:xe,sort:sort,note:note};
@@ -1748,6 +1817,24 @@ renderCharts();
         </div>
         <div id="api-key-status" style="margin-top:8px;font-size:11px;color:#8b949e">
           Dán API key vào đây → Nút "✨ Phân Tích" sẽ được kích hoạt
+        </div>
+      </div>
+
+      <!-- GITHUB SYNC PAT -->
+      <div style="margin-bottom:16px;padding:14px;background:#0d1117;border:1px solid #21262d;border-radius:10px;border-left:3px solid #da3633">
+        <div style="font-size:11px;font-weight:700;color:#f85149;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🌐 ĐỒNG BỘ GITHUB (QUYỀN TỐI CAO)</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">🔑 GitHub PAT (Personal Access Token)</div>
+          <a href="https://github.com/settings/tokens" target="_blank" style="font-size:10px;color:#58a6ff;text-decoration:none;margin-left:auto">🔗 Tạo Token GitHub →</a>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="password" id="cfg-github-pat" placeholder="ghp_..." autocomplete="off"
+            style="flex:1;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 12px;color:#e6edf3;font-size:13px;font-family:monospace;outline:none"
+            oninput="onGithubPatInput()">
+          <button onclick="toggleGithubPatVisibility(event)" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap">👁 Hiện</button>
+        </div>
+        <div id="github-pat-status" style="margin-top:8px;font-size:11px;color:#8b949e">
+          Nhập Token GitHub của bạn để đồng bộ lên Server.
         </div>
       </div>
 
@@ -1939,15 +2026,12 @@ renderCharts();
 
 <script>
 function saveSyncAdmin() {
-  var pwd = prompt("Nhập mật khẩu quản trị (Quyền Tối Cao):");
-  if (!pwd) return;
-  if (pwd !== "di46991") {
-    alert("Sai mật khẩu!");
+  var pat = localStorage.getItem('githubPat') || '';
+  if (!pat) {
+    alert("Vui lòng nhập GitHub PAT trong phần ⚙️ Cài đặt trước khi đồng bộ!");
+    openZoneSettings();
     return;
   }
-  
-  var encPat = "AwFEaVNOSCIsQU9XTHMQEHlSdE5rHiB+cgF6RiIrXAdRYQIDBmJYdg==";
-  var pat = atob(encPat).split('').map(function(c, i) { return String.fromCharCode(c.charCodeAt(0) ^ pwd.charCodeAt(i % pwd.length)); }).join('');
   
   saveZoneSettings(); 
   
@@ -1977,7 +2061,7 @@ function saveSyncAdmin() {
        btn.innerText = "🚀 Đã Đồng Bộ!";
        alert("Đã cập nhật cấu hình lên Server thành công! Các máy khác chỉ cần tải lại trang là nhận cấu hình mới.");
     } else {
-       alert("Lỗi đồng bộ: " + JSON.stringify(res));
+       alert("Lỗi đồng bộ: " + (res.message || JSON.stringify(res)));
     }
     setTimeout(function(){ btn.innerText = "🌐 Quyền Tối Cao (Đồng Bộ)"; }, 2000);
   }).catch(function(e) {
