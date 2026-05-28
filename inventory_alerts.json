@@ -20,7 +20,7 @@
     "ton_hien_tai": 129,
     "suc_chua": 250,
     "ty_le": "51.6%",
-    "gio_con_lai": "4.9h",
+    "gio_con_lai": "4.8h",
     "gio_xuat": "07:50"
   },
   {
@@ -32,7 +32,7 @@
     "ton_hien_tai": 156,
     "suc_chua": 250,
     "ty_le": "62.4%",
-    "gio_con_lai": "4.9h",
+    "gio_con_lai": "4.8h",
     "gio_xuat": "07:50"
   },
   {
@@ -44,7 +44,7 @@
     "ton_hien_tai": 159,
     "suc_chua": 250,
     "ty_le": "63.6%",
-    "gio_con_lai": "4.9h",
+    "gio_con_lai": "4.8h",
     "gio_xuat": "07:50"
   },
   {
@@ -140,7 +140,7 @@
     "ton_hien_tai": 258,
     "suc_chua": 250,
     "ty_le": "103.2%",
-    "gio_con_lai": "5.9h",
+    "gio_con_lai": "5.8h",
     "gio_xuat": "08:50"
   },
   {
@@ -158,7 +158,7 @@
   {
     "level": "critical",
     "title": "Báo Động Đỏ: HCM_GL_03",
-    "desc": "Kho Chuyển Tiếp Đắk Nông(15), Kho Trung Chuyển Gia Lai(148), Kho Trung Chuyển Hồ Chí Minh 20(3,593). Có 10414 đơn tồn > 24h: Ưu tiên xử lý lô hàng cũ (FIFO).",
+    "desc": "Kho Chuyển Tiếp Đắk Nông(15), Kho Trung Chuyển Gia Lai(148), Kho Trung Chuyển Hồ Chí Minh 20(3,593). Tồn cao + Giờ gấp: Điều phối gấp toàn lực lượng, gọi xe tăng cường.",
     "category": "Inventory & Fleet",
     "am": "Hệ Thống",
     "ton_hien_tai": 3756,
