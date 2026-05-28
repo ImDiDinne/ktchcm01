@@ -10,14 +10,33 @@ output_file = os.path.join(base_dir, 'Datatonkho_CanhBao.xlsx')
 # Sử dụng thời gian thực tế để tính toán cảnh báo
 CURRENT_TIME_SIMULATION = datetime.datetime.now().time()
 
-# Quy đổi tải trọng → sức chứa đơn hàng
-CAPACITY_MAP = {1900: 1500, 5000: 4000, 8000: 8000}
-
-def get_order_capacity(weight_kg):
-    if weight_kg in CAPACITY_MAP:
-        return CAPACITY_MAP[weight_kg]
-    closest = min(CAPACITY_MAP.keys(), key=lambda k: abs(k - weight_kg))
-    return CAPACITY_MAP[closest]
+# Quy đổi tải trọng → sức chứa đơn hàng dựa trên phân loại tuyến
+def get_order_capacity(route_name, dests):
+    name_lower = route_name.lower()
+    
+    # 1. Tuyến giao hàng nặng: 400 đơn đầy xe.
+    if 'ghn' in name_lower or 'gxt' in name_lower or any('giao hàng nặng' in d['name'].lower() or 'ghn' in d['name'].lower() for d in dests):
+        return 400
+        
+    # 2. Tuyến nội thành: 250 đơn
+    if 'nội thành' in name_lower or 'noi thanh' in name_lower or any('nội thành' in d['name'].lower() or 'noi thanh' in d['name'].lower() for d in dests):
+        return 250
+    if name_lower.startswith('sg'):
+        return 250
+        
+    # 3. Tuyến nội vùng: 2000 đơn
+    noi_vung_keywords = ['nội vùng', 'noi vung', 'long an', 'bình dương', 'binh duong', 'tây ninh', 'tay ninh', 
+                         'tiền giang', 'tien giang', 'bến tre', 'ben tre', 'đồng nai', 'dong nai', 
+                         'bình phước', 'binh phuoc', 'phú quốc', 'phu quoc', 'vũng tàu', 'vung tau']
+    if name_lower.startswith('xa') or 'nội vùng' in name_lower or 'noi vung' in name_lower:
+        return 2000
+    if any(p in name_lower for p in ['dongnai', 'đnai', 'pq', 'binhphuoc']):
+        return 2000
+    if any(any(kw in d['name'].lower() for kw in noi_vung_keywords) for d in dests):
+        return 2000
+        
+    # 4. Tuyến liên vùng: 8000 đơn
+    return 8000
 
 # --- 1. Load Data ---
 print("Reading data...")
@@ -148,7 +167,7 @@ results = []
 for route_name, info in route_groups.items():
     capacity_kg = info['capacity_kg']
     if capacity_kg <= 0: continue
-    order_cap = get_order_capacity(capacity_kg)
+    order_cap = get_order_capacity(route_name, info['dests'])
     
     total_inv = 0
     matched = []
@@ -429,7 +448,7 @@ for route_name, info in route_groups.items():
     if minutes_left < 0 or minutes_left > ALERT_WINDOW_MINUTES:
         continue
 
-    order_cap = get_order_capacity(capacity_kg)
+    order_cap = get_order_capacity(route_name, info['dests'])
     origin_dep = info.get('origin_dep_time')
     dep_str = origin_dep.strftime('%H:%M') if isinstance(origin_dep, datetime.time) else (str(origin_dep)[:5] if origin_dep else '—')
 
