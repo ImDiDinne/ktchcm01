@@ -1,62 +1,41 @@
 [
   {
-    "tuyen": "XA_S2_76",
-    "cot_type": "XA",
-    "gio_xuat_hcm01": "05:40",
-    "minutes_left": 6.9,
-    "tai_trong_kg": 1900,
-    "suc_chua_don": 1500,
-    "tong_ton": 63,
-    "ty_le_lay_day": "4.2%",
+    "tuyen": "BinhPhuoc_S_1",
+    "cot_type": "BinhPhuoc",
+    "gio_xuat_hcm01": "00:45",
+    "minutes_left": 1.0,
+    "tai_trong_kg": 5000,
+    "suc_chua_don": 4000,
+    "tong_ton": 400,
+    "ty_le_lay_day": "10.0%",
     "drop_risk": "🟢 THẤP - Đủ sức chứa",
     "drop_level": "low",
     "stops": [
       {
-        "name": "Bưu Cục 4B Khu B-Xã Hậu Nghĩa-Long An",
-        "loai": "Giao",
-        "inventory": 63,
-        "gio_den": "",
-        "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "HCM_BĐ_03",
-    "cot_type": "HCM",
-    "gio_xuat_hcm01": "06:00",
-    "minutes_left": 26.9,
-    "tai_trong_kg": 8000,
-    "suc_chua_don": 8000,
-    "tong_ton": 3737,
-    "ty_le_lay_day": "46.7%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
-      {
-        "name": "Kho Trung Chuyển Bình Định",
-        "loai": "Giao và lấy",
-        "inventory": 144,
+        "name": "Kho Chuyển Tiếp Bình Phước",
+        "loai": "Phân loại",
+        "inventory": 280,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Kho Trung Chuyển Hồ Chí Minh 20",
-        "loai": "Phân loại",
-        "inventory": 3593,
+        "name": "Bưu Cục Lộc Thái-Lộc Ninh-Bình Phước",
+        "loai": "Giao",
+        "inventory": 120,
         "gio_den": "",
         "gio_roi": ""
       }
     ]
   },
   {
-    "tuyen": "HCM_ĐN_06",
+    "tuyen": "HCM_ĐL_02",
     "cot_type": "HCM",
-    "gio_xuat_hcm01": "06:00",
-    "minutes_left": 26.9,
+    "gio_xuat_hcm01": "01:00",
+    "minutes_left": 16.0,
     "tai_trong_kg": 8000,
     "suc_chua_don": 8000,
-    "tong_ton": 862,
-    "ty_le_lay_day": "10.8%",
+    "tong_ton": 560,
+    "ty_le_lay_day": "7.0%",
     "drop_risk": "🟢 THẤP - Đủ sức chứa",
     "drop_level": "low",
     "stops": [
@@ -68,54 +47,47 @@
         "gio_roi": ""
       },
       {
-        "name": "Kho Trung Chuyển Đà Nẵng",
+        "name": "Kho Trung Chuyển Đắk Lắk",
         "loai": "Giao và lấy",
-        "inventory": 368,
+        "inventory": 272,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Kho Chuyển Tiếp Thừa Thiên Huế",
-        "loai": "Giao và lấy",
-        "inventory": 32,
+        "name": "Kho Giao Hàng Nặng - Buôn Ma Thuột - Đắk Lắk",
+        "loai": "Giao",
+        "inventory": 1,
         "gio_den": "",
         "gio_roi": ""
       },
       {
-        "name": "Kho Trung Chuyển Hà Nội 02",
-        "loai": "Phân loại",
-        "inventory": 462,
+        "name": "Kho Trung Chuyển Đắk Lắk",
+        "loai": "Lấy",
+        "inventory": 272,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Chuyển Tiếp Đắk Nông",
+        "loai": "Giao",
+        "inventory": 15,
         "gio_den": "",
         "gio_roi": ""
       }
     ]
   },
   {
-    "tuyen": "HCM_QB_02",
+    "tuyen": "HCM_QB_01",
     "cot_type": "HCM",
-    "gio_xuat_hcm01": "06:00",
-    "minutes_left": 26.9,
+    "gio_xuat_hcm01": "01:00",
+    "minutes_left": 16.0,
     "tai_trong_kg": 8000,
     "suc_chua_don": 8000,
-    "tong_ton": 648,
-    "ty_le_lay_day": "8.1%",
+    "tong_ton": 3808,
+    "ty_le_lay_day": "47.6%",
     "drop_risk": "🟢 THẤP - Đủ sức chứa",
     "drop_level": "low",
     "stops": [
-      {
-        "name": "B2B - Đức Hòa - Long An",
-        "loai": "Lấy",
-        "inventory": 0,
-        "gio_den": "",
-        "gio_roi": ""
-      },
-      {
-        "name": "Kho Chuyển Tiếp Quảng Ngãi",
-        "loai": "Giao",
-        "inventory": 17,
-        "gio_den": "",
-        "gio_roi": ""
-      },
       {
         "name": "Kho Trung Chuyển Quảng Bình",
         "loai": "Giao",
@@ -131,40 +103,40 @@
         "gio_roi": ""
       },
       {
-        "name": "Kho Trung Chuyển Hà Nội 02",
-        "loai": "Phân loại",
-        "inventory": 462,
+        "name": "Điểm Lấy Hàng Shop Lương Gà Đạt Minh",
+        "loai": "Lấy",
+        "inventory": 0,
         "gio_den": "",
         "gio_roi": ""
-      }
-    ]
-  },
-  {
-    "tuyen": "HCM_DX_05",
-    "cot_type": "HCM",
-    "gio_xuat_hcm01": "06:00",
-    "minutes_left": 26.9,
-    "tai_trong_kg": 8000,
-    "suc_chua_don": 8000,
-    "tong_ton": 824,
-    "ty_le_lay_day": "10.3%",
-    "drop_risk": "🟢 THẤP - Đủ sức chứa",
-    "drop_level": "low",
-    "stops": [
+      },
       {
-        "name": "Kho Trung Chuyển Dương Xá",
-        "loai": "Giao",
-        "inventory": 824,
+        "name": "Bưu Cục Đường 10 tháng 6, Khu 4- Yên Định-Thanh Hóa",
+        "loai": "Lấy",
+        "inventory": 0,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Chuyển Tiếp Thanh Hoá",
+        "loai": "Lấy",
+        "inventory": 46,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "loai": "Phân loại",
+        "inventory": 3593,
         "gio_den": "",
         "gio_roi": ""
       }
     ]
   },
   {
-    "tuyen": "HCM01_HN_08",
+    "tuyen": "HCM01_HN_07",
     "cot_type": "HCM01",
-    "gio_xuat_hcm01": "06:00",
-    "minutes_left": 26.9,
+    "gio_xuat_hcm01": "01:00",
+    "minutes_left": 16.0,
     "tai_trong_kg": 8000,
     "suc_chua_don": 8000,
     "tong_ton": 462,
@@ -182,21 +154,56 @@
     ]
   },
   {
-    "tuyen": "HCM01_HY_04",
-    "cot_type": "HCM01",
-    "gio_xuat_hcm01": "06:00",
-    "minutes_left": 26.9,
+    "tuyen": "DongNai_S_01",
+    "cot_type": "DongNai",
+    "gio_xuat_hcm01": "01:00",
+    "minutes_left": 16.0,
     "tai_trong_kg": 8000,
     "suc_chua_don": 8000,
-    "tong_ton": 3714,
-    "ty_le_lay_day": "46.4%",
+    "tong_ton": 676,
+    "ty_le_lay_day": "8.5%",
     "drop_risk": "🟢 THẤP - Đủ sức chứa",
     "drop_level": "low",
     "stops": [
       {
-        "name": "Kho Trung Chuyển Hưng Yên 01",
+        "name": "Kho Chuyển Tiếp Đồng Nai",
         "loai": "Giao",
-        "inventory": 3714,
+        "inventory": 676,
+        "gio_den": "",
+        "gio_roi": ""
+      }
+    ]
+  },
+  {
+    "tuyen": "HCM01_CT_16",
+    "cot_type": "HCM01",
+    "gio_xuat_hcm01": "01:00",
+    "minutes_left": 16.0,
+    "tai_trong_kg": 8000,
+    "suc_chua_don": 8000,
+    "tong_ton": 492,
+    "ty_le_lay_day": "6.2%",
+    "drop_risk": "🟢 THẤP - Đủ sức chứa",
+    "drop_level": "low",
+    "stops": [
+      {
+        "name": "B2B - Đức Hòa - Long An",
+        "loai": "Lấy",
+        "inventory": 0,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Trung Chuyển Cần Thơ",
+        "loai": "Phân loại",
+        "inventory": 492,
+        "gio_den": "",
+        "gio_roi": ""
+      },
+      {
+        "name": "Kho Giao Hàng Nặng Bình Thủy-Cần Thơ",
+        "loai": "Giao và lấy",
+        "inventory": 0,
         "gio_den": "",
         "gio_roi": ""
       }
