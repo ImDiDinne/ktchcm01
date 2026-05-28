@@ -501,7 +501,10 @@ body{font-family:Inter,sans-serif;background:linear-gradient(rgba(13,17,23,0.88)
     <div class="input-panel" style="display:flex; flex-direction:column; gap:16px; margin-bottom:0;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <h2 style="margin:0">📝 Cập Nhật & Khu Chia Hàng</h2>
-        <button class="btn-update" onclick="updateDash()" style="width:auto; padding:8px 16px; margin:0">⚡ Cập Nhật Tất Cả</button>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="sync-status" style="font-size:12px; color:#8b949e"></span>
+          <button class="btn-update" onclick="updateDash()" style="width:auto; padding:8px 16px; margin:0">⚡ Cập Nhật Tất Cả</button>
+        </div>
       </div>
 
       <div class="form-grid" style="grid-template-columns:repeat(3, 1fr); gap:12px">
@@ -1607,6 +1610,149 @@ window.addEventListener('load', function(){
   }
 });
 
+function syncDashboardStateToGithub() {
+  var pat = localStorage.getItem('githubPat') || '';
+  var statusEl = document.getElementById('sync-status');
+  
+  if (!pat) {
+    if (statusEl) {
+      statusEl.textContent = 'Lưu cục bộ (Chưa cấu hình PAT)';
+      statusEl.style.color = '#8b949e';
+    }
+    return;
+  }
+  
+  if (statusEl) {
+    statusEl.textContent = '⏳ Đang đồng bộ...';
+    statusEl.style.color = '#d29922';
+  }
+  
+  // Gather entire current manual input state
+  var stateData = {
+    xeton: state.xeton,
+    sort: state.sort,
+    congkenh: state.congkenh,
+    zones: {
+      ck1: {
+        pal: Math.max(0, parseInt(document.getElementById('zpal-ck1').value) || 0),
+        ns: Math.max(0, parseInt(document.getElementById('zns-ck1').value) || 0)
+      },
+      ck2: {
+        pal: Math.max(0, parseInt(document.getElementById('zpal-ck2').value) || 0),
+        ns: Math.max(0, parseInt(document.getElementById('zns-ck2').value) || 0)
+      },
+      nv: {
+        pal: Math.max(0, parseInt(document.getElementById('zpal-nv').value) || 0),
+        ns: Math.max(0, parseInt(document.getElementById('zns-nv').value) || 0)
+      },
+      hcm: {
+        pal: Math.max(0, parseInt(document.getElementById('zpal-hcm').value) || 0),
+        ns: Math.max(0, parseInt(document.getElementById('zns-hcm').value) || 0)
+      }
+    },
+    updated: new Date().toLocaleTimeString('vi-VN')
+  };
+  
+  var content = JSON.stringify(stateData, null, 2);
+  var b64Content = btoa(unescape(encodeURIComponent(content)));
+  var url = "https://api.github.com/repos/ImDiDinne/ktchcm01/contents/dashboardState.json";
+  
+  fetch(url, {
+    headers: { "Authorization": "token " + pat, "Accept": "application/vnd.github.v3+json" }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var sha = data.sha;
+    var reqBody = {
+      message: "Operator update dashboard state",
+      content: b64Content
+    };
+    if (sha) reqBody.sha = sha;
+    
+    return fetch(url, {
+      method: "PUT",
+      headers: { "Authorization": "token " + pat, "Content-Type": "application/json" },
+      body: JSON.stringify(reqBody)
+    });
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    if (res.content && res.content.name) {
+      if (statusEl) {
+        statusEl.textContent = '✅ Đã đồng bộ';
+        statusEl.style.color = '#3fb950';
+      }
+    } else {
+      if (statusEl) {
+        statusEl.textContent = '❌ Lỗi đồng bộ';
+        statusEl.style.color = '#f85149';
+      }
+      console.error("Sync error:", res);
+    }
+  })
+  .catch(function(e) {
+    if (statusEl) {
+      statusEl.textContent = '❌ Lỗi kết nối';
+      statusEl.style.color = '#f85149';
+    }
+    console.error("Sync fetch error:", e);
+  });
+}
+
+function loadSyncedDashboardState() {
+  var url = "https://raw.githubusercontent.com/ImDiDinne/ktchcm01/main/dashboardState.json?v=" + new Date().getTime();
+  fetch(url)
+    .then(function(r) {
+      if (r.ok) return r.json();
+      throw new Error("No sync state found");
+    })
+    .then(function(data) {
+      if (!data) return;
+      
+      // Update state variables
+      state.xeton = Math.max(0, data.xeton || 0);
+      state.sort = Math.max(0, data.sort || 0);
+      state.congkenh = Math.max(0, data.congkenh || 0);
+      
+      // Update input fields in UI
+      var elXe = document.getElementById('in-xeton');
+      var elSort = document.getElementById('in-sort');
+      var elCk = document.getElementById('in-congkenh');
+      if (elXe) elXe.value = state.xeton;
+      if (elSort) elSort.value = state.sort;
+      if (elCk) elCk.value = state.congkenh;
+      
+      // Update zone inputs in UI
+      if (data.zones) {
+        ['ck1', 'ck2', 'nv', 'hcm'].forEach(function(id) {
+          var zdata = data.zones[id];
+          if (zdata) {
+            var elPal = document.getElementById('zpal-' + id);
+            var elNs = document.getElementById('zns-' + id);
+            if (elPal) elPal.value = Math.max(0, zdata.pal || 0);
+            if (elNs) elNs.value = Math.max(0, zdata.ns || 0);
+            calcZone(id); // Recalculate each zone's rate and ETA
+          }
+        });
+      }
+      
+      // Re-render KPIs and alerts based on the new synced state
+      renderKPIs();
+      renderGates();
+      renderCBS();
+      renderAlerts();
+      
+      var statusEl = document.getElementById('sync-status');
+      if (statusEl) {
+        statusEl.textContent = 'Đồng bộ: ' + (data.updated || 'vừa xong');
+        statusEl.style.color = '#3fb950';
+      }
+    })
+    .catch(function(e) {
+      console.log('Load sync state error:', e);
+    });
+}
+
 function updateDash(){
   state.xeton     = Math.max(0, parseInt(document.getElementById('in-xeton').value)     || 0);
   state.sort      = Math.max(0, parseInt(document.getElementById('in-sort').value)      || 0);
@@ -1624,6 +1770,9 @@ function updateDash(){
   renderGates();
   renderCBS();
   renderAlerts();
+  
+  // Trigger sync to Github
+  syncDashboardStateToGithub();
 }
 
 /* ═══════════════════════════════════════
@@ -1750,13 +1899,20 @@ function autoFetchData() {
   fetch('tonkho_tuyen.json?v=' + new Date().getTime())
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      if (typeof TONKHO_DATA !== 'undefined' && TONKHO_DATA && TONKHO_DATA.updated === data.updated) return;
+      if (typeof TONKHO_DATA !== 'undefined' && TONKHO_DATA && TONKHO_DATA.updated === data.updated) {
+        loadSyncedDashboardState();
+        return;
+      }
       TONKHO_DATA = data;
       initKhoData();
       renderAlerts();
       renderKPIs();
+      loadSyncedDashboardState();
     })
-    .catch(function(e) { console.log('Auto fetch error:', e); });
+    .catch(function(e) {
+      console.log('Auto fetch error:', e);
+      loadSyncedDashboardState();
+    });
 }
 setInterval(autoFetchData, 30000);
 setInterval(updateClock, 1000);
@@ -1767,6 +1923,7 @@ renderCBS();
 renderKPIs();
 renderAlerts();
 renderCharts();
+loadSyncedDashboardState(); // Tải trạng thái đồng bộ khi trang vừa load
 </script>
 <!-- MODAL CHI TIẾT TỒN KHO -->
 <div class="modal-overlay" id="kho-modal" onclick="if(event.target===this)closeKhoModal()">
