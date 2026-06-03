@@ -398,6 +398,19 @@ def generate_subset_data(df_subset):
     dest_province = df_subset['deliver_province'].value_counts().head(30).to_dict()
     dest_vung = df_subset['Vùng'].value_counts().to_dict()
 
+    # Phân tích hàng mốc dưới 3 giờ nhập từ đâu về (Tỉnh lấy)
+    df_under3 = df_subset[df_subset['diff_hours'] < 3]
+    under3_counts = df_under3['pick_province'].value_counts()
+    total_under3 = len(df_under3)
+    
+    under_3h_origins = []
+    for prov, count in under3_counts.items():
+        under_3h_origins.append({
+            'province': str(prov).strip(),
+            'count': int(count),
+            'pct': float(count / total_under3 * 100) if total_under3 > 0 else 0.0
+        })
+
     return {
         'grand_total': grand_total,
         'routes': routes,
@@ -405,7 +418,9 @@ def generate_subset_data(df_subset):
             'by_region': dest_region,
             'by_province': dest_province,
             'by_vung': dest_vung,
-        }
+        },
+        'under_3h_origins': under_3h_origins,
+        'total_under_3h': total_under3
     }
 
 def build_hierarchical_data(df, pivot):

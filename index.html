@@ -87,6 +87,23 @@
           <div class="card-title">⏱️ Phân Bổ Thời Gian Tồn</div>
           <div class="bar-chart" id="aging-bars"></div>
         </div>
+
+        <!-- Table: Hàng nhập dưới 3 giờ -->
+        <div class="chart-card animate-in delay-6">
+          <div class="card-title">📥 Nguồn Hàng Nhập < 3h Theo Tỉnh Lấy</div>
+          <div class="table-wrapper" style="max-height: 220px; overflow-y: auto;">
+            <table class="pivot-table" id="under3h-table" style="font-size: 0.76rem; width: 100%;">
+              <thead>
+                <tr>
+                  <th style="text-align: left; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase;">Tỉnh Lấy</th>
+                  <th style="text-align: right; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase; color: var(--accent-light);">Số Đơn</th>
+                  <th style="text-align: right; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase;">Tỷ Lệ</th>
+                </tr>
+              </thead>
+              <tbody id="under3h-body"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -278,6 +295,28 @@
         });
       } else {
         agingEl.innerHTML = '<div style="margin:auto;color:var(--text-muted);font-size:0.9rem">Không có dữ liệu thời gian tồn</div>';
+      }
+
+      // ── Under 3h Origins Table ──
+      const under3hBody = document.getElementById('under3h-body');
+      if (under3hBody) {
+        under3hBody.innerHTML = '';
+        const under3hData = D.under_3h_origins || [];
+        const totalUnder3h = D.total_under_3h || 0;
+        
+        if (totalUnder3h > 0 && under3hData.length > 0) {
+          under3hData.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td style="text-align: left; padding: 6px 10px; font-family: 'Inter', sans-serif;">${item.province}</td>
+              <td style="text-align: right; padding: 6px 10px; font-weight: 600; color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">${fmt(item.count)}</td>
+              <td style="text-align: right; padding: 6px 10px; color: var(--text-muted); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">${item.pct.toFixed(1)}%</td>
+            `;
+            under3hBody.appendChild(tr);
+          });
+        } else {
+          under3hBody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted);font-family:\'Inter\',sans-serif">Không có hàng tồn < 3h</td></tr>';
+        }
       }
 
       // ── Destination Cards ──
