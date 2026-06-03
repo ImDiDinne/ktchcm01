@@ -5,8 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KTC HCM 01 — Tổng Quan Hàng Hoá</title>
   <meta name="description" content="Dashboard tổng quan hàng hoá tại Kho Trung Chuyển Hồ Chí Minh 01 — GHN Express">
-  <link rel="stylesheet" href="style.css">
+  
+  <!-- Chống cache trình duyệt dứt điểm -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <script>
+    document.write('<link rel="stylesheet" href="style.css?t=' + Date.now() + '">');
     document.write('<script src="tonkho_data.js?t=' + Date.now() + '"><\/script>');
   </script>
 </head>
