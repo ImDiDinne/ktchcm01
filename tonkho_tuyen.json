@@ -1,249 +1,510 @@
 {
-  "title": "BÁO CÁO CUỐI CA KTC HCM 01",
-  "grand_total": 41055,
+  "title": "BÁO CÁO TỒN KHO KTC HCM 01 — 1,048,575 đơn",
+  "grand_total": 1048575,
   "routes": [
     {
       "name": "Kho Chuyển Tiếp",
-      "total": 6140,
+      "total": 102416,
+      "aging": {
+        "1. 0-6": 55746,
+        "2. 6-12": 24013,
+        "3. 12-24": 18808,
+        "4. 24-36": 2955,
+        "5. 36-48": 583,
+        "6. 48-72": 134,
+        "7. 72-96": 11,
+        "8. 96-120": 10,
+        "9. 120+": 156
+      },
       "children": [
         {
-          "name": "Kho Chuyển Tiếp Bình Phước",
-          "short_name": "Bình Phước",
-          "total": 1535
+          "name": "Kho Chuyển Tiếp Đồng Nai",
+          "short_name": "Đồng Nai",
+          "total": 47057,
+          "aging": {
+            "1. 0-6": 21892,
+            "2. 6-12": 12734,
+            "3. 12-24": 10100,
+            "4. 24-36": 2104,
+            "5. 36-48": 96,
+            "6. 48-72": 45,
+            "7. 72-96": 3,
+            "8. 96-120": 7,
+            "9. 120+": 76
+          }
+        },
+        {
+          "name": "Kho Chuyến Tiếp Thanh Hoá",
+          "short_name": "Kho Chuyến Tiếp Thanh Hoá",
+          "total": 17471,
+          "aging": {
+            "1. 0-6": 11207,
+            "2. 6-12": 4370,
+            "3. 12-24": 1521,
+            "4. 24-36": 285,
+            "5. 36-48": 22,
+            "6. 48-72": 23,
+            "7. 72-96": 3,
+            "8. 96-120": 1,
+            "9. 120+": 39
+          }
         },
         {
           "name": "Kho Chuyển Tiếp Bình Thuận",
           "short_name": "Bình Thuận",
-          "total": 426
+          "total": 11810,
+          "aging": {
+            "1. 0-6": 7520,
+            "2. 6-12": 961,
+            "3. 12-24": 3221,
+            "4. 24-36": 62,
+            "5. 36-48": 19,
+            "6. 48-72": 8,
+            "7. 72-96": 1,
+            "8. 96-120": 1,
+            "9. 120+": 17
+          }
         },
         {
-          "name": "Kho Chuyển Tiếp Đắk Nông",
-          "short_name": "Đắk Nông",
-          "total": 221
-        },
-        {
-          "name": "Kho Chuyển Tiếp Đồng Nai",
-          "short_name": "Đồng Nai",
-          "total": 3606
+          "name": "Kho Chuyển Tiếp Bình Phước",
+          "short_name": "Bình Phước",
+          "total": 11221,
+          "aging": {
+            "1. 0-6": 5094,
+            "2. 6-12": 2299,
+            "3. 12-24": 2854,
+            "4. 24-36": 476,
+            "5. 36-48": 434,
+            "6. 48-72": 52,
+            "7. 72-96": 3,
+            "8. 96-120": 1,
+            "9. 120+": 8
+          }
         },
         {
           "name": "Kho Chuyển Tiếp Quảng Ngãi",
           "short_name": "Quảng Ngãi",
-          "total": 75
+          "total": 9961,
+          "aging": {
+            "1. 0-6": 7435,
+            "2. 6-12": 2271,
+            "3. 12-24": 238,
+            "4. 24-36": 4,
+            "5. 36-48": 4,
+            "6. 48-72": 1,
+            "7. 72-96": 1,
+            "8. 96-120": 0,
+            "9. 120+": 7
+          }
         },
         {
-          "name": "Kho Chuyến Tiếp Thanh Hoá",
-          "short_name": "Thanh Hoá",
-          "total": 277
-        }
-      ]
-    },
-    {
-      "name": "Kho Giao Hàng Nặng",
-      "total": 1743,
-      "children": [
-        {
-          "name": "Kho Giao Hàng Nặng - Bến Cát - Bình Dương",
-          "short_name": "Bến Cát - Bình Dương",
-          "total": 12
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - Dĩ An - Bình Dương",
-          "short_name": "Dĩ An - Bình Dương",
-          "total": 37
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - Đức Hòa - Long An",
-          "short_name": "Đức Hòa - Long An",
-          "total": 121
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - Hồ Chí Minh",
-          "short_name": "Hồ Chí Minh",
-          "total": 18
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - Nhà Bè - HCM",
-          "short_name": "Nhà Bè - HCM",
-          "total": 292
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - Tân Tạo - HCM",
-          "short_name": "Tân Tạo - HCM",
-          "total": 667
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - Thủ Dầu Một - Bình Dương",
-          "short_name": "Thủ Dầu Một - Bình Dương",
-          "total": 13
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - Thủ Đức - HCM",
-          "short_name": "Thủ Đức - HCM",
-          "total": 268
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - Thuận An - Bình Dương",
-          "short_name": "Thuận An - Bình Dương",
-          "total": 134
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - TP Bến Tre - Bến Tre",
-          "short_name": "TP Bến Tre - Bến Tre",
-          "total": 23
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - TP Mỹ Tho - Tiền Giang",
-          "short_name": "TP Mỹ Tho - Tiền Giang",
-          "total": 86
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - TP Tân An - Long An",
-          "short_name": "TP Tân An - Long An",
-          "total": 41
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - TP Tây Ninh - Tây Ninh",
-          "short_name": "TP Tây Ninh - Tây Ninh",
-          "total": 20
-        },
-        {
-          "name": "Kho Giao Hàng Nặng - TX Cai Lậy - Tiền Giang",
-          "short_name": "TX Cai Lậy - Tiền Giang",
-          "total": 11
-        }
-      ]
-    },
-    {
-      "name": "Kho KHL",
-      "total": 1096,
-      "children": [
-        {
-          "name": "Key Account Warehouse Ho Chi Minh",
-          "short_name": "Key Account Warehouse Ho Chi Minh",
-          "total": 1096
+          "name": "Kho Chuyển Tiếp Đắk Nông",
+          "short_name": "Đắk Nông",
+          "total": 4896,
+          "aging": {
+            "1. 0-6": 2598,
+            "2. 6-12": 1378,
+            "3. 12-24": 874,
+            "4. 24-36": 24,
+            "5. 36-48": 8,
+            "6. 48-72": 5,
+            "7. 72-96": 0,
+            "8. 96-120": 0,
+            "9. 120+": 9
+          }
         }
       ]
     },
     {
       "name": "Kho Trung Chuyển",
-      "total": 16981,
+      "total": 660513,
+      "aging": {
+        "1. 0-6": 313985,
+        "2. 6-12": 157870,
+        "3. 12-24": 165385,
+        "4. 24-36": 17688,
+        "5. 36-48": 3434,
+        "6. 48-72": 1176,
+        "7. 72-96": 60,
+        "8. 96-120": 108,
+        "9. 120+": 807
+      },
       "children": [
         {
-          "name": "Kho Trung Chuyển Bình Định",
-          "short_name": "Bình Định",
-          "total": 174
-        },
-        {
-          "name": "Kho Trung Chuyển Cần Thơ",
-          "short_name": "Cần Thơ",
-          "total": 3780
-        },
-        {
-          "name": "Kho Trung Chuyển Đà Nẵng",
-          "short_name": "Đà Nẵng",
-          "total": 421
-        },
-        {
-          "name": "Kho Trung Chuyển Đắk Lắk",
-          "short_name": "Đắk Lắk",
-          "total": 2268
+          "name": "Kho Trung Chuyển Hưng Yên 01",
+          "short_name": "Hưng Yên 01",
+          "total": 180175,
+          "aging": {
+            "1. 0-6": 80227,
+            "2. 6-12": 51131,
+            "3. 12-24": 43552,
+            "4. 24-36": 4416,
+            "5. 36-48": 177,
+            "6. 48-72": 414,
+            "7. 72-96": 15,
+            "8. 96-120": 28,
+            "9. 120+": 215
+          }
         },
         {
           "name": "Kho Trung Chuyển Dương Xá",
           "short_name": "Dương Xá",
-          "total": 851
-        },
-        {
-          "name": "Kho Trung Chuyển Gia Lai",
-          "short_name": "Gia Lai",
-          "total": 181
-        },
-        {
-          "name": "Kho Trung Chuyển Hà Nội 02",
-          "short_name": "Hà Nội 02",
-          "total": 540
+          "total": 122369,
+          "aging": {
+            "1. 0-6": 59247,
+            "2. 6-12": 24929,
+            "3. 12-24": 33102,
+            "4. 24-36": 4442,
+            "5. 36-48": 183,
+            "6. 48-72": 178,
+            "7. 72-96": 11,
+            "8. 96-120": 39,
+            "9. 120+": 238
+          }
         },
         {
           "name": "Kho Trung Chuyển Hồ Chí Minh 20",
           "short_name": "Hồ Chí Minh 20",
-          "total": 4084
+          "total": 98434,
+          "aging": {
+            "1. 0-6": 43647,
+            "2. 6-12": 19466,
+            "3. 12-24": 29504,
+            "4. 24-36": 3340,
+            "5. 36-48": 2126,
+            "6. 48-72": 244,
+            "7. 72-96": 12,
+            "8. 96-120": 10,
+            "9. 120+": 85
+          }
         },
         {
-          "name": "Kho Trung Chuyển Hưng Yên 01",
-          "short_name": "Hưng Yên 01",
-          "total": 4058
+          "name": "Kho Trung Chuyển Cần Thơ",
+          "short_name": "Cần Thơ",
+          "total": 73589,
+          "aging": {
+            "1. 0-6": 31032,
+            "2. 6-12": 14443,
+            "3. 12-24": 24135,
+            "4. 24-36": 2966,
+            "5. 36-48": 786,
+            "6. 48-72": 181,
+            "7. 72-96": 1,
+            "8. 96-120": 8,
+            "9. 120+": 37
+          }
+        },
+        {
+          "name": "Kho Trung Chuyển Đà Nẵng",
+          "short_name": "Đà Nẵng",
+          "total": 43429,
+          "aging": {
+            "1. 0-6": 24240,
+            "2. 6-12": 16271,
+            "3. 12-24": 2756,
+            "4. 24-36": 65,
+            "5. 36-48": 24,
+            "6. 48-72": 25,
+            "7. 72-96": 1,
+            "8. 96-120": 3,
+            "9. 120+": 44
+          }
+        },
+        {
+          "name": "Kho Trung Chuyển Hà Nội 02",
+          "short_name": "Hà Nội 02",
+          "total": 36314,
+          "aging": {
+            "1. 0-6": 13838,
+            "2. 6-12": 10172,
+            "3. 12-24": 11592,
+            "4. 24-36": 565,
+            "5. 36-48": 29,
+            "6. 48-72": 62,
+            "7. 72-96": 8,
+            "8. 96-120": 4,
+            "9. 120+": 44
+          }
+        },
+        {
+          "name": "Kho Trung Chuyến Nghệ An",
+          "short_name": "Kho Trung Chuyến Nghệ An",
+          "total": 25900,
+          "aging": {
+            "1. 0-6": 14171,
+            "2. 6-12": 2467,
+            "3. 12-24": 8252,
+            "4. 24-36": 871,
+            "5. 36-48": 50,
+            "6. 48-72": 29,
+            "7. 72-96": 2,
+            "8. 96-120": 7,
+            "9. 120+": 51
+          }
+        },
+        {
+          "name": "Kho Trung Chuyển Bình Định",
+          "short_name": "Bình Định",
+          "total": 23370,
+          "aging": {
+            "1. 0-6": 15666,
+            "2. 6-12": 6330,
+            "3. 12-24": 1327,
+            "4. 24-36": 10,
+            "5. 36-48": 12,
+            "6. 48-72": 10,
+            "7. 72-96": 1,
+            "8. 96-120": 1,
+            "9. 120+": 13
+          }
+        },
+        {
+          "name": "Kho Trung Chuyển Gia Lai",
+          "short_name": "Gia Lai",
+          "total": 17604,
+          "aging": {
+            "1. 0-6": 8300,
+            "2. 6-12": 3426,
+            "3. 12-24": 4903,
+            "4. 24-36": 924,
+            "5. 36-48": 23,
+            "6. 48-72": 6,
+            "7. 72-96": 3,
+            "8. 96-120": 1,
+            "9. 120+": 18
+          }
         },
         {
           "name": "Kho Trung Chuyển Khánh Hòa",
           "short_name": "Khánh Hòa",
-          "total": 221
-        },
-        {
-          "name": "Kho Trung Chuyến Nghệ An",
-          "short_name": "Nghệ An",
-          "total": 258
+          "total": 14490,
+          "aging": {
+            "1. 0-6": 7666,
+            "2. 6-12": 3412,
+            "3. 12-24": 3345,
+            "4. 24-36": 15,
+            "5. 36-48": 13,
+            "6. 48-72": 15,
+            "7. 72-96": 3,
+            "8. 96-120": 3,
+            "9. 120+": 18
+          }
         },
         {
           "name": "Kho Trung Chuyển Quảng Bình",
           "short_name": "Quảng Bình",
-          "total": 145
+          "total": 13161,
+          "aging": {
+            "1. 0-6": 9957,
+            "2. 6-12": 2805,
+            "3. 12-24": 367,
+            "4. 24-36": 6,
+            "5. 36-48": 4,
+            "6. 48-72": 5,
+            "7. 72-96": 0,
+            "8. 96-120": 1,
+            "9. 120+": 16
+          }
+        },
+        {
+          "name": "Kho Trung Chuyển Đắk Lắk",
+          "short_name": "Đắk Lắk",
+          "total": 11678,
+          "aging": {
+            "1. 0-6": 5994,
+            "2. 6-12": 3018,
+            "3. 12-24": 2550,
+            "4. 24-36": 68,
+            "5. 36-48": 7,
+            "6. 48-72": 7,
+            "7. 72-96": 3,
+            "8. 96-120": 3,
+            "9. 120+": 28
+          }
         }
       ]
     },
     {
       "name": "Nội Thành",
-      "total": 3390,
+      "total": 156313,
+      "aging": {
+        "1. 0-6": 71329,
+        "2. 6-12": 17011,
+        "3. 12-24": 55036,
+        "4. 24-36": 7788,
+        "5. 36-48": 4146,
+        "6. 48-72": 820,
+        "7. 72-96": 11,
+        "8. 96-120": 12,
+        "9. 120+": 160
+      },
       "children": [
         {
           "name": "Hồ Chí Minh",
           "short_name": "Hồ Chí Minh",
-          "total": 3390
+          "total": 156313,
+          "aging": {
+            "1. 0-6": 71329,
+            "2. 6-12": 17011,
+            "3. 12-24": 55036,
+            "4. 24-36": 7788,
+            "5. 36-48": 4146,
+            "6. 48-72": 820,
+            "7. 72-96": 11,
+            "8. 96-120": 12,
+            "9. 120+": 160
+          }
         }
       ]
     },
     {
       "name": "Nội vùng",
-      "total": 9930,
+      "total": 129333,
+      "aging": {
+        "1. 0-6": 62170,
+        "2. 6-12": 18990,
+        "3. 12-24": 40506,
+        "4. 24-36": 5406,
+        "5. 36-48": 1890,
+        "6. 48-72": 302,
+        "7. 72-96": 6,
+        "8. 96-120": 9,
+        "9. 120+": 54
+      },
       "children": [
-        {
-          "name": "Bến Tre",
-          "short_name": "Bến Tre",
-          "total": 1454
-        },
         {
           "name": "Bình Dương",
           "short_name": "Bình Dương",
-          "total": 3106
+          "total": 42782,
+          "aging": {
+            "1. 0-6": 19310,
+            "2. 6-12": 6919,
+            "3. 12-24": 13686,
+            "4. 24-36": 1969,
+            "5. 36-48": 760,
+            "6. 48-72": 111,
+            "7. 72-96": 1,
+            "8. 96-120": 5,
+            "9. 120+": 21
+          }
         },
         {
           "name": "Long An",
           "short_name": "Long An",
-          "total": 2382
-        },
-        {
-          "name": "Tây Ninh",
-          "short_name": "Tây Ninh",
-          "total": 1539
+          "total": 29563,
+          "aging": {
+            "1. 0-6": 14379,
+            "2. 6-12": 3961,
+            "3. 12-24": 9583,
+            "4. 24-36": 1149,
+            "5. 36-48": 419,
+            "6. 48-72": 64,
+            "7. 72-96": 2,
+            "8. 96-120": 2,
+            "9. 120+": 4
+          }
         },
         {
           "name": "Tiền Giang",
           "short_name": "Tiền Giang",
-          "total": 1449
-        }
-      ]
-    },
-    {
-      "name": "Phú Quốc",
-      "total": 1775,
-      "children": [
+          "total": 21305,
+          "aging": {
+            "1. 0-6": 10735,
+            "2. 6-12": 2961,
+            "3. 12-24": 6441,
+            "4. 24-36": 844,
+            "5. 36-48": 265,
+            "6. 48-72": 43,
+            "7. 72-96": 2,
+            "8. 96-120": 1,
+            "9. 120+": 13
+          }
+        },
         {
-          "name": "Phú Quốc",
-          "short_name": "Phú Quốc",
-          "total": 1775
+          "name": "Tây Ninh",
+          "short_name": "Tây Ninh",
+          "total": 20370,
+          "aging": {
+            "1. 0-6": 10019,
+            "2. 6-12": 2871,
+            "3. 12-24": 6271,
+            "4. 24-36": 852,
+            "5. 36-48": 296,
+            "6. 48-72": 49,
+            "7. 72-96": 1,
+            "8. 96-120": 0,
+            "9. 120+": 11
+          }
+        },
+        {
+          "name": "Bến Tre",
+          "short_name": "Bến Tre",
+          "total": 15313,
+          "aging": {
+            "1. 0-6": 7727,
+            "2. 6-12": 2278,
+            "3. 12-24": 4525,
+            "4. 24-36": 592,
+            "5. 36-48": 150,
+            "6. 48-72": 35,
+            "7. 72-96": 0,
+            "8. 96-120": 1,
+            "9. 120+": 5
+          }
         }
       ]
     }
   ],
-  "updated": "29/05/2026 03:00:48"
+  "destinations": {
+    "by_region": {
+      "TNB": 194978,
+      "HCM": 185876,
+      "DNB": 122019,
+      "HNO": 104803,
+      "DSH": 102650,
+      "TTB": 84155,
+      "NTB": 79318,
+      "BTB": 72256,
+      "DBB": 55919,
+      "TBB": 46601
+    },
+    "by_province": {
+      "Hồ Chí Minh": 156313,
+      "Hà Nội": 104803,
+      "Bình Dương": 42782,
+      "Đồng Nai": 32705,
+      "Long An": 29563,
+      "Kiên Giang": 27000,
+      "Hải Phòng": 23948,
+      "Tiền Giang": 21305,
+      "Quảng Ninh": 20922,
+      "Tây Ninh": 20370,
+      "An Giang": 20241,
+      "Cà Mau": 19350,
+      "Cần Thơ": 18905,
+      "Đồng Tháp": 17886,
+      "Bắc Ninh": 17566,
+      "Thanh Hóa": 17471,
+      "Nghệ An": 17374,
+      "Hải Dương": 15700,
+      "Bến Tre": 15313,
+      "Thừa Thiên Huế": 15290,
+      "Đà Nẵng": 15163,
+      "Bình Định": 15059,
+      "Bắc Giang": 14886,
+      "Bà Rịa - Vũng Tàu": 14352,
+      "Lâm Đồng": 13663,
+      "Nam Định": 13122,
+      "Sóc Trăng": 13078,
+      "Gia Lai": 13009,
+      "Quảng Nam": 12976,
+      "Hưng Yên": 12886
+    },
+    "by_vung": {
+      "Liên Vùng": 580294,
+      "Nội vùng": 355779,
+      "Nội thành": 112502
+    }
+  },
+  "updated": "04/06/2026 03:22:02"
 }

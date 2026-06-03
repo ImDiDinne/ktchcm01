@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "/Users/duyhuynh/Desktop/AI dashboard"
+cd "$(dirname "$0")"
 
 # Dừng server cũ nếu có
 OLD_PID=$(lsof -ti :8080)

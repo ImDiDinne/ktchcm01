@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "/Users/duyhuynh/Desktop/AI dashboard"
+cd "$(dirname "$0")"
 
 # Xuất dữ liệu mới nhất từ Excel
 python3 export_tonkho.py

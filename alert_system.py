@@ -172,7 +172,7 @@ for route, info in route_groups.items():
             if dep_dt < current_dt:
                 dep_dt += datetime.timedelta(days=1)
             hours_left = (dep_dt - current_dt).total_seconds() / 3600
-        except:
+        except Exception:
             pass
     info['hours_left'] = hours_left
 
@@ -237,7 +237,7 @@ for route_name, info in route_groups.items():
                             v = float(r.iloc[col_idx])
                             if not pd.isna(v):
                                 aging_sum += v
-                        except:
+                        except Exception:
                             pass
     has_aging = aging_sum > 0
     
@@ -292,7 +292,7 @@ inventory_data = []
 def safe_int(val):
     if pd.isna(val): return 0
     try: return int(val)
-    except: return 0
+    except Exception: return 0
 
 for _, row in df_pv.iterrows():
     kho_name = str(row['Loại Kho']).strip()

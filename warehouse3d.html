@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <title>GHN HCM01 — Kho 3D Layout</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -82,7 +87,7 @@
   <button class="btn" id="btnToggleRoof">🏠 Mái</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
 <script>
 // ─── SCENE SETUP ───────────────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
@@ -341,7 +346,11 @@ window.addEventListener('mousemove', e => {
     tooltip.style.left = (e.clientX + 15) + 'px';
     tooltip.style.top = (e.clientY - 30) + 'px';
     tipTitle.textContent = obj.userData.name;
-    tipDesc.innerHTML = obj.userData.desc.replace(/\n/g, '<br>');
+    tipDesc.innerHTML = '';
+    obj.userData.desc.split('\n').forEach(function(line, i) {
+      if (i > 0) tipDesc.appendChild(document.createElement('br'));
+      tipDesc.appendChild(document.createTextNode(line));
+    });
     document.body.style.cursor = 'pointer';
   } else {
     tooltip.style.display = 'none';

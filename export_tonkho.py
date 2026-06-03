@@ -106,7 +106,7 @@ def read_excel():
 
 def inject_into_html(data):
     html     = HTML_FILE.read_text(encoding='utf-8')
-    json_str = json.dumps(data, ensure_ascii=False)
+    json_str = json.dumps(data, ensure_ascii=False).replace('</script>', '<\/script>')
     new_block = (
         f'<!-- TONKHO_DATA_START -->\n'
         f'<script>var TONKHO_DATA={json_str};</script>\n'
@@ -119,7 +119,7 @@ def inject_into_html(data):
 
 def write_aux(data):
     JSON_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
-    js = f"// Auto-generated — {data['updated']}\nvar TONKHO_DATA={json.dumps(data, ensure_ascii=False)};\n"
+    js = f"// Auto-generated — {data['updated']}\nvar TONKHO_DATA={json.dumps(data, ensure_ascii=False).replace('</script>', '<' + '/script>')};\n"
     JS_FILE.write_text(js, encoding='utf-8')
 
 def main():

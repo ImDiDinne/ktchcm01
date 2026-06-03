@@ -1,5 +1,14 @@
 /* GHN OPS Dashboard - Main Application */
 const APP = { fleet: {}, inventory_alerts: [], inventory: [], postoffices: [], hierarchy_inventory: [], charts: {} };
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 // ===== DATA LOADING =====
 async function loadJSON(name) {
@@ -147,9 +156,8 @@ function renderHierarchyInventoryTable() {
             <tr>
                 <th>Nhóm Tuyến / Điểm nhận hàng</th>
                 <th class="text-right">Tổng tồn kho</th>
-                <th class="text-right" style="color:#60a5fa;">Normal</th>
-                <th class="text-right" style="color:#f59e0b;">Bulky</th>
-                <th class="text-right" style="color:#a78bfa;">Freight</th>
+                <th class="text-right" style="color:#60a5fa;">Hàng nhỏ</th>
+                <th class="text-right" style="color:#f59e0b;">Hàng cồng kềnh</th>
                 <th class="text-right">Trạng thái</th>
             </tr>
         </thead>
@@ -157,15 +165,15 @@ function renderHierarchyInventoryTable() {
     `;
 
     data.forEach(group => {
-        const gNorm = group.normal || 0, gBulk = group.bulky || 0, gFreight = group.freight || 0;
+        const gNorm = group.normal || 0;
+        const gCongKenh = (group.bulky || 0) + (group.freight || 0);
         // Parent Row
         html += `
             <tr class="row-parent" style="background: rgba(255,255,255,0.03);">
-                <td style="font-weight: 700; color: var(--accent);"><i class="fas fa-folder-open"></i> ${group.name}</td>
+                <td style="font-weight: 700; color: var(--accent);"><i class="fas fa-folder-open"></i> ${escapeHTML(group.name)}</td>
                 <td class="text-right" style="font-weight: 700; color: #fff;">${fmt(group.total)}</td>
                 <td class="text-right" style="color:#60a5fa; font-weight:600;">${gNorm > 0 ? fmt(gNorm) : '—'}</td>
-                <td class="text-right" style="color:#f59e0b; font-weight:600;">${gBulk > 0 ? fmt(gBulk) : '—'}</td>
-                <td class="text-right" style="color:#a78bfa; font-weight:600;">${gFreight > 0 ? fmt(gFreight) : '—'}</td>
+                <td class="text-right" style="color:#f59e0b; font-weight:600;">${gCongKenh > 0 ? fmt(gCongKenh) : '—'}</td>
                 <td class="text-right"><span class="chart-tag tag-info">Tổng nhóm</span></td>
             </tr>
         `;
@@ -174,14 +182,14 @@ function renderHierarchyInventoryTable() {
         if (group.children && group.children.length > 0) {
             group.children.forEach(child => {
                 const badgeClass = child.total > 1000 ? 'tag-warning' : 'tag-success';
-                const cNorm = child.normal || 0, cBulk = child.bulky || 0, cFreight = child.freight || 0;
+                const cNorm = child.normal || 0;
+                const cCongKenh = (child.bulky || 0) + (child.freight || 0);
                 html += `
                     <tr class="row-child">
-                        <td style="padding-left: 30px; color: #cbd5e1;"><i class="fas fa-caret-right" style="margin-right: 8px; color: #64748b;"></i> ${child.name}</td>
+                        <td style="padding-left: 30px; color: #cbd5e1;"><i class="fas fa-caret-right" style="margin-right: 8px; color: #64748b;"></i> ${escapeHTML(child.name)}</td>
                         <td class="text-right" style="color: #fff;">${fmt(child.total)}</td>
                         <td class="text-right" style="color:#93c5fd;">${cNorm > 0 ? fmt(cNorm) : '—'}</td>
-                        <td class="text-right" style="color:#fcd34d;">${cBulk > 0 ? fmt(cBulk) : '—'}</td>
-                        <td class="text-right" style="color:#c4b5fd;">${cFreight > 0 ? fmt(cFreight) : '—'}</td>
+                        <td class="text-right" style="color:#fcd34d;">${cCongKenh > 0 ? fmt(cCongKenh) : '—'}</td>
                         <td class="text-right"><span class="chart-tag ${badgeClass}">${child.total > 0 ? 'Có tồn' : 'Trống'}</span></td>
                     </tr>
                 `;
@@ -229,7 +237,7 @@ function renderFleetPage(groupFilter, search) {
         let groupHasMatch = false;
         let groupHtml = `<div class="fleet-group-card">
             <div class="fleet-group-header">
-                <div class="fleet-group-title"><i class="fas fa-folder-open" style="color:var(--accent);"></i> Nhóm/COT: <strong>${group.trim() || 'Khác'}</strong></div>
+                <div class="fleet-group-title"><i class="fas fa-folder-open" style="color:var(--accent);"></i> Nhóm/COT: <strong>${escapeHTML(group.trim() || 'Khác')}</strong></div>
                 <div class="fleet-group-count">${stops.length} điểm dừng</div>
             </div>
             <div class="table-wrap"><table class="data-table">
@@ -248,10 +256,10 @@ function renderFleetPage(groupFilter, search) {
             else if ((s.loai_hinh || '').includes('Trung Chuyển')) pillClass = 'status-good';
 
             stopsHtml += `<tr>
-                <td><span class="route-tag">${s.tuyen}</span></td>
+                <td><span class="route-tag">${escapeHTML(s.tuyen)}</span></td>
                 <td style="font-weight:600; color:var(--text-primary);"><i class="fas fa-weight-hanging" style="color:var(--text-muted); margin-right:4px;"></i>${fmt(s.tai_trong)}</td>
-                <td style="font-weight:500;">${s.diem_dung || '-'}</td>
-                <td><span class="status-pill ${pillClass}">${s.loai_hinh || '-'}</span></td>
+                <td style="font-weight:500;">${escapeHTML(s.diem_dung || '-')}</td>
+                <td><span class="status-pill ${pillClass}">${escapeHTML(s.loai_hinh || '-')}</span></td>
                 <td style="color:var(--blue-light); font-weight:600;">${s.gio_den || '-'}</td>
                 <td style="color:var(--accent-light); font-weight:600;">${s.gio_roi || '-'}</td>
             </tr>`;
@@ -288,10 +296,10 @@ function renderPostOfficePage(tinhFilter, search) {
         const bcList = bcs.map(b => {
             // Shorten the name for display
             const shortName = b.buu_cuc.replace('Bưu Cục ', '').replace('Kho Trung Chuyển ', 'KTC ');
-            return `<span class="bc-tag">${shortName}</span>`;
+            return `<span class="bc-tag">${escapeHTML(shortName)}</span>`;
         }).join(' ');
         const countClass = bcs.length > 10 ? 'style="color:var(--green);font-weight:bold"' : '';
-        html += `<tr><td style="font-weight:600">${tinh}</td><td ${countClass}>${bcs.length}</td><td class="bc-list-cell">${bcList}</td></tr>`;
+        html += `<tr><td style="font-weight:600">${escapeHTML(tinh)}</td><td ${countClass}>${bcs.length}</td><td class="bc-list-cell">${bcList}</td></tr>`;
     });
 
     html += `</tbody></table>`;
@@ -331,7 +339,7 @@ function renderInventoryPage(search) {
         const over72Html = over72 > 0 ? `<span style="color:var(--red);font-weight:bold">${fmt(over72)}</span>` : '-';
         
         html += `<tr>
-            <td style="font-weight:500">${r.kho}</td>
+            <td style="font-weight:500">${escapeHTML(r.kho)}</td>
             <td>${r.h_0_6 ? fmt(r.h_0_6) : '-'}</td>
             <td>${r.h_6_12 ? fmt(r.h_6_12) : '-'}</td>
             <td>${r.h_12_24 ? fmt(r.h_12_24) : '-'}</td>
@@ -403,10 +411,10 @@ function renderAlertsPage(levelFilter) {
             html += `<div class="alert-item ${a.level}" style="animation-delay:${i * 0.05}s">
                 <div class="alert-icon"><i class="fas ${icons[a.level]}"></i></div>
                 <div class="alert-body">
-                    <div class="alert-title">${a.title}</div>
-                    <div class="alert-desc">${a.desc}</div>
+                    <div class="alert-title">${escapeHTML(a.title)}</div>
+                    <div class="alert-desc">${escapeHTML(a.desc)}</div>
                     ${progressHtml}
-                    <div class="alert-meta"><span><i class="fas fa-tag"></i> ${a.category}</span>${a.am ? `<span><i class="fas fa-user"></i> ${a.am}</span>` : ''}</div>
+                    <div class="alert-meta"><span><i class="fas fa-tag"></i> ${escapeHTML(a.category)}</span>${a.am ? `<span><i class="fas fa-user"></i> ${escapeHTML(a.am)}</span>` : ''}</div>
                 </div>
             </div>`;
         });
@@ -526,7 +534,7 @@ function populateFilters() {
         const hits = searchIndex.filter(item => item.search.includes(ql)).slice(0, 20);
 
         if (!hits.length) {
-            searchDropdown.innerHTML = `<div class="search-empty"><i class="fas fa-search-minus"></i> Không tìm thấy kết quả cho "<b>${q}</b>"</div>`;
+            searchDropdown.innerHTML = `<div class="search-empty"><i class="fas fa-search-minus"></i> Không tìm thấy kết quả cho "<b>${escapeHTML(q)}</b>"</div>`;
             searchDropdown.style.display = 'block';
             return;
         }
@@ -542,8 +550,8 @@ function populateFilters() {
             items.slice(0, 6).forEach((item, idx) => {
                 const levelDot = item.level === 'critical' ? '🔴' : item.level === 'warning' ? '🟡' : '';
                 html += `<div class="search-result-item" data-idx="${type}_${idx}">
-                    <div class="sri-label">${levelDot} ${item.label}</div>
-                    <div class="sri-sub">${item.sub}</div>
+                    <div class="sri-label">${levelDot} ${escapeHTML(item.label)}</div>
+                    <div class="sri-sub">${escapeHTML(item.sub)}</div>
                 </div>`;
                 // Store item data on element after render
             });

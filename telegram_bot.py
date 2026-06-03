@@ -26,8 +26,12 @@ def load_env(env_path):
 
 env_vars = load_env(os.path.join(base_dir, '.env'))
 
-TELEGRAM_BOT_TOKEN = env_vars.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN') or '8603830788:AAG_jRHHLx6VzwRWr9fA2M9XhSuw2aU-KaE'
-TELEGRAM_CHAT_ID = env_vars.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID') or '-5253055024'
+TELEGRAM_BOT_TOKEN = env_vars.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = env_vars.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+
+if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+    print("⚠️ Thiếu cấu hình Telegram. Vui lòng tạo file .env với TELEGRAM_BOT_TOKEN và TELEGRAM_CHAT_ID.")
+    print("   Xem file .env.example để biết định dạng.")
 
 # File paths
 COT_ALERTS_FILE = os.path.join(base_dir, 'cot_alerts.json')
