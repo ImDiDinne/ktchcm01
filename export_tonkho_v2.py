@@ -184,15 +184,14 @@ def build_pivot(df):
 
     return pivot
 
-def build_hierarchical_data(df, pivot):
-    """Xây dựng dữ liệu phân cấp cho dashboard."""
-    grand_total = len(df)
+def generate_subset_data(df_subset):
+    grand_total = len(df_subset)
     routes = []
 
     for group_name in GROUP_ORDER:
         # Lọc các kho thuộc nhóm này
-        group_mask = df['_loai_kho'] == group_name
-        group_df = df[group_mask]
+        group_mask = df_subset['_loai_kho'] == group_name
+        group_df = df_subset[group_mask]
         group_total = len(group_df)
 
         if group_total == 0:
@@ -212,7 +211,7 @@ def build_hierarchical_data(df, pivot):
 
             children.append({
                 'name': child_name,
-                'short_name': child_name.replace(group_name, '').strip().lstrip('-').strip() or child_name,
+                'short_name': child_name, # Giữ nguyên tên gốc chính xác như yêu cầu
                 'total': child_count,
                 'aging': aging_ordered,
             })
@@ -231,9 +230,9 @@ def build_hierarchical_data(df, pivot):
         })
 
     # Xử lý nhóm "Khác" nếu có
-    other_mask = ~df['_loai_kho'].isin(GROUP_ORDER)
+    other_mask = ~df_subset['_loai_kho'].isin(GROUP_ORDER)
     if other_mask.sum() > 0:
-        other_df = df[other_mask]
+        other_df = df_subset[other_mask]
         other_children = other_df['_kho_den'].value_counts().to_dict()
         routes.append({
             'name': 'Khác',
@@ -244,22 +243,48 @@ def build_hierarchical_data(df, pivot):
         })
 
     # Destinations summary
-    dest_region = df['deliver_region'].value_counts().to_dict()
-    dest_province = df['deliver_province'].value_counts().head(30).to_dict()
-    dest_vung = df['Vùng'].value_counts().to_dict()
+    dest_region = df_subset['deliver_region'].value_counts().to_dict()
+    dest_province = df_subset['deliver_province'].value_counts().head(30).to_dict()
+    dest_vung = df_subset['Vùng'].value_counts().to_dict()
 
-    data = {
-        'title': f'BÁO CÁO TỒN KHO KTC HCM 01 — {grand_total:,} đơn',
+    return {
         'grand_total': grand_total,
         'routes': routes,
         'destinations': {
             'by_region': dest_region,
             'by_province': dest_province,
             'by_vung': dest_vung,
-        },
+        }
+    }
+
+def build_hierarchical_data(df, pivot):
+    """Xây dựng dữ liệu phân cấp cho dashboard theo từng loại hàng và tất cả."""
+    # 1. Toàn bộ
+    data_all = generate_subset_data(df)
+    
+    # 2. Normal (loaihang == 'Normal')
+    df_normal = df[df['loaihang'].fillna('').str.lower() == 'normal']
+    data_normal = generate_subset_data(df_normal)
+    
+    # 3. Bulky (loaihang == 'Bulky')
+    df_bulky = df[df['loaihang'].fillna('').str.lower() == 'bulky']
+    data_bulky = generate_subset_data(df_bulky)
+    
+    # 4. Freight (loaihang == 'Freight')
+    df_freight = df[df['loaihang'].fillna('').str.lower() == 'freight']
+    data_freight = generate_subset_data(df_freight)
+    
+    # Gộp tất cả vào cấu trúc chung
+    full_data = {
+        'all': data_all,
+        'normal': data_normal,
+        'bulky': data_bulky,
+        'freight': data_freight,
+        'title': f'BÁO CÁO TỒN KHO KTC HCM 01',
+        'grand_total': len(df),
         'updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
     }
-    return data
+    return full_data
 
 def export_pivot_xlsx(df, pivot):
     """Xuất file XLSX giống Form Final sheet PV."""
@@ -377,7 +402,9 @@ def write_aux(data):
 
 def print_summary(data):
     """In bảng tổng hợp giống PV."""
-    g = data['grand_total']
+    # Hỗ trợ cấu trúc phân nhóm mới
+    source = data['all'] if 'all' in data else data
+    g = source['grand_total']
     print(f"\n{'='*80}")
     print(f"📊 BÁO CÁO TỒN KHO — {g:,} đơn | {data['updated']}")
     print(f"{'='*80}")
@@ -391,7 +418,7 @@ def print_summary(data):
     print(f"\n{header}")
     print(f"{'─'*len(header)}")
 
-    for route in data['routes']:
+    for route in source['routes']:
         # Parent row
         line = f"📦 {route['name']:<32}"
         aging = route.get('aging', {})
