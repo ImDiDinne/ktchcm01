@@ -536,224 +536,226 @@
       showLoginOverlay();
     }
     
-    // Đăng xuất
-    document.getElementById('logout-btn').addEventListener('click', logout);
-    
-    // Xử lý Login Form
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const uname = document.getElementById('login-username').value.trim();
-      const pass = document.getElementById('login-password').value;
-      const errorEl = document.getElementById('login-error');
-      errorEl.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', () => {
+      // Đăng xuất
+      document.getElementById('logout-btn').addEventListener('click', logout);
       
-      const unameLower = uname.toLowerCase();
-      const userHashes = {
-        'manager': '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5', // manager123
-        'operator': 'ec6e1c25258002eb1c67d15c7f45da7945fa4c58778fd7d88faa5e53e3b4698d' // operator123
-      };
-
-      // 1. Ưu tiên xác thực tài khoản Local trước để tránh bị cấu hình Cloud làm kẹt
-      if (userHashes[unameLower]) {
-        const inputHash = await hashSHA256(pass);
-        if (inputHash === userHashes[unameLower]) {
-          const sessionUser = {
-            username: unameLower,
-            name: unameLower === 'manager' ? 'Hub Manager' : 'Staff / Operator',
-            role: unameLower === 'manager' ? 'manager' : 'operator'
-          };
-          sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
-          setLoggedInUser(sessionUser);
-        } else {
-          errorEl.textContent = '❌ Mật khẩu local không chính xác.';
-          errorEl.style.display = 'block';
-        }
-        return;
-      }
-      
-      // 2. Chạy xác thực Cloud Auth nếu tên đăng nhập không phải account local
-      const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
-      if (supabaseConfig && window.supabase) {
-        try {
-          const client = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
-          const { data, error } = await client.auth.signInWithPassword({
-            email: uname,
-            password: pass
-          });
-          if (error) throw error;
-          const user = data.user;
-          const role = user.user_metadata?.role || 'operator';
-          const name = user.user_metadata?.name || user.email;
-          setLoggedInUser({ username: user.email, name, role });
-          return;
-        } catch (err) {
-          errorEl.textContent = '❌ Lỗi Cloud Auth: ' + err.message;
-          errorEl.style.display = 'block';
-          return;
-        }
-      }
-      
-      errorEl.textContent = '❌ Tên đăng nhập không tồn tại hoặc chưa kết nối Cloud Auth.';
-      errorEl.style.display = 'block';
-    });
-
-    // Toggle hiển thị panel Supabase
-    document.getElementById('toggle-cloud-auth-btn').addEventListener('click', (e) => {
-      e.preventDefault();
-      const panel = document.getElementById('cloud-auth-panel');
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-      if (panel.style.display === 'block') {
-        const config = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || '{"url":"","key":""}');
-        document.getElementById('supabase-url').value = config.url || '';
-        document.getElementById('supabase-key').value = config.key || '';
-      }
-    });
-
-    // Lưu cấu hình Supabase
-    document.getElementById('save-cloud-auth-btn').addEventListener('click', () => {
-      const url = document.getElementById('supabase-url').value.trim();
-      const key = document.getElementById('supabase-key').value.trim();
-      
-      if (url && key) {
-        localStorage.setItem(CLOUD_AUTH_KEY, JSON.stringify({ url, key }));
-        alert('✅ Đã cấu hình Supabase Cloud Auth! Trình duyệt sẽ khởi động lại để kết nối.');
-        location.reload();
-      } else {
-        localStorage.removeItem(CLOUD_AUTH_KEY);
-        alert('🗑️ Đã xóa cấu hình Supabase. Hệ thống quay về dùng tài khoản cục bộ.');
-        location.reload();
-      }
-    });
-
-    // ── Settings Parameter Mapping Panel ──
-    function renderParamsList() {
-      const listBody = document.getElementById('params-list-body');
-      if (!listBody) return;
-      listBody.innerHTML = '';
-      
-      const currentRaw = window.TONKHO_DATA || rawData;
-      const params = currentRaw.mapping_params || [];
-      
-      params.forEach((p, idx) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="tinh_giao" value="${escapeHTML(p['Tỉnh giao'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
-          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="lv2" value="${escapeHTML(p['LV-2'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
-          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="kho_den" value="${escapeHTML(p['Kho Đến'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
-          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="loai_kho" value="${escapeHTML(p['Loại kho'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
-        `;
-        listBody.appendChild(tr);
-      });
-    }
-
-    document.getElementById('open-settings-btn').addEventListener('click', () => {
-      document.getElementById('settings-panel').classList.add('open');
-      renderParamsList();
-      const pat = sessionStorage.getItem('github_pat') || '';
-      document.getElementById('github-pat').value = pat;
-    });
-
-    document.getElementById('settings-close-btn').addEventListener('click', () => {
-      document.getElementById('settings-panel').classList.remove('open');
-    });
-
-    document.getElementById('add-param-row-btn').addEventListener('click', () => {
-      const listBody = document.getElementById('params-list-body');
-      if (!listBody) return;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="tinh_giao" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Tỉnh mới"></td>
-        <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="lv2" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="LV-2"></td>
-        <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="kho_den" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Kho Đến"></td>
-        <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="loai_kho" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Loại kho"></td>
-      `;
-      listBody.appendChild(tr);
-      listBody.parentElement.scrollTop = listBody.parentElement.scrollHeight;
-    });
-
-    document.getElementById('save-params-btn').addEventListener('click', async () => {
-      const pat = document.getElementById('github-pat').value.trim();
-      if (!pat) {
-        alert('⚠️ Vui lòng nhập GitHub Personal Access Token (PAT) để xác thực quyền ghi!');
-        return;
-      }
-      
-      sessionStorage.setItem('github_pat', pat);
-      
-      const rows = document.querySelectorAll('#params-list-body tr');
-      let csvContent = 'Tỉnh giao,Loại hàng,Vùng,LV-1,LV-2,Kho Đến,Loại kho,Phân vùng,Miền\n';
-      
-      rows.forEach(tr => {
-        const tinh_giao_el = tr.querySelector('[data-col="tinh_giao"]');
-        const lv2_el = tr.querySelector('[data-col="lv2"]');
-        const kho_den_el = tr.querySelector('[data-col="kho_den"]');
-        const loai_kho_el = tr.querySelector('[data-col="loai_kho"]');
+      // Xử lý Login Form
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const uname = document.getElementById('login-username').value.trim();
+        const pass = document.getElementById('login-password').value;
+        const errorEl = document.getElementById('login-error');
+        errorEl.style.display = 'none';
         
-        if (tinh_giao_el && lv2_el && kho_den_el && loai_kho_el) {
-          const tg = tinh_giao_el.value.trim();
-          const l2 = lv2_el.value.trim();
-          const kd = kho_den_el.value.trim();
-          const lk = loai_kho_el.value.trim();
-          
-          if (tg) {
-            csvContent += `"${tg}","","Liên vùng","${tg}","${l2}","${kd}","${lk}","${lk}","Trung"\n`;
+        const unameLower = uname.toLowerCase();
+        const userHashes = {
+          'manager': '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5', // manager123
+          'operator': 'ec6e1c25258002eb1c67d15c7f45da7945fa4c58778fd7d88faa5e53e3b4698d' // operator123
+        };
+
+        // 1. Ưu tiên xác thực tài khoản Local trước để tránh bị cấu hình Cloud làm kẹt
+        if (userHashes[unameLower]) {
+          const inputHash = await hashSHA256(pass);
+          if (inputHash === userHashes[unameLower]) {
+            const sessionUser = {
+              username: unameLower,
+              name: unameLower === 'manager' ? 'Hub Manager' : 'Staff / Operator',
+              role: unameLower === 'manager' ? 'manager' : 'operator'
+            };
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+            setLoggedInUser(sessionUser);
+          } else {
+            errorEl.textContent = '❌ Mật khẩu local không chính xác.';
+            errorEl.style.display = 'block';
+          }
+          return;
+        }
+        
+        // 2. Chạy xác thực Cloud Auth nếu tên đăng nhập không phải account local
+        const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
+        if (supabaseConfig && window.supabase) {
+          try {
+            const client = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+            const { data, error } = await client.auth.signInWithPassword({
+              email: uname,
+              password: pass
+            });
+            if (error) throw error;
+            const user = data.user;
+            const role = user.user_metadata?.role || 'operator';
+            const name = user.user_metadata?.name || user.email;
+            setLoggedInUser({ username: user.email, name, role });
+            return;
+          } catch (err) {
+            errorEl.textContent = '❌ Lỗi Cloud Auth: ' + err.message;
+            errorEl.style.display = 'block';
+            return;
           }
         }
+        
+        errorEl.textContent = '❌ Tên đăng nhập không tồn tại hoặc chưa kết nối Cloud Auth.';
+        errorEl.style.display = 'block';
       });
-      
-      const btn = document.getElementById('save-params-btn');
-      btn.textContent = '⏳ Đang lưu lên GitHub...';
-      btn.disabled = true;
-      
-      try {
-        const repo = 'ImDiDinne/ktchcm01';
-        const path = 'mapping_params.csv';
-        const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-        
-        const getResp = await fetch(url);
-        if (!getResp.ok) throw new Error('Không thể tải file hiện tại từ GitHub.');
-        const fileData = await getResp.json();
-        const sha = fileData.sha;
-        
-        const utf8Bytes = new TextEncoder().encode(csvContent);
-        let binary = '';
-        const len = utf8Bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-          binary += String.fromCharCode(utf8Bytes[i]);
+
+      // Toggle hiển thị panel Supabase
+      document.getElementById('toggle-cloud-auth-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const panel = document.getElementById('cloud-auth-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        if (panel.style.display === 'block') {
+          const config = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || '{"url":"","key":""}');
+          document.getElementById('supabase-url').value = config.url || '';
+          document.getElementById('supabase-key').value = config.key || '';
         }
-        const base64Content = btoa(binary);
+      });
+
+      // Lưu cấu hình Supabase
+      document.getElementById('save-cloud-auth-btn').addEventListener('click', () => {
+        const url = document.getElementById('supabase-url').value.trim();
+        const key = document.getElementById('supabase-key').value.trim();
         
-        const putResp = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${pat}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: 'chore(config): update mapping parameters via dashboard Settings UI',
-            content: base64Content,
-            sha: sha,
-            branch: 'main'
-          })
+        if (url && key) {
+          localStorage.setItem(CLOUD_AUTH_KEY, JSON.stringify({ url, key }));
+          alert('✅ Đã cấu hình Supabase Cloud Auth! Trình duyệt sẽ khởi động lại để kết nối.');
+          location.reload();
+        } else {
+          localStorage.removeItem(CLOUD_AUTH_KEY);
+          alert('🗑️ Đã xóa cấu hình Supabase. Hệ thống quay về dùng tài khoản cục bộ.');
+          location.reload();
+        }
+      });
+
+      // ── Settings Parameter Mapping Panel ──
+      function renderParamsList() {
+        const listBody = document.getElementById('params-list-body');
+        if (!listBody) return;
+        listBody.innerHTML = '';
+        
+        const currentRaw = window.TONKHO_DATA || rawData;
+        const params = currentRaw.mapping_params || [];
+        
+        params.forEach((p, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="tinh_giao" value="${escapeHTML(p['Tỉnh giao'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
+            <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="lv2" value="${escapeHTML(p['LV-2'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
+            <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="kho_den" value="${escapeHTML(p['Kho Đến'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
+            <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="loai_kho" value="${escapeHTML(p['Loại kho'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
+          `;
+          listBody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('open-settings-btn').addEventListener('click', () => {
+        document.getElementById('settings-panel').classList.add('open');
+        renderParamsList();
+        const pat = sessionStorage.getItem('github_pat') || '';
+        document.getElementById('github-pat').value = pat;
+      });
+
+      document.getElementById('settings-close-btn').addEventListener('click', () => {
+        document.getElementById('settings-panel').classList.remove('open');
+      });
+
+      document.getElementById('add-param-row-btn').addEventListener('click', () => {
+        const listBody = document.getElementById('params-list-body');
+        if (!listBody) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="tinh_giao" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Tỉnh mới"></td>
+          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="lv2" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="LV-2"></td>
+          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="kho_den" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Kho Đến"></td>
+          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="loai_kho" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Loại kho"></td>
+        `;
+        listBody.appendChild(tr);
+        listBody.parentElement.scrollTop = listBody.parentElement.scrollHeight;
+      });
+
+      document.getElementById('save-params-btn').addEventListener('click', async () => {
+        const pat = document.getElementById('github-pat').value.trim();
+        if (!pat) {
+          alert('⚠️ Vui lòng nhập GitHub Personal Access Token (PAT) để xác thực quyền ghi!');
+          return;
+        }
+        
+        sessionStorage.setItem('github_pat', pat);
+        
+        const rows = document.querySelectorAll('#params-list-body tr');
+        let csvContent = 'Tỉnh giao,Loại hàng,Vùng,LV-1,LV-2,Kho Đến,Loại kho,Phân vùng,Miền\n';
+        
+        rows.forEach(tr => {
+          const tinh_giao_el = tr.querySelector('[data-col="tinh_giao"]');
+          const lv2_el = tr.querySelector('[data-col="lv2"]');
+          const kho_den_el = tr.querySelector('[data-col="kho_den"]');
+          const loai_kho_el = tr.querySelector('[data-col="loai_kho"]');
+          
+          if (tinh_giao_el && lv2_el && kho_den_el && loai_kho_el) {
+            const tg = tinh_giao_el.value.trim();
+            const l2 = lv2_el.value.trim();
+            const kd = kho_den_el.value.trim();
+            const lk = loai_kho_el.value.trim();
+            
+            if (tg) {
+              csvContent += `"${tg}","","Liên vùng","${tg}","${l2}","${kd}","${lk}","${lk}","Trung"\n`;
+            }
+          }
         });
         
-        if (!putResp.ok) {
-          const errData = await putResp.json();
-          throw new Error(errData.message || 'Lỗi đẩy file.');
-        }
+        const btn = document.getElementById('save-params-btn');
+        btn.textContent = '⏳ Đang lưu lên GitHub...';
+        btn.disabled = true;
         
-        alert('✨ Lưu thành công! Tiến trình cập nhật dữ liệu tự động trên GitHub Cloud sẽ kích hoạt sau vài giây để đồng bộ báo cáo.');
-        document.getElementById('settings-panel').classList.remove('open');
-      } catch (err) {
-        alert('❌ Thất bại: ' + err.message);
-      } finally {
-        btn.textContent = '💾 Lưu Tham Số Lên Cloud';
-        btn.disabled = false;
-      }
-    });
+        try {
+          const repo = 'ImDiDinne/ktchcm01';
+          const path = 'mapping_params.csv';
+          const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+          
+          const getResp = await fetch(url);
+          if (!getResp.ok) throw new Error('Không thể tải file hiện tại từ GitHub.');
+          const fileData = await getResp.json();
+          const sha = fileData.sha;
+          
+          const utf8Bytes = new TextEncoder().encode(csvContent);
+          let binary = '';
+          const len = utf8Bytes.byteLength;
+          for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(utf8Bytes[i]);
+          }
+          const base64Content = btoa(binary);
+          
+          const putResp = await fetch(url, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${pat}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: 'chore(config): update mapping parameters via dashboard Settings UI',
+              content: base64Content,
+              sha: sha,
+              branch: 'main'
+            })
+          });
+          
+          if (!putResp.ok) {
+            const errData = await putResp.json();
+            throw new Error(errData.message || 'Lỗi đẩy file.');
+          }
+          
+          alert('✨ Lưu thành công! Tiến trình cập nhật dữ liệu tự động trên GitHub Cloud sẽ kích hoạt sau vài giây để đồng bộ báo cáo.');
+          document.getElementById('settings-panel').classList.remove('open');
+        } catch (err) {
+          alert('❌ Thất bại: ' + err.message);
+        } finally {
+          btn.textContent = '💾 Lưu Tham Số Lên Cloud';
+          btn.disabled = false;
+        }
+      });
 
-    // Khởi chạy kiểm tra đăng nhập
-    checkAuth();
+      // Khởi chạy kiểm tra đăng nhập
+      checkAuth();
+    });
 
     // Khắc phục đề xuất 2: Tự động tải lại script dữ liệu mới mỗi 10 phút (không cần reload trang)
     function autoRefreshData() {
