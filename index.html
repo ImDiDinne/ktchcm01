@@ -146,6 +146,16 @@
 
     const fmt = n => n != null ? n.toLocaleString('vi-VN') : '0';
     const pct = (n, t) => t ? ((n / t) * 100).toFixed(1) + '%' : '0%';
+    const escapeHTML = str => {
+      if (typeof str !== 'string') return str;
+      return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag));
+    };
 
     // ── Update time ──
     document.getElementById('update-time').textContent = 'Cập nhật: ' + rawData.updated;
@@ -196,7 +206,7 @@
           const pr = document.createElement('tr');
           pr.className = 'group-parent';
           pr.dataset.group = ri;
-          let cells = `<td><span class="group-toggle" id="toggle-${ri}">▼</span> ${route.name}</td>`;
+          let cells = `<td><span class="group-toggle" id="toggle-${ri}">▼</span> ${escapeHTML(route.name)}</td>`;
           AGING_KEYS.forEach(k => {
             const v = (route.aging || {})[k] || 0;
             cells += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}">${v ? fmt(v) : '—'}</td>`;
@@ -210,7 +220,7 @@
           route.children.forEach(child => {
             const cr = document.createElement('tr');
             cr.className = 'group-child group-' + ri;
-            let cc = `<td>${child.short_name || child.name}</td>`;
+            let cc = `<td>${escapeHTML(child.short_name || child.name)}</td>`;
             AGING_KEYS.forEach(k => {
               const v = (child.aging || {})[k] || 0;
               cc += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}">${v ? fmt(v) : '—'}</td>`;
@@ -267,7 +277,7 @@
             ${slices.map(s => `
               <div class="legend-item">
                 <span class="legend-color" style="background:${s.color}"></span>
-                <span class="legend-name">${s.name}</span>
+                <span class="legend-name">${escapeHTML(s.name)}</span>
                 <span class="legend-value">${fmt(s.value)}</span>
                 <span class="legend-pct">${s.pct.toFixed(1)}%</span>
               </div>
@@ -324,7 +334,7 @@
           under3hData.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-              <td style="text-align: left; padding: 6px 10px; font-family: 'Inter', sans-serif;">${item.province}</td>
+              <td style="text-align: left; padding: 6px 10px; font-family: 'Inter', sans-serif;">${escapeHTML(item.province)}</td>
               <td style="text-align: right; padding: 6px 10px; font-weight: 600; color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">${fmt(item.count)}</td>
               <td style="text-align: right; padding: 6px 10px; color: var(--text-muted); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">${item.pct.toFixed(1)}%</td>
             `;
@@ -347,14 +357,14 @@
           const childrenSorted = [...route.children].sort((a, b) => b.total - a.total);
           const childrenHtml = childrenSorted.map(c => `
             <div class="dest-row">
-              <span class="name">${c.short_name || c.name}</span>
+              <span class="name">${escapeHTML(c.short_name || c.name)}</span>
               <span class="count">${fmt(c.total)}</span>
               <span class="pct">${pct(c.total, route.total)}</span>
             </div>`).join('');
 
           card.innerHTML = `
             <div class="dest-card-header">
-              <h3>${route.name}</h3>
+              <h3>${escapeHTML(route.name)}</h3>
               <span class="total">${fmt(route.total)}</span>
             </div>
             <div class="dest-list">${childrenHtml}</div>`;
