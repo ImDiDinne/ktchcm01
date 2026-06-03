@@ -820,9 +820,14 @@
         "pct": 45.744793318532615
       },
       {
-        "province": "Đồng Nai",
-        "count": 1265,
-        "pct": 13.373506713183211
+        "province": "Kho Chuyển Tiếp Đồng Nai",
+        "count": 1626,
+        "pct": 17.189977798921664
+      },
+      {
+        "province": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "count": 839,
+        "pct": 8.869859393170525
       },
       {
         "province": "Bình Dương",
@@ -830,22 +835,12 @@
         "pct": 8.510413362934772
       },
       {
-        "province": "Đồng Tháp",
-        "count": 385,
-        "pct": 4.0701976953166294
+        "province": "Kho Trung Chuyển Cần Thơ",
+        "count": 652,
+        "pct": 6.892906226873877
       },
       {
-        "province": "Cần Thơ",
-        "count": 382,
-        "pct": 4.038481869119357
-      },
-      {
-        "province": "Bà Rịa - Vũng Tàu",
-        "count": 361,
-        "pct": 3.81647108573845
-      },
-      {
-        "province": "Đắk Nông",
+        "province": "Kho Chuyển Tiếp Đắk Nông",
         "count": 306,
         "pct": 3.2350142721217887
       },
@@ -855,24 +850,14 @@
         "pct": 3.129294851464214
       },
       {
-        "province": "Cà Mau",
-        "count": 230,
-        "pct": 2.4315466751242205
-      },
-      {
         "province": "Tây Ninh",
         "count": 143,
         "pct": 1.5117877154033197
       },
       {
-        "province": "Kiên Giang",
-        "count": 119,
-        "pct": 1.25806110582514
-      },
-      {
-        "province": "Hà Nội",
-        "count": 112,
-        "pct": 1.1840575113648377
+        "province": "Kho Trung Chuyển Hà Nội 02",
+        "count": 140,
+        "pct": 1.4800718892060472
       },
       {
         "province": "Tiền Giang",
@@ -880,34 +865,9 @@
         "pct": 1.1629136272333227
       },
       {
-        "province": "An Giang",
-        "count": 93,
-        "pct": 0.9831906121154456
-      },
-      {
-        "province": "Bình Phước",
+        "province": "Kho Chuyển Tiếp Bình Phước",
         "count": 81,
         "pct": 0.8563273073263558
-      },
-      {
-        "province": "Bạc Liêu",
-        "count": 77,
-        "pct": 0.814039539063326
-      },
-      {
-        "province": "Trà Vinh",
-        "count": 67,
-        "pct": 0.7083201184057512
-      },
-      {
-        "province": "Vĩnh Long",
-        "count": 58,
-        "pct": 0.6131726398139338
-      },
-      {
-        "province": "Hậu Giang",
-        "count": 50,
-        "pct": 0.528597103287874
       },
       {
         "province": "Bến Tre",
@@ -915,139 +875,34 @@
         "pct": 0.4651654508933291
       },
       {
-        "province": "Sóc Trăng",
-        "count": 30,
-        "pct": 0.3171582619727244
+        "province": "Kho Trung Chuyển Hưng Yên 01",
+        "count": 39,
+        "pct": 0.41230574056454167
       },
       {
-        "province": "Thanh Hóa",
+        "province": "Kho Chuyến Tiếp Thanh Hoá",
         "count": 22,
         "pct": 0.23258272544666456
       },
       {
-        "province": "Lào Cai",
-        "count": 18,
-        "pct": 0.19029495718363465
+        "province": "Kho Trung Chuyển Đà Nẵng",
+        "count": 15,
+        "pct": 0.1585791309863622
       },
       {
-        "province": "Thừa Thiên Huế",
-        "count": 14,
-        "pct": 0.14800718892060472
+        "province": "Kho Trung Chuyến Nghệ An",
+        "count": 8,
+        "pct": 0.08457553652605984
       },
       {
-        "province": "Phú Thọ",
-        "count": 13,
-        "pct": 0.13743524685484723
-      },
-      {
-        "province": "Nghệ An",
-        "count": 7,
-        "pct": 0.07400359446030236
-      },
-      {
-        "province": "Lai Châu",
-        "count": 5,
-        "pct": 0.052859710328787404
-      },
-      {
-        "province": "Quảng Ngãi",
+        "province": "Kho Chuyển Tiếp Quảng Ngãi",
         "count": 4,
         "pct": 0.04228776826302992
       },
       {
-        "province": "Bắc Giang",
-        "count": 4,
-        "pct": 0.04228776826302992
-      },
-      {
-        "province": "Hà Giang",
-        "count": 3,
-        "pct": 0.03171582619727244
-      },
-      {
-        "province": "Vĩnh Phúc",
-        "count": 3,
-        "pct": 0.03171582619727244
-      },
-      {
-        "province": "Nam Định",
-        "count": 3,
-        "pct": 0.03171582619727244
-      },
-      {
-        "province": "Lạng Sơn",
-        "count": 3,
-        "pct": 0.03171582619727244
-      },
-      {
-        "province": "Bắc Kạn",
+        "province": "Kho Trung Chuyển Bình Định",
         "count": 2,
         "pct": 0.02114388413151496
-      },
-      {
-        "province": "Hải Phòng",
-        "count": 2,
-        "pct": 0.02114388413151496
-      },
-      {
-        "province": "Hải Dương",
-        "count": 2,
-        "pct": 0.02114388413151496
-      },
-      {
-        "province": "Bắc Ninh",
-        "count": 2,
-        "pct": 0.02114388413151496
-      },
-      {
-        "province": "Phú Yên",
-        "count": 2,
-        "pct": 0.02114388413151496
-      },
-      {
-        "province": "Ninh Bình",
-        "count": 1,
-        "pct": 0.01057194206575748
-      },
-      {
-        "province": "Cao Bằng",
-        "count": 1,
-        "pct": 0.01057194206575748
-      },
-      {
-        "province": "Hà Tĩnh",
-        "count": 1,
-        "pct": 0.01057194206575748
-      },
-      {
-        "province": "Điện Biên",
-        "count": 1,
-        "pct": 0.01057194206575748
-      },
-      {
-        "province": "Thái Bình",
-        "count": 1,
-        "pct": 0.01057194206575748
-      },
-      {
-        "province": "Đà Nẵng",
-        "count": 1,
-        "pct": 0.01057194206575748
-      },
-      {
-        "province": "Sơn La",
-        "count": 1,
-        "pct": 0.01057194206575748
-      },
-      {
-        "province": "Hà Nam",
-        "count": 1,
-        "pct": 0.01057194206575748
-      },
-      {
-        "province": "Yên Bái",
-        "count": 1,
-        "pct": 0.01057194206575748
       }
     ],
     "total_under_3h": 9459
@@ -1729,9 +1584,9 @@
         "pct": 47.357106727364695
       },
       {
-        "province": "Đồng Nai",
-        "count": 1084,
-        "pct": 13.707637835103693
+        "province": "Kho Chuyển Tiếp Đồng Nai",
+        "count": 1410,
+        "pct": 17.830045523520486
       },
       {
         "province": "Bình Dương",
@@ -1739,19 +1594,19 @@
         "pct": 8.851795649974708
       },
       {
-        "province": "Bà Rịa - Vũng Tàu",
-        "count": 326,
-        "pct": 4.122407688416793
+        "province": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "count": 575,
+        "pct": 7.271117855336367
       },
       {
-        "province": "Đắk Nông",
+        "province": "Kho Trung Chuyển Cần Thơ",
+        "count": 352,
+        "pct": 4.451188669701568
+      },
+      {
+        "province": "Kho Chuyển Tiếp Đắk Nông",
         "count": 300,
         "pct": 3.793626707132018
-      },
-      {
-        "province": "Cần Thơ",
-        "count": 254,
-        "pct": 3.2119372787051086
       },
       {
         "province": "Long An",
@@ -1759,19 +1614,14 @@
         "pct": 3.110773899848255
       },
       {
-        "province": "Cà Mau",
-        "count": 182,
-        "pct": 2.3014668689934243
-      },
-      {
         "province": "Tây Ninh",
         "count": 143,
         "pct": 1.8082953970662619
       },
       {
-        "province": "Đồng Tháp",
-        "count": 132,
-        "pct": 1.669195751138088
+        "province": "Kho Trung Chuyển Hà Nội 02",
+        "count": 138,
+        "pct": 1.7450682852807284
       },
       {
         "province": "Tiền Giang",
@@ -1779,34 +1629,9 @@
         "pct": 1.3909964592817399
       },
       {
-        "province": "Hà Nội",
-        "count": 110,
-        "pct": 1.3909964592817399
-      },
-      {
-        "province": "Kiên Giang",
-        "count": 79,
-        "pct": 0.9989883662114315
-      },
-      {
-        "province": "Bình Phước",
+        "province": "Kho Chuyển Tiếp Bình Phước",
         "count": 78,
         "pct": 0.9863429438543246
-      },
-      {
-        "province": "Bạc Liêu",
-        "count": 68,
-        "pct": 0.8598887202832575
-      },
-      {
-        "province": "An Giang",
-        "count": 67,
-        "pct": 0.8472432979261507
-      },
-      {
-        "province": "Trà Vinh",
-        "count": 64,
-        "pct": 0.8093070308548306
       },
       {
         "province": "Bến Tre",
@@ -1814,149 +1639,34 @@
         "pct": 0.5184623166413758
       },
       {
-        "province": "Hậu Giang",
-        "count": 31,
-        "pct": 0.39200809307030854
+        "province": "Kho Trung Chuyển Hưng Yên 01",
+        "count": 39,
+        "pct": 0.4931714719271623
       },
       {
-        "province": "Vĩnh Long",
-        "count": 29,
-        "pct": 0.3667172483560951
+        "province": "Kho Trung Chuyển Đà Nẵng",
+        "count": 15,
+        "pct": 0.18968133535660092
       },
       {
-        "province": "Sóc Trăng",
-        "count": 21,
-        "pct": 0.26555386949924126
+        "province": "Kho Trung Chuyến Nghệ An",
+        "count": 8,
+        "pct": 0.10116337885685382
       },
       {
-        "province": "Lào Cai",
-        "count": 18,
-        "pct": 0.2276176024279211
-      },
-      {
-        "province": "Thừa Thiên Huế",
-        "count": 14,
-        "pct": 0.1770359129994942
-      },
-      {
-        "province": "Phú Thọ",
-        "count": 13,
-        "pct": 0.16439049064238745
-      },
-      {
-        "province": "Nghệ An",
-        "count": 7,
-        "pct": 0.0885179564997471
-      },
-      {
-        "province": "Lai Châu",
-        "count": 5,
-        "pct": 0.06322711178553364
-      },
-      {
-        "province": "Quảng Ngãi",
+        "province": "Kho Chuyển Tiếp Quảng Ngãi",
         "count": 4,
         "pct": 0.05058168942842691
       },
       {
-        "province": "Bắc Giang",
-        "count": 4,
-        "pct": 0.05058168942842691
-      },
-      {
-        "province": "Lạng Sơn",
-        "count": 3,
-        "pct": 0.03793626707132018
-      },
-      {
-        "province": "Vĩnh Phúc",
-        "count": 3,
-        "pct": 0.03793626707132018
-      },
-      {
-        "province": "Nam Định",
-        "count": 3,
-        "pct": 0.03793626707132018
-      },
-      {
-        "province": "Hà Giang",
-        "count": 3,
-        "pct": 0.03793626707132018
-      },
-      {
-        "province": "Hải Phòng",
+        "province": "Kho Trung Chuyển Bình Định",
         "count": 2,
         "pct": 0.025290844714213456
       },
       {
-        "province": "Thanh Hóa",
+        "province": "Kho Chuyến Tiếp Thanh Hoá",
         "count": 2,
         "pct": 0.025290844714213456
-      },
-      {
-        "province": "Bắc Ninh",
-        "count": 2,
-        "pct": 0.025290844714213456
-      },
-      {
-        "province": "Bắc Kạn",
-        "count": 2,
-        "pct": 0.025290844714213456
-      },
-      {
-        "province": "Hải Dương",
-        "count": 2,
-        "pct": 0.025290844714213456
-      },
-      {
-        "province": "Phú Yên",
-        "count": 2,
-        "pct": 0.025290844714213456
-      },
-      {
-        "province": "Hà Nam",
-        "count": 1,
-        "pct": 0.012645422357106728
-      },
-      {
-        "province": "Hà Tĩnh",
-        "count": 1,
-        "pct": 0.012645422357106728
-      },
-      {
-        "province": "Yên Bái",
-        "count": 1,
-        "pct": 0.012645422357106728
-      },
-      {
-        "province": "Thái Bình",
-        "count": 1,
-        "pct": 0.012645422357106728
-      },
-      {
-        "province": "Điện Biên",
-        "count": 1,
-        "pct": 0.012645422357106728
-      },
-      {
-        "province": "Ninh Bình",
-        "count": 1,
-        "pct": 0.012645422357106728
-      },
-      {
-        "province": "Sơn La",
-        "count": 1,
-        "pct": 0.012645422357106728
-      },
-      {
-        "province": "Đà Nẵng",
-        "count": 1,
-        "pct": 0.012645422357106728
-      },
-      {
-        "province": "Cao Bằng",
-        "count": 1,
-        "pct": 0.012645422357106728
       }
     ],
     "total_under_3h": 7908
@@ -2718,19 +2428,19 @@
         "pct": 28.42920353982301
       },
       {
-        "province": "Đồng Tháp",
-        "count": 212,
-        "pct": 23.451327433628318
+        "province": "Kho Trung Chuyển Cần Thơ",
+        "count": 238,
+        "pct": 26.327433628318587
       },
       {
-        "province": "Đồng Nai",
-        "count": 142,
-        "pct": 15.70796460176991
+        "province": "Kho Chuyển Tiếp Đồng Nai",
+        "count": 163,
+        "pct": 18.030973451327434
       },
       {
-        "province": "Cần Thơ",
-        "count": 64,
-        "pct": 7.079646017699115
+        "province": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "count": 150,
+        "pct": 16.5929203539823
       },
       {
         "province": "Bình Dương",
@@ -2738,49 +2448,19 @@
         "pct": 5.3097345132743365
       },
       {
-        "province": "Cà Mau",
-        "count": 32,
-        "pct": 3.5398230088495577
-      },
-      {
         "province": "Long An",
         "count": 31,
         "pct": 3.4292035398230087
       },
       {
-        "province": "Kiên Giang",
-        "count": 26,
-        "pct": 2.8761061946902653
-      },
-      {
-        "province": "Bà Rịa - Vũng Tàu",
-        "count": 21,
-        "pct": 2.3230088495575223
-      },
-      {
-        "province": "An Giang",
-        "count": 17,
-        "pct": 1.8805309734513276
-      },
-      {
-        "province": "Hậu Giang",
-        "count": 15,
-        "pct": 1.6592920353982303
-      },
-      {
-        "province": "Vĩnh Long",
-        "count": 13,
-        "pct": 1.4380530973451326
-      },
-      {
-        "province": "Thanh Hóa",
+        "province": "Kho Chuyến Tiếp Thanh Hoá",
         "count": 11,
         "pct": 1.2168141592920354
       },
       {
-        "province": "Bạc Liêu",
-        "count": 6,
-        "pct": 0.6637168141592921
+        "province": "Kho Trung Chuyển Hà Nội 02",
+        "count": 2,
+        "pct": 0.22123893805309736
       },
       {
         "province": "Bến Tre",
@@ -2788,27 +2468,12 @@
         "pct": 0.22123893805309736
       },
       {
-        "province": "Hà Nội",
-        "count": 2,
-        "pct": 0.22123893805309736
-      },
-      {
-        "province": "Trà Vinh",
-        "count": 2,
-        "pct": 0.22123893805309736
-      },
-      {
-        "province": "Sóc Trăng",
+        "province": "Kho Chuyển Tiếp Đắk Nông",
         "count": 1,
         "pct": 0.11061946902654868
       },
       {
-        "province": "Đắk Nông",
-        "count": 1,
-        "pct": 0.11061946902654868
-      },
-      {
-        "province": "Bình Phước",
+        "province": "Kho Chuyển Tiếp Bình Phước",
         "count": 1,
         "pct": 0.11061946902654868
       }
@@ -3620,9 +3285,14 @@
         "pct": 50.23183925811438
       },
       {
-        "province": "Cần Thơ",
-        "count": 64,
-        "pct": 9.891808346213292
+        "province": "Kho Trung Chuyển Hồ Chí Minh 20",
+        "count": 114,
+        "pct": 17.619783616692427
+      },
+      {
+        "province": "Kho Trung Chuyển Cần Thơ",
+        "count": 62,
+        "pct": 9.582689335394127
       },
       {
         "province": "Bình Dương",
@@ -3630,14 +3300,9 @@
         "pct": 8.809891808346213
       },
       {
-        "province": "Đồng Tháp",
-        "count": 41,
-        "pct": 6.3369397217928904
-      },
-      {
-        "province": "Đồng Nai",
-        "count": 39,
-        "pct": 6.0278207109737245
+        "province": "Kho Chuyển Tiếp Đồng Nai",
+        "count": 53,
+        "pct": 8.191653786707882
       },
       {
         "province": "Long An",
@@ -3645,67 +3310,22 @@
         "pct": 2.936630602782071
       },
       {
-        "province": "Cà Mau",
-        "count": 16,
-        "pct": 2.472952086553323
-      },
-      {
-        "province": "Vĩnh Long",
-        "count": 16,
-        "pct": 2.472952086553323
-      },
-      {
-        "province": "Kiên Giang",
-        "count": 14,
-        "pct": 2.1638330757341575
-      },
-      {
-        "province": "Bà Rịa - Vũng Tàu",
-        "count": 14,
-        "pct": 2.1638330757341575
-      },
-      {
-        "province": "Thanh Hóa",
+        "province": "Kho Chuyến Tiếp Thanh Hoá",
         "count": 9,
         "pct": 1.3910355486862442
       },
       {
-        "province": "An Giang",
-        "count": 9,
-        "pct": 1.3910355486862442
-      },
-      {
-        "province": "Sóc Trăng",
-        "count": 8,
-        "pct": 1.2364760432766615
-      },
-      {
-        "province": "Đắk Nông",
+        "province": "Kho Chuyển Tiếp Đắk Nông",
         "count": 5,
         "pct": 0.7727975270479135
       },
       {
-        "province": "Hậu Giang",
-        "count": 4,
-        "pct": 0.6182380216383307
-      },
-      {
-        "province": "Bạc Liêu",
-        "count": 3,
-        "pct": 0.46367851622874806
-      },
-      {
-        "province": "Bình Phước",
+        "province": "Kho Chuyển Tiếp Bình Phước",
         "count": 2,
         "pct": 0.3091190108191654
       },
       {
         "province": "Bến Tre",
-        "count": 1,
-        "pct": 0.1545595054095827
-      },
-      {
-        "province": "Trà Vinh",
         "count": 1,
         "pct": 0.1545595054095827
       }
@@ -3714,5 +3334,5 @@
   },
   "title": "BÁO CÁO TỒN KHO KTC HCM 01",
   "grand_total": 60987,
-  "updated": "04/06/2026 05:21:55"
+  "updated": "04/06/2026 05:30:52"
 }

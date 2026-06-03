@@ -314,7 +314,7 @@ def build_pivot(df):
 
     return pivot
 
-def generate_subset_data(df_subset):
+def generate_subset_data(df_subset, map_tinh_to_lv2=None, map_lv2_to_khoden=None):
     grand_total = len(df_subset)
     routes = []
 
@@ -398,9 +398,27 @@ def generate_subset_data(df_subset):
     dest_province = df_subset['deliver_province'].value_counts().head(30).to_dict()
     dest_vung = df_subset['Vùng'].value_counts().to_dict()
 
-    # Phân tích hàng mốc dưới 3 giờ nhập từ đâu về (Tỉnh lấy)
-    df_under3 = df_subset[df_subset['diff_hours'] < 3]
-    under3_counts = df_under3['pick_province'].value_counts()
+    # Phân tích hàng mốc dưới 3 giờ nhập từ đâu về (Tỉnh lấy được map theo tham số)
+    df_under3 = df_subset[df_subset['diff_hours'] < 3].copy()
+    
+    mapped_origins = []
+    for prov in df_under3['pick_province']:
+        prov_str = str(prov).strip()
+        prov_lower = prov_str.lower()
+        
+        # Mapping logic:
+        # Step 1: Look up pick_province in Tỉnh giao to get LV-2
+        lv2 = map_tinh_to_lv2.get(prov_lower, '') if map_tinh_to_lv2 else ''
+        
+        # Step 2: Translate LV-2 to Kho Đến
+        kho_den = map_lv2_to_khoden.get(lv2.lower(), '') if lv2 and map_lv2_to_khoden else ''
+        
+        # Fallback to raw pick_province if empty or not found
+        final_origin = kho_den if kho_den else prov_str
+        mapped_origins.append(final_origin)
+        
+    df_under3['_mapped_origin'] = mapped_origins
+    under3_counts = df_under3['_mapped_origin'].value_counts()
     total_under3 = len(df_under3)
     
     under_3h_origins = []
@@ -423,22 +441,35 @@ def generate_subset_data(df_subset):
         'total_under_3h': total_under3
     }
 
-def build_hierarchical_data(df, pivot):
+def build_hierarchical_data(df, pivot, params=None):
     """Xây dựng dữ liệu phân cấp cho dashboard theo từng loại hàng và tất cả."""
+    map_tinh_to_lv2 = {}
+    map_lv2_to_khoden = {}
+    
+    if params is not None:
+        for _, r in params.iterrows():
+            k = str(r['Tỉnh giao']).lower().strip()
+            if k not in map_tinh_to_lv2:
+                map_tinh_to_lv2[k] = str(r['LV-2']).strip()
+        for _, r in params.iterrows():
+            k = str(r['LV-2']).lower().strip()
+            if k not in map_lv2_to_khoden:
+                map_lv2_to_khoden[k] = str(r['Kho Đến']).strip()
+
     # 1. Toàn bộ
-    data_all = generate_subset_data(df)
+    data_all = generate_subset_data(df, map_tinh_to_lv2, map_lv2_to_khoden)
     
     # 2. Normal (loaihang == 'Normal')
     df_normal = df[df['loaihang'].fillna('').str.lower() == 'normal']
-    data_normal = generate_subset_data(df_normal)
+    data_normal = generate_subset_data(df_normal, map_tinh_to_lv2, map_lv2_to_khoden)
     
     # 3. Bulky (loaihang == 'Bulky')
     df_bulky = df[df['loaihang'].fillna('').str.lower() == 'bulky']
-    data_bulky = generate_subset_data(df_bulky)
+    data_bulky = generate_subset_data(df_bulky, map_tinh_to_lv2, map_lv2_to_khoden)
     
     # 4. Freight (loaihang == 'Freight')
     df_freight = df[df['loaihang'].fillna('').str.lower() == 'freight']
-    data_freight = generate_subset_data(df_freight)
+    data_freight = generate_subset_data(df_freight, map_tinh_to_lv2, map_lv2_to_khoden)
     
     # Gộp tất cả vào cấu trúc chung
     full_data = {
@@ -644,7 +675,7 @@ def main():
         pivot = build_pivot(df)
 
         # Xuất các file
-        data = build_hierarchical_data(df, pivot)
+        data = build_hierarchical_data(df, pivot, params)
         inject_into_html(data)
         write_aux(data)
         export_pivot_xlsx(df, pivot)
