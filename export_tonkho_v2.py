@@ -675,6 +675,10 @@ def main():
         df = pd.read_excel(EXCEL_FILE)
         print(f"   {len(df):,} đơn hàng (toàn bộ)")
 
+        # 🛡️ KIỂM TRA CHẤT LƯỢNG DỮ LIỆU ĐẦU VÀO (Data Sanitization Check)
+        if len(df) < 1000:
+            raise ValueError(f"Dữ liệu thô quá ít ({len(df)} dòng). Có khả năng file excel tải từ Metabase bị lỗi hoặc rỗng. Huỷ bỏ ghi đè để bảo vệ số liệu cũ.")
+
         # ── Lọc chỉ KTC HCM 01 ──
         KHO_FILTER = 'Kho Trung Chuyển Hồ Chí Minh 01'
         df = df[df['current_warehouse_name'] == KHO_FILTER].copy()

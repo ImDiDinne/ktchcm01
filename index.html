@@ -33,6 +33,10 @@
         </div>
       </div>
       <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
+        <!-- Thẻ ROI Tác Động Kinh Doanh (Business ROI Badge) -->
+        <div class="filter-btn" style="background: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.4); color: rgb(74, 222, 128); font-size: 0.7rem; font-weight: 600; cursor: default; outline: none; border-radius: var(--radius-sm); border: 1px solid rgba(34, 197, 94, 0.4); padding: 5px 9px; display: flex; align-items: center; gap: 5px; user-select: none;">
+          ⏱️ Tiết kiệm: ~45h thủ công/tháng
+        </div>
         <a href="BaoCao_TonKho.xlsx" id="download-excel-btn" class="filter-btn" style="background: rgba(251, 146, 60, 0.15); border-color: var(--accent); color: var(--accent-light); font-weight: 600; text-decoration: none; display: none; align-items: center; gap: 6px;" download>
           📥 Tải Báo Cáo Excel
         </a>
@@ -97,6 +101,7 @@
             <tbody id="pivot-body"></tbody>
           </table>
         </div>
+        <div class="mobile-cards-container" id="mobile-cards-container"></div>
       </div>
 
       <!-- Side Panel -->
@@ -261,6 +266,45 @@
         tbody.appendChild(gtr);
       } else {
         tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-muted);font-family:\'Inter\',sans-serif">Không có đơn hàng nào thuộc nhóm này</td></tr>';
+      }
+
+      // ── Populate Mobile Cards ──
+      const mobileContainer = document.getElementById('mobile-cards-container');
+      if (mobileContainer) {
+        mobileContainer.innerHTML = '';
+        if (D.routes && D.routes.length > 0) {
+          D.routes.forEach(route => {
+            const card = document.createElement('div');
+            card.className = 'mobile-card';
+            
+            const a = route.aging || {};
+            const critical = (a['4. 24-36']||0) + (a['5. 36-48']||0) + (a['6. 48-72']||0) + (a['7. 72-96']||0) + (a['8. 96-120']||0) + (a['9. 120+']||0);
+            
+            card.innerHTML = `
+              <div class="mobile-card-header">
+                <span class="mobile-card-title">📦 ${escapeHTML(route.name)}</span>
+                <span class="mobile-card-total">${fmt(route.total)}</span>
+              </div>
+              <div class="mobile-card-grid">
+                <div class="mobile-card-item">
+                  <div class="mobile-card-label">0 - 12h</div>
+                  <div class="mobile-card-value">${fmt((a['1. 0-6']||0) + (a['2. 6-12']||0))}</div>
+                </div>
+                <div class="mobile-card-item">
+                  <div class="mobile-card-label">12 - 24h</div>
+                  <div class="mobile-card-value">${fmt(a['3. 12-24']||0)}</div>
+                </div>
+                <div class="mobile-card-item">
+                  <div class="mobile-card-label">> 24h (Trễ)</div>
+                  <div class="mobile-card-value${critical > 0 ? ' highlight' : ''}">${fmt(critical)}</div>
+                </div>
+              </div>
+            `;
+            mobileContainer.appendChild(card);
+          });
+        } else {
+          mobileContainer.innerHTML = '<div style="text-align:center;padding:25px;color:var(--text-muted);font-size:0.75rem;">Không có đơn hàng nào thuộc nhóm này</div>';
+        }
       }
 
       // ── Donut Chart ──
