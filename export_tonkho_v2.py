@@ -36,11 +36,28 @@ GROUP_ORDER = [
 
 def load_params():
     """Đọc bảng tham số mapping tỉnh → kho → loại kho."""
+    csv_file = BASE / 'mapping_params.csv'
+    if csv_file.exists():
+        try:
+            params = pd.read_csv(csv_file)
+            print(f"📋 Đọc tham số từ CSV: {len(params)} dòng mapping")
+            return params
+        except Exception as e:
+            print(f"⚠️ Lỗi đọc file CSV: {e}. Thử đọc Excel...")
+            
     if not PARAMS_FILE.exists():
-        print(f"⚠️ Không tìm thấy {PARAMS_FILE.name}, dùng mapping tự động.")
+        print(f"⚠️ Không tìm thấy {PARAMS_FILE.name} hoặc {csv_file.name}, dùng mapping tự động.")
         return None
     params = pd.read_excel(PARAMS_FILE, sheet_name='Tham Số 1')
-    print(f"📋 Đọc tham số: {len(params)} dòng mapping")
+    print(f"📋 Đọc tham số từ Excel: {len(params)} dòng mapping")
+    
+    # Tự động đồng bộ ra CSV cục bộ để sẵn sàng commit lên Git
+    try:
+        params.to_csv(csv_file, index=False, encoding='utf-8')
+        print(f"✨ Đã tự động đồng bộ tham số ra {csv_file.name}")
+    except Exception as e:
+        print(f"⚠️ Không thể lưu tham số ra CSV: {e}")
+        
     return params
 
 def guess_params_for_missing_key(key):
