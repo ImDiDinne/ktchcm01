@@ -44,22 +44,79 @@ def load_params():
     return params
 
 def classify_by_params(df, params):
-    """Phân loại đơn theo bảng tham số (Tỉnh giao → Loại kho / Kho đến)."""
-    # Tạo mapping: Tỉnh giao → {Loại kho, Kho Đến, Phân vùng}
-    mapping = {}
-    for _, row in params.iterrows():
-        tinh = str(row['Tỉnh giao']).strip()
-        if tinh and tinh != 'nan':
-            mapping[tinh] = {
-                'loai_kho': str(row['Loại kho']).strip() if pd.notna(row['Loại kho']) else 'Khác',
-                'kho_den': str(row['Kho Đến']).strip() if pd.notna(row['Kho Đến']) else tinh,
-                'phan_vung': str(row['Phân vùng']).strip() if pd.notna(row['Phân vùng']) else '',
-            }
+    """Phân loại đơn theo bảng tham số (Kho tiếp & Tỉnh giao → LV-2 → Kho Đến → Loại kho)."""
+    # Xây dựng các mapping case-insensitive (không strip() để khớp chính xác như Excel VLOOKUP)
+    map_tinh_to_lv2 = {}
+    map_tinh_to_phanvung = {}
+    for _, r in params.iterrows():
+        k = str(r['Tỉnh giao']).lower()
+        if k not in map_tinh_to_lv2:
+            map_tinh_to_lv2[k] = r['LV-2']
+        if k not in map_tinh_to_phanvung:
+            map_tinh_to_phanvung[k] = r['Phân vùng']
 
-    # Áp dụng mapping
-    df['_loai_kho'] = df['deliver_province'].map(lambda x: mapping.get(str(x).strip(), {}).get('loai_kho', 'Khác'))
-    df['_kho_den'] = df['deliver_province'].map(lambda x: mapping.get(str(x).strip(), {}).get('kho_den', str(x)))
-    df['_phan_vung'] = df['deliver_province'].map(lambda x: mapping.get(str(x).strip(), {}).get('phan_vung', ''))
+    map_lv2_to_khoden = {}
+    for _, r in params.iterrows():
+        k = str(r['LV-2']).lower()
+        if k not in map_lv2_to_khoden:
+            map_lv2_to_khoden[k] = r['Kho Đến']
+
+    map_khoden_to_loaikho = {}
+    for _, r in params.iterrows():
+        k = str(r['Kho Đến']).lower()
+        if k not in map_khoden_to_loaikho:
+            map_khoden_to_loaikho[k] = r['Loại kho']
+
+    # Danh sách kết quả
+    loai_kho_list = []
+    kho_den_list = []
+    phan_vung_list = []
+
+    for _, r in df.iterrows():
+        kho_tiep = str(r['next_warehouse_name']).lower() if pd.notna(r['next_warehouse_name']) else ''
+        tinh_giao = str(r['deliver_province']).lower() if pd.notna(r['deliver_province']) else ''
+        loai_hang = str(r['loaihang']).strip() if pd.notna(r['loaihang']) else ''
+
+        # 1. Điều kiện 1 (S): lookup next_warehouse_name trong Tỉnh giao
+        s_val = map_tinh_to_lv2.get(kho_tiep, '')
+        if pd.isna(s_val): s_val = ''
+
+        # 2. Điều kiện 2 (T)
+        if s_val != '':
+            t_val = s_val
+        else:
+            t_val = map_tinh_to_lv2.get(tinh_giao, '')
+            if pd.isna(t_val): t_val = ''
+
+        t_val_str = str(t_val)
+        t_val_lower = t_val_str.lower()
+
+        # 3. KHO ĐẾN (U)
+        if t_val_lower == 'kho trung chuyển hà nội 02' and loai_hang == 'Freight':
+            my_kho_den = 'Kho Trung Chuyển Dương Xá'
+        else:
+            my_kho_den = map_lv2_to_khoden.get(t_val_lower, '')
+            if pd.isna(my_kho_den): my_kho_den = ''
+
+        my_kho_den_str = str(my_kho_den)
+        my_kho_den_lower = my_kho_den_str.lower()
+
+        # 4. LOẠI KHO (V)
+        my_loai_kho = map_khoden_to_loaikho.get(my_kho_den_lower, '')
+        if pd.isna(my_loai_kho): my_loai_kho = ''
+        my_loai_kho_str = str(my_loai_kho)
+
+        # 5. Phân vùng (dựa vào tinh_giao để lấy Phân vùng trong mapping)
+        my_phan_vung = map_tinh_to_phanvung.get(tinh_giao, '')
+        if pd.isna(my_phan_vung): my_phan_vung = ''
+
+        loai_kho_list.append(my_loai_kho_str)
+        kho_den_list.append(my_kho_den_str)
+        phan_vung_list.append(my_phan_vung)
+
+    df['_loai_kho'] = loai_kho_list
+    df['_kho_den'] = kho_den_list
+    df['_phan_vung'] = phan_vung_list
 
     return df
 
@@ -372,7 +429,7 @@ def main():
 
         # ── Lọc chỉ KTC HCM 01 ──
         KHO_FILTER = 'Kho Trung Chuyển Hồ Chí Minh 01'
-        df = df[df['name_kho'] == KHO_FILTER].copy()
+        df = df[df['current_warehouse_name'] == KHO_FILTER].copy()
         print(f"   {len(df):,} đơn hàng (lọc: {KHO_FILTER})")
 
         if len(df) == 0:
