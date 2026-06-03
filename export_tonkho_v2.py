@@ -368,7 +368,16 @@ def main():
         # Đọc dữ liệu thô
         print(f"📂 Đọc file: {EXCEL_FILE.name}")
         df = pd.read_excel(EXCEL_FILE)
-        print(f"   {len(df):,} đơn hàng")
+        print(f"   {len(df):,} đơn hàng (toàn bộ)")
+
+        # ── Lọc chỉ KTC HCM 01 ──
+        KHO_FILTER = 'Kho Trung Chuyển Hồ Chí Minh 01'
+        df = df[df['name_kho'] == KHO_FILTER].copy()
+        print(f"   {len(df):,} đơn hàng (lọc: {KHO_FILTER})")
+
+        if len(df) == 0:
+            print(f"❌ Không có dữ liệu cho kho '{KHO_FILTER}'")
+            sys.exit(1)
 
         # Đọc tham số mapping
         params = load_params()
