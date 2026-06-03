@@ -221,8 +221,9 @@
 
         let svgPaths = '';
         slices.forEach(s => {
-          const angle = (s.value / total) * 360;
-          svgPaths += describeArc(70, 70, 52, angleStart, angleStart + angle - 0.5, s.color);
+          let angle = (s.value / total) * 360;
+          if (angle >= 360) angle = 359.99; // Tránh lỗi góc 360 độ khiến SVG biến mất
+          svgPaths += describeArc(70, 70, 52, angleStart, angleStart + angle - (angle >= 359.99 ? 0 : 0.5), s.color);
           angleStart += angle;
         });
 
@@ -260,7 +261,7 @@
           const item = document.createElement('div');
           item.className = 'bar-item';
           item.innerHTML = `
-            <span class="bar-label">${AGING_KEYS[i].replace(/^\d+\.\s*/, '')}</span>
+            <span class="bar-label">${AGING_KEYS[i].replace(/^\d+\.\s*/, '')}h</span>
             <div class="bar-track">
               <div class="bar-fill ${barClass}" style="width:0%"></div>
             </div>

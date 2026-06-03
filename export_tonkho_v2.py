@@ -364,12 +364,33 @@ def generate_subset_data(df_subset):
     if other_mask.sum() > 0:
         other_df = df_subset[other_mask]
         other_children = other_df['_kho_den'].value_counts().to_dict()
+        
+        # Tính aging cho từng child của Khác
+        children = []
+        for child_name, child_count in sorted(other_children.items(), key=lambda x: -x[1]):
+            child_df = other_df[other_df['_kho_den'] == child_name]
+            aging = child_df['diff_hours_bucket'].value_counts().to_dict()
+            aging_ordered = OrderedDict()
+            for bucket in AGING_ORDER:
+                aging_ordered[bucket] = aging.get(bucket, 0)
+            children.append({
+                'name': child_name,
+                'short_name': child_name,
+                'total': child_count,
+                'aging': aging_ordered,
+            })
+            
+        # Tính aging tổng cho nhóm Khác
+        group_aging = other_df['diff_hours_bucket'].value_counts().to_dict()
+        aging_ordered = OrderedDict()
+        for bucket in AGING_ORDER:
+            aging_ordered[bucket] = group_aging.get(bucket, 0)
+            
         routes.append({
             'name': 'Khác',
             'total': len(other_df),
-            'aging': {},
-            'children': [{'name': k, 'short_name': k, 'total': v, 'aging': {}} 
-                         for k, v in sorted(other_children.items(), key=lambda x: -x[1])]
+            'aging': aging_ordered,
+            'children': children
         })
 
     # Destinations summary
