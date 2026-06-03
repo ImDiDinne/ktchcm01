@@ -28,10 +28,23 @@
           <div class="subtitle">Kho Trung Chuyển Hồ Chí Minh 01 — Tổng Quan Hàng Hoá</div>
         </div>
       </div>
-      <div class="header-right">
+      <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
+        <a href="BaoCao_TonKho.xlsx" id="download-excel-btn" class="filter-btn" style="background: rgba(251, 146, 60, 0.15); border-color: var(--accent); color: var(--accent-light); font-weight: 600; text-decoration: none; display: none; align-items: center; gap: 6px;" download>
+          📥 Tải Báo Cáo Excel
+        </a>
+        <button id="open-settings-btn" class="filter-btn" style="display: none; align-items: center; gap: 6px; cursor: pointer; outline: none;">
+          ⚙️ Cấu Hình Mappings
+        </button>
         <div class="update-badge" id="update-badge">
           <span class="dot"></span>
           <span id="update-time">—</span>
+        </div>
+        <div class="user-profile" id="user-profile" style="display: none;">
+          <div class="user-info">
+            <span class="user-name-label" id="user-name">—</span>
+            <span class="user-role-label" id="user-role">—</span>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Đăng xuất" style="cursor: pointer; outline: none; padding-left: 8px;">❌</button>
         </div>
       </div>
     </header>
@@ -430,8 +443,308 @@
       }
     }
 
-    // Render ban đầu
-    renderDashboard(savedFilter);
+    // ── Auth & Session Management ──
+    const SESSION_KEY = 'ktc_auth_session';
+    const CLOUD_AUTH_KEY = 'ktc_supabase_config';
+    
+    async function hashSHA256(str) {
+      const msgBuffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    
+    async function checkAuth() {
+      // 1. Kiểm tra cấu hình Supabase Cloud Auth
+      const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
+      if (supabaseConfig && window.supabase) {
+        try {
+          const client = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+          const { data: { session } } = await client.auth.getSession();
+          if (session) {
+            const user = session.user;
+            const role = user.user_metadata?.role || 'operator';
+            const name = user.user_metadata?.name || user.email;
+            setLoggedInUser({ username: user.email, name, role });
+            return;
+          }
+        } catch (e) {
+          console.error("Supabase Auth error:", e);
+        }
+      }
+      
+      // 2. Fallback sang Local Auth Session
+      const localSession = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (localSession) {
+        setLoggedInUser(localSession);
+      } else {
+        showLoginOverlay();
+      }
+    }
+    
+    function setLoggedInUser(user) {
+      document.getElementById('login-overlay').style.display = 'none';
+      const profileEl = document.getElementById('user-profile');
+      if (profileEl) {
+        profileEl.style.display = 'flex';
+        document.getElementById('user-name').textContent = user.name;
+        document.getElementById('user-role').textContent = user.role === 'manager' ? 'Hub Manager' : 'Nhân Viên';
+      }
+      
+      applyRBAC(user.role);
+      
+      const currentFilter = localStorage.getItem('ktc_filter_type') || 'all';
+      renderDashboard(currentFilter);
+    }
+    
+    function applyRBAC(role) {
+      const downloadBtn = document.getElementById('download-excel-btn');
+      const settingsBtn = document.getElementById('open-settings-btn');
+      
+      if (role === 'manager') {
+        if (downloadBtn) downloadBtn.style.display = 'flex';
+        if (settingsBtn) settingsBtn.style.display = 'flex';
+      } else {
+        if (downloadBtn) downloadBtn.style.display = 'none';
+        if (settingsBtn) settingsBtn.style.display = 'none';
+      }
+    }
+    
+    function showLoginOverlay() {
+      document.getElementById('login-overlay').style.display = 'flex';
+      document.getElementById('user-profile').style.display = 'none';
+      if (document.getElementById('download-excel-btn')) document.getElementById('download-excel-btn').style.display = 'none';
+      if (document.getElementById('open-settings-btn')) document.getElementById('open-settings-btn').style.display = 'none';
+    }
+    
+    function logout() {
+      sessionStorage.removeItem(SESSION_KEY);
+      const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
+      if (supabaseConfig && window.supabase) {
+        try {
+          const client = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+          client.auth.signOut();
+        } catch(e) {}
+      }
+      showLoginOverlay();
+    }
+    
+    // Đăng xuất
+    document.getElementById('logout-btn').addEventListener('click', logout);
+    
+    // Xử lý Login Form
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const uname = document.getElementById('login-username').value.trim();
+      const pass = document.getElementById('login-password').value;
+      const errorEl = document.getElementById('login-error');
+      errorEl.style.display = 'none';
+      
+      const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
+      if (supabaseConfig && window.supabase) {
+        try {
+          const client = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+          const { data, error } = await client.auth.signInWithPassword({
+            email: uname,
+            password: pass
+          });
+          if (error) throw error;
+          const user = data.user;
+          const role = user.user_metadata?.role || 'operator';
+          const name = user.user_metadata?.name || user.email;
+          setLoggedInUser({ username: user.email, name, role });
+          return;
+        } catch (err) {
+          errorEl.textContent = '❌ Lỗi Cloud Auth: ' + err.message;
+          errorEl.style.display = 'block';
+          return;
+        }
+      }
+      
+      const unameLower = uname.toLowerCase();
+      const userHashes = {
+        'manager': '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5', // manager123
+        'operator': 'ec6e1c25258002eb1c67d15c7f45da7945fa4c58778fd7d88faa5e53e3b4698d' // operator123
+      };
+      
+      if (!userHashes[unameLower]) {
+        errorEl.textContent = '❌ Tên đăng nhập không đúng.';
+        errorEl.style.display = 'block';
+        return;
+      }
+      
+      const inputHash = await hashSHA256(pass);
+      if (inputHash === userHashes[unameLower]) {
+        const sessionUser = {
+          username: unameLower,
+          name: unameLower === 'manager' ? 'Hub Manager' : 'Staff / Operator',
+          role: unameLower === 'manager' ? 'manager' : 'operator'
+        };
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+        setLoggedInUser(sessionUser);
+      } else {
+        errorEl.textContent = '❌ Mật khẩu không chính xác.';
+        errorEl.style.display = 'block';
+      }
+    });
+
+    // Toggle hiển thị panel Supabase
+    document.getElementById('toggle-cloud-auth-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      const panel = document.getElementById('cloud-auth-panel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      if (panel.style.display === 'block') {
+        const config = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || '{"url":"","key":""}');
+        document.getElementById('supabase-url').value = config.url || '';
+        document.getElementById('supabase-key').value = config.key || '';
+      }
+    });
+
+    // Lưu cấu hình Supabase
+    document.getElementById('save-cloud-auth-btn').addEventListener('click', () => {
+      const url = document.getElementById('supabase-url').value.trim();
+      const key = document.getElementById('supabase-key').value.trim();
+      
+      if (url && key) {
+        localStorage.setItem(CLOUD_AUTH_KEY, JSON.stringify({ url, key }));
+        alert('✅ Đã cấu hình Supabase Cloud Auth! Trình duyệt sẽ khởi động lại để kết nối.');
+        location.reload();
+      } else {
+        localStorage.removeItem(CLOUD_AUTH_KEY);
+        alert('🗑️ Đã xóa cấu hình Supabase. Hệ thống quay về dùng tài khoản cục bộ.');
+        location.reload();
+      }
+    });
+
+    // ── Settings Parameter Mapping Panel ──
+    function renderParamsList() {
+      const listBody = document.getElementById('params-list-body');
+      if (!listBody) return;
+      listBody.innerHTML = '';
+      
+      const currentRaw = window.TONKHO_DATA || rawData;
+      const params = currentRaw.mapping_params || [];
+      
+      params.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="tinh_giao" value="${escapeHTML(p['Tỉnh giao'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
+          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="lv2" value="${escapeHTML(p['LV-2'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
+          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="kho_den" value="${escapeHTML(p['Kho Đến'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
+          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="loai_kho" value="${escapeHTML(p['Loại kho'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
+        `;
+        listBody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('open-settings-btn').addEventListener('click', () => {
+      document.getElementById('settings-panel').classList.add('open');
+      renderParamsList();
+      const pat = sessionStorage.getItem('github_pat') || '';
+      document.getElementById('github-pat').value = pat;
+    });
+
+    document.getElementById('settings-close-btn').addEventListener('click', () => {
+      document.getElementById('settings-panel').classList.remove('open');
+    });
+
+    document.getElementById('add-param-row-btn').addEventListener('click', () => {
+      const listBody = document.getElementById('params-list-body');
+      if (!listBody) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="tinh_giao" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Tỉnh mới"></td>
+        <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="lv2" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="LV-2"></td>
+        <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="kho_den" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Kho Đến"></td>
+        <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="loai_kho" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Loại kho"></td>
+      `;
+      listBody.appendChild(tr);
+      listBody.parentElement.scrollTop = listBody.parentElement.scrollHeight;
+    });
+
+    document.getElementById('save-params-btn').addEventListener('click', async () => {
+      const pat = document.getElementById('github-pat').value.trim();
+      if (!pat) {
+        alert('⚠️ Vui lòng nhập GitHub Personal Access Token (PAT) để xác thực quyền ghi!');
+        return;
+      }
+      
+      sessionStorage.setItem('github_pat', pat);
+      
+      const rows = document.querySelectorAll('#params-list-body tr');
+      let csvContent = 'Tỉnh giao,Loại hàng,Vùng,LV-1,LV-2,Kho Đến,Loại kho,Phân vùng,Miền\n';
+      
+      rows.forEach(tr => {
+        const tinh_giao_el = tr.querySelector('[data-col="tinh_giao"]');
+        const lv2_el = tr.querySelector('[data-col="lv2"]');
+        const kho_den_el = tr.querySelector('[data-col="kho_den"]');
+        const loai_kho_el = tr.querySelector('[data-col="loai_kho"]');
+        
+        if (tinh_giao_el && lv2_el && kho_den_el && loai_kho_el) {
+          const tg = tinh_giao_el.value.trim();
+          const l2 = lv2_el.value.trim();
+          const kd = kho_den_el.value.trim();
+          const lk = loai_kho_el.value.trim();
+          
+          if (tg) {
+            csvContent += `"${tg}","","Liên vùng","${tg}","${l2}","${kd}","${lk}","${lk}","Trung"\n`;
+          }
+        }
+      });
+      
+      const btn = document.getElementById('save-params-btn');
+      btn.textContent = '⏳ Đang lưu lên GitHub...';
+      btn.disabled = true;
+      
+      try {
+        const repo = 'ImDiDinne/ktchcm01';
+        const path = 'mapping_params.csv';
+        const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+        
+        const getResp = await fetch(url);
+        if (!getResp.ok) throw new Error('Không thể tải file hiện tại từ GitHub.');
+        const fileData = await getResp.json();
+        const sha = fileData.sha;
+        
+        const utf8Bytes = new TextEncoder().encode(csvContent);
+        let binary = '';
+        const len = utf8Bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(utf8Bytes[i]);
+        }
+        const base64Content = btoa(binary);
+        
+        const putResp = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${pat}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: 'chore(config): update mapping parameters via dashboard Settings UI',
+            content: base64Content,
+            sha: sha,
+            branch: 'main'
+          })
+        });
+        
+        if (!putResp.ok) {
+          const errData = await putResp.json();
+          throw new Error(errData.message || 'Lỗi đẩy file.');
+        }
+        
+        alert('✨ Lưu thành công! Tiến trình cập nhật dữ liệu tự động trên GitHub Cloud sẽ kích hoạt sau vài giây để đồng bộ báo cáo.');
+        document.getElementById('settings-panel').classList.remove('open');
+      } catch (err) {
+        alert('❌ Thất bại: ' + err.message);
+      } finally {
+        btn.textContent = '💾 Lưu Tham Số Lên Cloud';
+        btn.disabled = false;
+      }
+    });
+
+    // Khởi chạy kiểm tra đăng nhập
+    checkAuth();
 
     // Khắc phục đề xuất 2: Tự động tải lại script dữ liệu mới mỗi 10 phút (không cần reload trang)
     function autoRefreshData() {
@@ -459,5 +772,90 @@
 
   })();
   </script>
+
+  <!-- ═══ Login Overlay (Modal) ═══ -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-logo">📦</div>
+      <h2>KTC HCM 01</h2>
+      <p class="login-subtitle">Hệ Thống Tổng Quan Hàng Hoá & Tồn Kho</p>
+      
+      <div id="login-error" class="login-error-msg" style="display: none;"></div>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-username">Tên đăng nhập</label>
+          <input type="text" id="login-username" placeholder="Nhập username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Mật khẩu</label>
+          <input type="password" id="login-password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="login-btn">Đăng Nhập</button>
+      </form>
+      
+      <div class="demo-accounts">
+        <div class="demo-title">Tài khoản lái thử (Demo):</div>
+        <div>🔑 Quản lý kho: <code>manager</code> / <code>manager123</code></div>
+        <div>🔑 Nhân viên / Bưu tá: <code>operator</code> / <code>operator123</code></div>
+      </div>
+      
+      <div class="cloud-auth-toggle">
+        <a href="#" id="toggle-cloud-auth-btn" style="color: var(--text-muted); font-size: 0.7rem; text-decoration: underline;">⚙️ Kết nối Supabase Cloud Auth</a>
+      </div>
+      
+      <div id="cloud-auth-panel" style="display: none; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; text-align: left;">
+        <div class="form-group">
+          <label style="font-size: 0.7rem;">Supabase URL</label>
+          <input type="text" id="supabase-url" placeholder="https://xxx.supabase.co" style="font-size: 0.75rem; padding: 6px 10px;">
+        </div>
+        <div class="form-group">
+          <label style="font-size: 0.7rem;">Supabase Anon Key</label>
+          <input type="password" id="supabase-key" placeholder="eyJhbGciOi..." style="font-size: 0.75rem; padding: 6px 10px;">
+        </div>
+        <button type="button" id="save-cloud-auth-btn" class="login-btn" style="background: var(--accent-alpha); color: var(--accent-light); font-size: 0.7rem; padding: 6px 12px; margin-top: 5px;">Lưu Cấu Hình</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Settings Slide-Out Panel ═══ -->
+  <div id="settings-panel" class="settings-panel">
+    <div class="settings-header">
+      <h2>⚙️ Cấu Hình Tham Số Mapping</h2>
+      <button id="settings-close-btn" class="settings-close-btn">&times;</button>
+    </div>
+    <div class="settings-body">
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">
+        Nhập thông tin GitHub Token để cập nhật trực tiếp tham số mapping tỉnh/kho về repository GitHub Pages:
+      </p>
+      
+      <div class="form-group">
+        <label for="github-pat">GitHub Personal Access Token (PAT)</label>
+        <input type="password" id="github-pat" placeholder="ghp_xxxx..." style="font-size: 0.8rem;">
+      </div>
+      
+      <h3 style="font-size: 0.85rem; font-weight: 600; margin-top: 20px; color: var(--text-primary);">Danh Sách Tham Số Mapping</h3>
+      
+      <div class="param-table-wrapper">
+        <table class="pivot-table" style="font-size: 0.72rem; width: 100%;">
+          <thead>
+            <tr>
+              <th style="padding: 6px 10px;">Tỉnh Giao</th>
+              <th style="padding: 6px 10px;">LV-2</th>
+              <th style="padding: 6px 10px;">Kho Đến</th>
+              <th style="padding: 6px 10px;">Loại Kho</th>
+            </tr>
+          </thead>
+          <tbody id="params-list-body">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="settings-footer">
+      <button id="save-params-btn" class="login-btn" style="margin: 0; flex: 1;">💾 Lưu Tham Số Lên Cloud</button>
+      <button id="add-param-row-btn" class="login-btn" style="margin: 0; background: var(--bg-glass); border: 1px solid var(--border); color: var(--text-primary); width: auto;">➕ Thêm</button>
+    </div>
+  </div>
 </body>
 </html>

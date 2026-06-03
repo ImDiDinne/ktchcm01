@@ -498,6 +498,13 @@ def build_hierarchical_data(df, pivot, params=None):
         'grand_total': len(df),
         'updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
     }
+    if params is not None:
+        try:
+            cols = ['Tỉnh giao', 'LV-2', 'Kho Đến', 'Loại kho']
+            full_data['mapping_params'] = params[cols].fillna('').to_dict(orient='records')
+        except Exception as e:
+            print(f"⚠️ Không thể trích xuất tham số ra JSON: {e}")
+            
     return full_data
 
 def export_pivot_xlsx(df, pivot):
