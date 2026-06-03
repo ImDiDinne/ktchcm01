@@ -11,6 +11,10 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
+  <!-- Thư viện hỗ trợ Cloud Auth & SHA-256 mã hóa mật khẩu (hoạt động kể cả trên HTTP/LAN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+
   <script>
     document.write('<link rel="stylesheet" href="style.css?t=' + Date.now() + '">');
     document.write('<script src="tonkho_data.js?t=' + Date.now() + '"><\/script>');
@@ -448,6 +452,9 @@
     const CLOUD_AUTH_KEY = 'ktc_supabase_config';
     
     async function hashSHA256(str) {
+      if (window.sha256) {
+        return window.sha256(str);
+      }
       const msgBuffer = new TextEncoder().encode(str);
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -540,6 +547,31 @@
       const errorEl = document.getElementById('login-error');
       errorEl.style.display = 'none';
       
+      const unameLower = uname.toLowerCase();
+      const userHashes = {
+        'manager': '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5', // manager123
+        'operator': 'ec6e1c25258002eb1c67d15c7f45da7945fa4c58778fd7d88faa5e53e3b4698d' // operator123
+      };
+
+      // 1. Ưu tiên xác thực tài khoản Local trước để tránh bị cấu hình Cloud làm kẹt
+      if (userHashes[unameLower]) {
+        const inputHash = await hashSHA256(pass);
+        if (inputHash === userHashes[unameLower]) {
+          const sessionUser = {
+            username: unameLower,
+            name: unameLower === 'manager' ? 'Hub Manager' : 'Staff / Operator',
+            role: unameLower === 'manager' ? 'manager' : 'operator'
+          };
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+          setLoggedInUser(sessionUser);
+        } else {
+          errorEl.textContent = '❌ Mật khẩu local không chính xác.';
+          errorEl.style.display = 'block';
+        }
+        return;
+      }
+      
+      // 2. Chạy xác thực Cloud Auth nếu tên đăng nhập không phải account local
       const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
       if (supabaseConfig && window.supabase) {
         try {
@@ -561,31 +593,8 @@
         }
       }
       
-      const unameLower = uname.toLowerCase();
-      const userHashes = {
-        'manager': '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5', // manager123
-        'operator': 'ec6e1c25258002eb1c67d15c7f45da7945fa4c58778fd7d88faa5e53e3b4698d' // operator123
-      };
-      
-      if (!userHashes[unameLower]) {
-        errorEl.textContent = '❌ Tên đăng nhập không đúng.';
-        errorEl.style.display = 'block';
-        return;
-      }
-      
-      const inputHash = await hashSHA256(pass);
-      if (inputHash === userHashes[unameLower]) {
-        const sessionUser = {
-          username: unameLower,
-          name: unameLower === 'manager' ? 'Hub Manager' : 'Staff / Operator',
-          role: unameLower === 'manager' ? 'manager' : 'operator'
-        };
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
-        setLoggedInUser(sessionUser);
-      } else {
-        errorEl.textContent = '❌ Mật khẩu không chính xác.';
-        errorEl.style.display = 'block';
-      }
+      errorEl.textContent = '❌ Tên đăng nhập không tồn tại hoặc chưa kết nối Cloud Auth.';
+      errorEl.style.display = 'block';
     });
 
     // Toggle hiển thị panel Supabase
