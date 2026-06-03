@@ -430,7 +430,9 @@ def main():
         # ── Lọc chỉ KTC HCM 01 ──
         KHO_FILTER = 'Kho Trung Chuyển Hồ Chí Minh 01'
         df = df[df['current_warehouse_name'] == KHO_FILTER].copy()
-        print(f"   {len(df):,} đơn hàng (lọc: {KHO_FILTER})")
+        # Loại các đơn đang luân chuyển đến KTC
+        df = df[df['task_status'].fillna('').str.strip() != 'Đang luân chuyển đến KTC'].copy()
+        print(f"   {len(df):,} đơn hàng (lọc: {KHO_FILTER} và loại bỏ Đang luân chuyển đến KTC)")
 
         if len(df) == 0:
             print(f"❌ Không có dữ liệu cho kho '{KHO_FILTER}'")
