@@ -43,6 +43,104 @@ def load_params():
     print(f"📋 Đọc tham số: {len(params)} dòng mapping")
     return params
 
+def guess_params_for_missing_key(key):
+    """
+    Tự động đoán tham số cho một tỉnh giao / kho tiếp mới chưa có trong mapping.
+    """
+    key_str = str(key).strip()
+    key_lower = key_str.lower()
+    
+    # Mặc định
+    vung = "Khác"
+    lv1 = key_str
+    lv2 = key_str
+    kho_den = key_str
+    loai_kho = "Kho Trung Chuyển"
+    phan_vung = "Liên vùng"
+    mien = "Trung"
+    
+    # 1. Đoán Loại kho & Kho Đến dựa vào tên kho
+    if "kho trung chuyển" in key_lower or "ktc" in key_lower:
+        loai_kho = "Kho Trung Chuyển"
+        kho_den = key_str
+    elif "kho chuyển tiếp" in key_lower or "kct" in key_lower:
+        loai_kho = "Kho Chuyển Tiếp"
+        kho_den = key_str
+    elif "kho giao hàng nặng" in key_lower or "ghn" in key_lower:
+        loai_kho = "Kho Giao Hàng Nặng"
+        kho_den = key_str
+    elif "kho khl" in key_lower or "key account" in key_lower:
+        loai_kho = "Kho KHL"
+        kho_den = key_str
+    elif "bưu cục" in key_lower or "bc" in key_lower:
+        if "hồ chí minh" in key_lower or "hcm" in key_lower:
+            loai_kho = "Nội Thành"
+            kho_den = "Hồ Chí Minh"
+            phan_vung = "Nội Thành"
+            mien = "Nam"
+        else:
+            loai_kho = "Nội vùng"
+            kho_den = key_str
+            phan_vung = "Nội vùng"
+            mien = "Nam"
+            
+    # 2. Đoán dựa trên tên Tỉnh giao nếu là tỉnh
+    south_provinces = ["bình dương", "đồng nai", "long an", "tây ninh", "tiền giang", "bến tre", "bà rịa - vũng tàu", "vũng tàu", "cần thơ", "vĩnh long", "đồng tháp", "an giang", "kiên giang", "cà mau", "bạc liêu", "sóc trăng", "trà vinh", "hậu giang"]
+    for p in south_provinces:
+        if p in key_lower:
+            loai_kho = "Nội vùng"
+            kho_den = p.title()
+            vung = "Nam"
+            phan_vung = "Nội vùng"
+            mien = "Nam"
+            break
+            
+    if "hồ chí minh" in key_lower or "hcm" in key_lower:
+        loai_kho = "Nội Thành"
+        kho_den = "Hồ Chí Minh"
+        vung = "Nội thành"
+        phan_vung = "Nội Thành"
+        mien = "Nam"
+    elif "phú quốc" in key_lower:
+        loai_kho = "Phú Quốc"
+        kho_den = "Phú Quốc"
+        vung = "Phú Quốc"
+        phan_vung = "Phú Quốc"
+        mien = "Nam"
+        
+    return {
+        'Tỉnh giao': key_str,
+        'Loại hàng': None,
+        'Vùng': vung,
+        'LV-1': lv1,
+        'LV-2': lv2,
+        'Kho Đến': kho_den,
+        'Loại kho': loai_kho,
+        'Phân vùng': phan_vung,
+        'Miền': mien
+    }
+
+def append_param_to_excel(param_row):
+    """
+    Tự động ghi đè/thêm dòng tham số mới vào sheet 'Tham Số 1' của Form Final.xlsx.
+    """
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(PARAMS_FILE)
+        ws = wb['Tham Số 1']
+        
+        # Lấy header dòng 1 để sắp xếp đúng cột
+        headers = [ws.cell(row=1, column=c).value for c in range(1, 10)]
+        row_data = []
+        for h in headers:
+            row_data.append(param_row.get(h, ""))
+            
+        ws.append(row_data)
+        wb.save(PARAMS_FILE)
+        print(f"✨ Đã tự động cập nhật tham số mới vào {PARAMS_FILE.name}: {param_row['Tỉnh giao']} -> {param_row['Loại kho']}")
+    except Exception as e:
+        print(f"⚠️ Không thể tự động ghi tham số vào file Excel: {e}")
+
 def classify_by_params(df, params):
     """Phân loại đơn theo bảng tham số (Kho tiếp & Tỉnh giao → LV-2 → Kho Đến → Loại kho)."""
     # Xây dựng các mapping case-insensitive (không strip() để khớp chính xác như Excel VLOOKUP)
@@ -85,6 +183,24 @@ def classify_by_params(df, params):
         if s_val != '':
             t_val = s_val
         else:
+            # Nếu tỉnh giao chưa có trong tham số, tự động tạo & cập nhật
+            tinh_giao_raw = str(r['deliver_province']).strip() if pd.notna(r['deliver_province']) else ''
+            if tinh_giao_raw and tinh_giao_raw.lower() not in map_tinh_to_lv2:
+                guessed = guess_params_for_missing_key(tinh_giao_raw)
+                append_param_to_excel(guessed)
+                
+                # Cập nhật vào dictionary nhớ tạm thời để các dòng tiếp theo dùng
+                map_tinh_to_lv2[tinh_giao_raw.lower()] = guessed['LV-2']
+                map_tinh_to_phanvung[tinh_giao_raw.lower()] = guessed['Phân vùng']
+                
+                glv2_lower = str(guessed['LV-2']).lower()
+                if glv2_lower not in map_lv2_to_khoden:
+                    map_lv2_to_khoden[glv2_lower] = guessed['Kho Đến']
+                
+                gkhoden_lower = str(guessed['Kho Đến']).lower()
+                if gkhoden_lower not in map_khoden_to_loaikho:
+                    map_khoden_to_loaikho[gkhoden_lower] = guessed['Loại kho']
+            
             t_val = map_tinh_to_lv2.get(tinh_giao, '')
             if pd.isna(t_val): t_val = ''
 
@@ -95,6 +211,15 @@ def classify_by_params(df, params):
         if t_val_lower == 'kho trung chuyển hà nội 02' and loai_hang == 'Freight':
             my_kho_den = 'Kho Trung Chuyển Dương Xá'
         else:
+            if t_val_lower and t_val_lower not in map_lv2_to_khoden:
+                guessed = guess_params_for_missing_key(t_val_str)
+                append_param_to_excel(guessed)
+                map_lv2_to_khoden[t_val_lower] = guessed['Kho Đến']
+                
+                gkhoden_lower = str(guessed['Kho Đến']).lower()
+                if gkhoden_lower not in map_khoden_to_loaikho:
+                    map_khoden_to_loaikho[gkhoden_lower] = guessed['Loại kho']
+            
             my_kho_den = map_lv2_to_khoden.get(t_val_lower, '')
             if pd.isna(my_kho_den): my_kho_den = ''
 
@@ -102,6 +227,11 @@ def classify_by_params(df, params):
         my_kho_den_lower = my_kho_den_str.lower()
 
         # 4. LOẠI KHO (V)
+        if my_kho_den_lower and my_kho_den_lower not in map_khoden_to_loaikho:
+            guessed = guess_params_for_missing_key(my_kho_den_str)
+            append_param_to_excel(guessed)
+            map_khoden_to_loaikho[my_kho_den_lower] = guessed['Loại kho']
+
         my_loai_kho = map_khoden_to_loaikho.get(my_kho_den_lower, '')
         if pd.isna(my_loai_kho): my_loai_kho = ''
         my_loai_kho_str = str(my_loai_kho)
