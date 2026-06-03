@@ -98,7 +98,10 @@
 
         <!-- Table: Hàng nhập dưới 3 giờ -->
         <div class="chart-card animate-in delay-6">
-          <div class="card-title">📥 Nguồn Hàng Nhập < 3h (Theo Nguồn Gửi)</div>
+          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>📥 Nguồn Nhập < 3h (Theo Nguồn Gửi)</span>
+            <span id="under3h-total-badge" style="font-size: 0.75rem; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 2px 8px; border-radius: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace;">0 đơn</span>
+          </div>
           <div class="table-wrapper" style="max-height: 220px; overflow-y: auto;">
             <table class="pivot-table" id="under3h-table" style="font-size: 0.76rem; width: 100%;">
               <thead>
@@ -307,6 +310,11 @@
 
       // ── Under 3h Origins Table ──
       const under3hBody = document.getElementById('under3h-body');
+      const badgeEl = document.getElementById('under3h-total-badge');
+      if (badgeEl) {
+        const totalUnder3h = D.total_under_3h || 0;
+        badgeEl.textContent = fmt(totalUnder3h) + ' đơn';
+      }
       if (under3hBody) {
         under3hBody.innerHTML = '';
         const under3hData = D.under_3h_origins || [];
