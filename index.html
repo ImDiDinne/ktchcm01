@@ -124,9 +124,10 @@
 
     // Hàm render chính
     function renderDashboard(filterType) {
-      let D = rawData;
-      if (rawData[filterType]) {
-        D = rawData[filterType];
+      const currentRaw = window.TONKHO_DATA || rawData;
+      let D = currentRaw;
+      if (currentRaw[filterType]) {
+        D = currentRaw[filterType];
       } else if (filterType !== 'all') {
         D = { grand_total: 0, routes: [], destinations: {} };
       }
@@ -345,18 +346,51 @@
         const btn = e.target.closest('.filter-btn');
         if (!btn || btn.classList.contains('active')) return;
         
-        // Cập nhật active button
         filterContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         
-        // Render lại dashboard theo bộ lọc
         const filterVal = btn.dataset.filter;
+        localStorage.setItem('ktc_filter_type', filterVal); // Khắc phục đề xuất 1
         renderDashboard(filterVal);
       });
     }
 
+    // Khắc phục đề xuất 1: Đọc và kích hoạt bộ lọc đã chọn trước đó
+    const savedFilter = localStorage.getItem('ktc_filter_type') || 'all';
+    if (filterContainer) {
+      const targetBtn = filterContainer.querySelector(`[data-filter="${savedFilter}"]`);
+      if (targetBtn) {
+        filterContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        targetBtn.classList.add('active');
+      }
+    }
+
     // Render ban đầu
-    renderDashboard('all');
+    renderDashboard(savedFilter);
+
+    // Khắc phục đề xuất 2: Tự động tải lại script dữ liệu mới mỗi 10 phút (không cần reload trang)
+    function autoRefreshData() {
+      const oldScript = document.getElementById('tonkho-data-script');
+      if (oldScript) oldScript.remove();
+      
+      const script = document.createElement('script');
+      script.id = 'tonkho-data-script';
+      script.src = 'tonkho_data.js?t=' + Date.now();
+      script.onload = () => {
+        const activeBtn = document.querySelector('.filter-btn.active');
+        const currentFilter = activeBtn ? activeBtn.dataset.filter : 'all';
+        const updateTimeEl = document.getElementById('update-time');
+        if (updateTimeEl && window.TONKHO_DATA) {
+          updateTimeEl.textContent = 'Cập nhật: ' + window.TONKHO_DATA.updated;
+        }
+        renderDashboard(currentFilter);
+        console.log('🔄 Dashboard auto-refreshed successfully at ' + new Date().toLocaleTimeString());
+      };
+      document.head.appendChild(script);
+    }
+    
+    // Refresh mỗi 10 phút (600,000ms)
+    setInterval(autoRefreshData, 600000);
 
   })();
   </script>
