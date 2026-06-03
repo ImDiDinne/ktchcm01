@@ -1,0 +1,49 @@
+name: 🔄 Auto Update Inventory Data
+
+on:
+  schedule:
+    # Tự động cập nhật mỗi 2 giờ
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # Cho phép nhấn nút "Run workflow" để chạy cập nhật chủ động bất cứ lúc nào
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📂 Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas openpyxl requests
+
+    - name: 🔄 Fetch and Process Data
+      env:
+        METABASE_USERNAME: ${{ secrets.METABASE_USERNAME }}
+        METABASE_PASSWORD: ${{ secrets.METABASE_PASSWORD }}
+        METABASE_SESSION: ${{ secrets.METABASE_SESSION }}
+      run: |
+        python auto_fetch_data.py --run-export
+
+    - name: 🚀 Commit & Push Changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        
+        git add tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx "Form Final.xlsx"
+        if git diff --staged --quiet; then
+          echo "No changes in data files. Skipping commit."
+        else
+          git commit -m "chore(data): auto-update inventory data [skip ci]"
+          git push origin main
+        fi
