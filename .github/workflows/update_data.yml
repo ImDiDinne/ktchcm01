@@ -37,6 +37,31 @@ jobs:
       run: |
         python auto_fetch_data.py --run-export
 
+    - name: 🔑 Auto-Renew Session Secret (nếu token mới được tạo)
+      if: always()
+      env:
+        GH_TOKEN: ${{ secrets.GH_PAT }}
+      run: |
+        if [ -f ".session_token" ]; then
+          NEW_TOKEN=$(cat .session_token)
+          echo "🔑 Phát hiện session token mới: ${NEW_TOKEN:0:8}..."
+          
+          if [ -n "$GH_TOKEN" ]; then
+            # Cập nhật GitHub Secret bằng GitHub CLI
+            echo "$NEW_TOKEN" | gh secret set METABASE_SESSION --repo ${{ github.repository }}
+            echo "✅ Đã tự động cập nhật METABASE_SESSION trong GitHub Secrets!"
+          else
+            echo "⚠️ Chưa có GH_PAT secret — không thể tự cập nhật Secrets."
+            echo "   Hãy thêm Personal Access Token vào repo secret với tên GH_PAT"
+            echo "   (cần quyền: repo, admin:org → secrets)"
+          fi
+          
+          # Xóa file token (không commit)
+          rm -f .session_token
+        else
+          echo "ℹ️ Không có token mới — session hiện tại vẫn hợp lệ."
+        fi
+
     - name: 🚀 Commit & Push Changes
       run: |
         git config --global user.name "github-actions[bot]"

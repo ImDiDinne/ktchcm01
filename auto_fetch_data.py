@@ -98,6 +98,7 @@ class MetabaseClient:
             if resp.status_code == 200:
                 self.session_token = resp.json().get('id')
                 print("✅ Đăng nhập thành công!")
+                self._save_new_token()
                 return True
 
             # Nếu thất bại, thử LDAP
@@ -110,6 +111,7 @@ class MetabaseClient:
             if resp2.status_code == 200:
                 self.session_token = resp2.json().get('id')
                 print("✅ Đăng nhập LDAP thành công!")
+                self._save_new_token()
                 return True
 
             print("❌ Đăng nhập thất bại. Nếu bạn đăng nhập bằng Google/SSO:")
@@ -121,6 +123,15 @@ class MetabaseClient:
         except Exception as e:
             print(f"❌ Lỗi đăng nhập: {e}")
             return False
+
+    def _save_new_token(self):
+        """Lưu session token mới vào file để GitHub Actions cập nhật Secrets."""
+        token_file = BASE_DIR / '.session_token'
+        try:
+            token_file.write_text(self.session_token)
+            print(f"💾 Đã lưu session token mới vào {token_file.name}")
+        except Exception as e:
+            print(f"⚠️ Không thể lưu token: {e}")
 
     def _headers(self):
         """Headers cho mỗi request."""
