@@ -36,6 +36,7 @@ jobs:
         python auto_fetch_data.py --run-export
 
     - name: 🚀 Commit & Push Changes
+      if: always()
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
