@@ -180,12 +180,22 @@ class MetabaseClient:
                 )
 
             if resp.status_code == 200:
-                with open(output_path, 'wb') as f:
+                tmp_path = output_path.with_suffix('.tmp')
+                with open(tmp_path, 'wb') as f:
                     for chunk in resp.iter_content(chunk_size=8192):
                         f.write(chunk)
-                file_size = os.path.getsize(output_path)
-                print(f"✅ Đã tải: {output_path.name} ({file_size:,} bytes)")
-                return True
+                if tmp_path.exists() and tmp_path.stat().st_size > 1000000:
+                    if output_path.exists():
+                        output_path.unlink()
+                    tmp_path.rename(output_path)
+                    file_size = os.path.getsize(output_path)
+                    print(f"✅ Đã tải: {output_path.name} ({file_size:,} bytes)")
+                    return True
+                else:
+                    print("❌ Lỗi: File tải về rỗng hoặc kích thước quá nhỏ. Không lưu đè.")
+                    if tmp_path.exists():
+                        tmp_path.unlink()
+                    return False
             elif resp.status_code == 401:
                 print("❌ Session hết hạn. Đang đăng nhập lại...")
                 if self.login():
@@ -219,12 +229,22 @@ class MetabaseClient:
             )
 
             if resp.status_code == 200:
-                with open(output_path, 'wb') as f:
+                tmp_path = output_path.with_suffix('.tmp')
+                with open(tmp_path, 'wb') as f:
                     for chunk in resp.iter_content(chunk_size=8192):
                         f.write(chunk)
-                file_size = os.path.getsize(output_path)
-                print(f"✅ Đã tải: {output_path.name} ({file_size:,} bytes)")
-                return True
+                if tmp_path.exists() and tmp_path.stat().st_size > 1000000:
+                    if output_path.exists():
+                        output_path.unlink()
+                    tmp_path.rename(output_path)
+                    file_size = os.path.getsize(output_path)
+                    print(f"✅ Đã tải: {output_path.name} ({file_size:,} bytes)")
+                    return True
+                else:
+                    print("❌ Lỗi: File tải về rỗng hoặc kích thước quá nhỏ. Không lưu đè.")
+                    if tmp_path.exists():
+                        tmp_path.unlink()
+                    return False
             elif resp.status_code != 202:
                 print(f"❌ Lỗi (HTTP {resp.status_code}): {resp.text[:200]}")
                 return False
