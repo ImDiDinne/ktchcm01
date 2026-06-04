@@ -68,9 +68,14 @@ module.exports = async (req, res) => {
       return;
     }
 
-    // 2. Gọi API Metabase để tải file XLSX của câu hỏi chi tiết đơn
-    const queryUrl = `${metabaseUrl}/api/card/${cardId}/query/xlsx`;
-    console.log(`📥 Đang gửi yêu cầu tải dữ liệu tới Metabase...`);
+    // 2. Gọi API Metabase để tải file XLSX qua Dashboard API để có sẵn bộ lọc kho (tránh bị truncate)
+    const dashboardId = 152;
+    const dashcardId = 1599;
+    const parameterId = '6d90f1e2';
+    const warehouseName = 'Kho Trung Chuyển Hồ Chí Minh 01';
+
+    const queryUrl = `${metabaseUrl}/api/dashboard/${dashboardId}/dashcard/${dashcardId}/card/${cardId}/query/xlsx`;
+    console.log(`📥 Đang gửi yêu cầu tải dữ liệu (có lọc Kho HCM 01) tới Metabase...`);
 
     const response = await fetch(queryUrl, {
       method: 'POST',
@@ -78,7 +83,15 @@ module.exports = async (req, res) => {
         'X-Metabase-Session': sessionToken,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({}) // Không cần parameter lọc vì lọc toàn cục ở tầng xử lý python
+      body: JSON.stringify({
+        parameters: [
+          {
+            type: 'string/=',
+            value: [warehouseName],
+            id: parameterId
+          }
+        ]
+      })
     });
 
     if (!response.ok) {

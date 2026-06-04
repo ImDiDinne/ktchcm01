@@ -29,6 +29,11 @@ METABASE_URL    = 'https://data-bi.ghn.vn'
 CARD_ID         = 1386  # Question "Tồn chi tiết đơn"
 WAREHOUSE_NAME  = 'Kho Trung Chuyển Hồ Chí Minh 01'
 
+# Cấu hình Dashboard để lọc trước khi tải (Tránh bị Metabase truncate ở giới hạn 1M dòng)
+DASHBOARD_ID    = 152
+DASHCARD_ID     = 1599
+PARAMETER_ID    = '6d90f1e2'
+
 # ── Đọc .env ──────────────────────────────────────────────
 def load_env():
     """Đọc credentials từ file .env"""
@@ -125,21 +130,54 @@ class MetabaseClient:
         }
 
     def download_card_xlsx(self, card_id, output_path, parameters=None):
-        """Tải kết quả query của card dưới dạng XLSX."""
+        """Tải kết quả query của card dưới dạng XLSX (ưu tiên dùng Dashboard API để có lọc tránh bị truncate)."""
         print(f"📥 Đang tải dữ liệu từ Card #{card_id}...")
 
         body = {}
-        if parameters:
+        use_dashboard_api = False
+        
+        # Nếu đang tải card 1386, dùng Dashboard API để có lọc theo kho
+        if card_id == 1386:
+            use_dashboard_api = True
+            body = {
+                "parameters": [
+                    {
+                        "type": "string/=",
+                        "value": [WAREHOUSE_NAME],
+                        "id": PARAMETER_ID
+                    }
+                ]
+            }
+        elif parameters:
             body['parameters'] = parameters
 
         try:
+            if use_dashboard_api:
+                query_url = f"{self.base_url}/api/dashboard/{DASHBOARD_ID}/dashcard/{DASHCARD_ID}/card/{card_id}/query/xlsx"
+                print(f"🎯 Sử dụng Dashboard API (#{DASHBOARD_ID}) với bộ lọc: {WAREHOUSE_NAME}")
+            else:
+                query_url = f"{self.base_url}/api/card/{card_id}/query/xlsx"
+
             resp = requests.post(
-                f"{self.base_url}/api/card/{card_id}/query/xlsx",
+                query_url,
                 headers=self._headers(),
                 json=body,
                 timeout=300,
                 stream=True
             )
+
+            # Fallback nếu Dashboard API thất bại
+            if use_dashboard_api and resp.status_code != 200 and resp.status_code != 202:
+                print(f"⚠️ Dashboard API lỗi ({resp.status_code}). Fallback về Card API gốc (không lọc)...")
+                query_url = f"{self.base_url}/api/card/{card_id}/query/xlsx"
+                body = {}
+                resp = requests.post(
+                    query_url,
+                    headers=self._headers(),
+                    json=body,
+                    timeout=300,
+                    stream=True
+                )
 
             if resp.status_code == 200:
                 with open(output_path, 'wb') as f:
@@ -155,7 +193,7 @@ class MetabaseClient:
                 return False
             elif resp.status_code == 202:
                 print("⏳ Query đang xử lý, chờ kết quả...")
-                return self._wait_and_download(card_id, output_path, parameters)
+                return self._wait_and_download(query_url, output_path, body)
             else:
                 print(f"❌ Lỗi tải dữ liệu (HTTP {resp.status_code}): {resp.text[:300]}")
                 return False
@@ -166,18 +204,14 @@ class MetabaseClient:
             print(f"❌ Lỗi: {e}")
             return False
 
-    def _wait_and_download(self, card_id, output_path, parameters=None, max_retries=24):
+    def _wait_and_download(self, query_url, output_path, body, max_retries=24):
         """Chờ query xử lý xong rồi tải kết quả (retry mỗi 5 giây, tối đa 2 phút)."""
         for attempt in range(1, max_retries + 1):
             print(f"   ⏳ Chờ... ({attempt * 5}s)")
             time.sleep(5)
 
-            body = {}
-            if parameters:
-                body['parameters'] = parameters
-
             resp = requests.post(
-                f"{self.base_url}/api/card/{card_id}/query/xlsx",
+                query_url,
                 headers=self._headers(),
                 json=body,
                 timeout=300,

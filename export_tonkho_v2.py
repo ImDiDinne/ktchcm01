@@ -675,6 +675,29 @@ def main():
         df = pd.read_excel(EXCEL_FILE)
         print(f"   {len(df):,} đơn hàng (toàn bộ)")
 
+        # Đồng bộ tên cột nếu dữ liệu được tải bằng API Dashboard (có tên hiển thị tiếng Việt)
+        rename_map = {
+            'Ngày': 'dt',
+            'Order_code': 'order_code',
+            'Task_status': 'task_status',
+            'Kho hiện tại': 'current_warehouse_name',
+            'Kho tiếp': 'next_warehouse_name',
+            'Loại hàng': 'loaihang',
+            'Grams': 'weight',
+            'Tỉnh giao': 'deliver_province',
+            'Tỉnh lấy': 'pick_province',
+            'Miện kho hiện tại': 'current_mien',
+            'Miền giao': 'deliver_mien',
+            'Khu vực hiện tại': 'current_region',
+            'Khu vực giao': 'deliver_region',
+            'Phân vùng': 'Vùng',
+            'Thời gian tồn': 'diff_hours',
+            'Khung thời gian tồn': 'diff_hours_bucket',
+            'Tên kho xét': 'name_kho',
+            'deliver_warehouse_id': 'deliver_warehouse_id'
+        }
+        df.rename(columns=rename_map, inplace=True)
+
         # 🛡️ KIỂM TRA CHẤT LƯỢNG DỮ LIỆU ĐẦU VÀO (Data Sanitization Check)
         if len(df) < 1000:
             raise ValueError(f"Dữ liệu thô quá ít ({len(df)} dòng). Có khả năng file excel tải từ Metabase bị lỗi hoặc rỗng. Huỷ bỏ ghi đè để bảo vệ số liệu cũ.")
