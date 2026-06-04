@@ -11,13 +11,24 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
+  <!-- Chính sách bảo mật nội dung — giới hạn nguồn tải tài nguyên -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; connect-src 'self' *.supabase.co script.google.com api.github.com imdidinne.github.io; img-src 'self' data:;">
+
   <!-- Thư viện hỗ trợ Cloud Auth & SHA-256 mã hóa mật khẩu (hoạt động kể cả trên HTTP/LAN) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 
+  <!-- Tải CSS và JS động bằng DOM manipulation thay vì document.write() để tránh lỗ hổng XSS -->
   <script>
-    document.write('<link rel="stylesheet" href="style.css?t=' + Date.now() + '">');
-    document.write('<script src="tonkho_data.js?t=' + Date.now() + '"><\/script>');
+  (function() {
+    var t = Date.now();
+    var link = document.createElement('link');
+    link.rel = 'stylesheet'; link.href = 'style.css?t=' + t;
+    document.head.appendChild(link);
+    var script = document.createElement('script');
+    script.src = 'tonkho_data.js?t=' + t;
+    document.head.appendChild(script);
+  })();
   </script>
 </head>
 <body>
@@ -1640,11 +1651,7 @@
         <button type="submit" class="login-btn">Đăng Nhập</button>
       </form>
       
-      <div class="demo-accounts">
-        <div class="demo-title">Tài khoản lái thử (Demo):</div>
-        <div>🔑 Quản lý kho: <code>manager</code> / <code>manager123</code></div>
-        <div>🔑 Nhân viên / Bưu tá: <code>operator</code> / <code>operator123</code></div>
-      </div>
+      <!-- Đã xoá thông tin đăng nhập demo để tránh lộ mật khẩu dạng plaintext -->
       
       <div class="cloud-auth-toggle">
         <a href="#" id="toggle-cloud-auth-btn" style="color: var(--text-muted); font-size: 0.7rem; text-decoration: underline;">⚙️ Kết nối Supabase Cloud Auth</a>

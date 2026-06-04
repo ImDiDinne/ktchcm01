@@ -10,7 +10,10 @@
 module.exports = async (req, res) => {
   // Cấu hình CORS Header cho phép gọi từ trang Dashboard (GitHub Pages hoặc tên miền khác)
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Chỉ cho phép các nguồn gốc đáng tin cậy thay vì mở toàn bộ bằng '*'
+  const allowedOrigins = ['https://imdidinne.github.io', 'http://localhost', 'http://127.0.0.1'];
+  const origin = req.headers.origin || '';
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigins.includes(origin) ? origin : 'https://imdidinne.github.io');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader(
     'Access-Control-Allow-Headers',
