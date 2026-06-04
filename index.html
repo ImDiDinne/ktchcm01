@@ -62,7 +62,15 @@
       </div>
     </header>
 
-    <!-- ═══ Filter Container ═══ -->
+    <!-- Main Tabs Navigation -->
+    <div class="nav-main-tabs animate-in">
+      <button class="nav-main-tab active" id="tab-btn-inventory">📦 TỒN KHO REALTIME</button>
+      <button class="nav-main-tab" id="tab-btn-dock">🚚 GIÁM SÁT CẢNG NHẬP (TRIPSCAN)</button>
+    </div>
+
+    <!-- ═══ Tab Content: Inventory ═══ -->
+    <div id="tab-content-inventory" class="tab-content-main">
+      <!-- ═══ Filter Container ═══ -->
     <div class="filter-container animate-in delay-1" id="filter-container">
       <div class="filter-label">
         <span class="icon">🏷️</span> Phân Loại Hàng Hóa:
@@ -152,6 +160,147 @@
       </div>
       <div class="dest-grid" id="dest-grid"></div>
     </div>
+    </div> <!-- end of tab-content-inventory -->
+
+    <!-- ═══ Tab Content: Dock (TripScan) ═══ -->
+    <div id="tab-content-dock" class="tab-content-main" style="display: none;">
+      <!-- Dock KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card animate-in delay-1">
+          <div class="kpi-label">Tổng Chuyến Hôm Nay</div>
+          <div class="kpi-value" id="dock-total-trips">—</div>
+          <div class="kpi-sub" id="dock-sub-total">0 xe tải</div>
+        </div>
+        <div class="kpi-card animate-in delay-2">
+          <div class="kpi-label">Đang Chờ (Queue)</div>
+          <div class="kpi-value" id="dock-total-waiting" style="color: var(--yellow);">—</div>
+          <div class="kpi-sub" id="dock-sub-waiting">0 xe</div>
+        </div>
+        <div class="kpi-card animate-in delay-3">
+          <div class="kpi-label">Đang Nhập (Unloading)</div>
+          <div class="kpi-value" id="dock-total-entering" style="color: var(--blue-light);">—</div>
+          <div class="kpi-sub" id="dock-sub-entering">0 xe</div>
+        </div>
+        <div class="kpi-card animate-in delay-4">
+          <div class="kpi-label">Đã Nhận (Received)</div>
+          <div class="kpi-value" id="dock-total-received" style="color: var(--green);">—</div>
+          <div class="kpi-sub" id="dock-sub-received">0 xe</div>
+        </div>
+        <div class="kpi-card animate-in delay-5">
+          <div class="kpi-label">Độ Trễ Phân Phối (SLA)</div>
+          <div class="kpi-value" id="dock-overdue-count" style="color: var(--red);">—</div>
+          <div class="kpi-sub" id="dock-sub-overdue">> 30p chờ</div>
+        </div>
+      </div>
+
+      <!-- Settings & Controls Grid -->
+      <div style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+        <!-- Average Unloading Time Slider -->
+        <div class="chart-card" style="flex: 1; min-width: 320px; display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;">
+          <div class="card-title">⏱️ Thời Gian Dỡ Hàng Trung Bình (T_avg)</div>
+          <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
+            <input type="range" id="sim-t-avg" min="15" max="90" step="5" value="30" style="flex: 1; cursor: pointer;">
+            <span id="sim-t-avg-val" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.1rem; color: var(--accent); width: 100px; text-align: right;">30 phút</span>
+          </div>
+        </div>
+
+        <!-- Update Button -->
+        <button class="filter-btn" id="btn-refresh-trips" style="display: flex; align-items: center; gap: 8px; font-weight: 600; border-color: var(--accent); color: var(--accent-light); cursor: pointer; padding: 0 24px;">
+          🔄 CẬP NHẬT DỮ LIỆU TRIPSCAN
+        </button>
+      </div>
+
+      <!-- Dock Operations Columns -->
+      <div class="content-grid">
+        
+        <!-- Left: Flow Simulation & Active Stations configuration -->
+        <div class="table-card animate-in delay-2" style="flex: 2;">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <div class="card-title">📈 Mô Phỏng Dòng Chảy & Xe Ùn Ứ Theo Khung Giờ</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 12px;">
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--green); display: inline-block; border-radius: 2px;"></span> Đã dỡ</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--red); display: inline-block; border-radius: 2px;"></span> Ùn ứ</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 2px; background: var(--yellow); display: inline-block;"></span> Năng lực</span>
+            </div>
+          </div>
+          <div style="padding: 0 20px;">
+            <div class="flow-chart-container" id="dock-flow-chart">
+              <!-- Bars are dynamically generated here -->
+            </div>
+          </div>
+
+          <!-- Active Stations Grid Configuration -->
+          <div style="padding: 20px; border-top: 1px solid var(--border);">
+            <div class="card-title" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+              <span>⚙️ Cấu Hình Số Cửa Tải / Trạm Nhập Mở Theo Khung Giờ (S_t)</span>
+              <button class="filter-btn" id="btn-save-docks" style="font-size: 0.72rem; padding: 4px 12px;">💾 Lưu & Áp Dụng</button>
+            </div>
+            <div class="dock-config-grid" id="dock-config-inputs">
+              <!-- Inputs are dynamically generated here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: AI Dispatch Advisory & Overdue Backlogs -->
+        <div class="side-panel">
+          <!-- AI Advisory Panel -->
+          <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="card-title">💡 Khuyến Nghị Vận Hành (AI Dispatch Advisory)</div>
+            <div style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;" id="dock-advisory-list">
+              <!-- Recommendations go here -->
+            </div>
+          </div>
+
+          <!-- Overdue Waiting Trucks -->
+          <div class="chart-card animate-in delay-4">
+            <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>⚠️ Cảnh Báo Xe Chờ Quá Hạn (> 30p)</span>
+              <span id="dock-overdue-badge" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem; color: var(--red);">0</span>
+            </div>
+            <div class="table-wrapper" style="max-height: 220px; overflow-y: auto;">
+              <table class="pivot-table" id="dock-overdue-table" style="font-size: 0.76rem; width: 100%;">
+                <thead>
+                  <tr>
+                    <th style="text-align: left; padding: 6px 10px;">Biển Số Xe</th>
+                    <th style="text-align: right; padding: 6px 10px; color: var(--yellow);">Chờ Đợi</th>
+                    <th style="text-align: right; padding: 6px 10px;">Slot Đăng Ký</th>
+                  </tr>
+                </thead>
+                <tbody id="dock-overdue-body">
+                  <tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">Không có xe chờ lâu</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dock Detail Trip Table -->
+      <div class="table-card animate-in delay-4" style="margin-top: 16px;">
+        <div class="card-header">
+          <div class="card-title">📋 Danh Sách Chi Tiết Xe Tải Hôm Ngay (TripScan)</div>
+        </div>
+        <div class="table-wrapper" style="max-height: 380px; overflow-y: auto;">
+          <table class="pivot-table" id="dock-trips-table" style="width: 100%;">
+            <thead>
+              <tr>
+                <th style="text-align: left; padding-left: 20px;">Mã Chuyến Đi</th>
+                <th style="text-align: left;">Biển Số Xe</th>
+                <th style="text-align: left;">Tải Trọng</th>
+                <th style="text-align: right;">Slot</th>
+                <th style="text-align: right;">Giờ Quét</th>
+                <th style="text-align: right;">Nhân Viên Ghi Nhận</th>
+                <th style="text-align: right; padding-right: 20px;">Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody id="dock-trips-body">
+              <tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">Đang tải danh sách...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -229,6 +378,451 @@
       }
     }
     checkSessionExpiry();
+
+    // ── TripScan / Dock Control Logic variables & helpers ──
+    let tripScanData = [];
+
+    function getTodayString() {
+      const now = new Date();
+      const tzOffset = 7 * 60; // GMT+7 in minutes
+      const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
+      const day = String(localTime.getDate()).padStart(2, '0');
+      const month = String(localTime.getMonth() + 1).padStart(2, '0');
+      const year = localTime.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    function parseDateDDMMYYYY(str) {
+      if (!str) return null;
+      const parts = str.split('/');
+      if (parts.length === 3) {
+        return {
+          day: parseInt(parts[0], 10),
+          month: parseInt(parts[1], 10) - 1,
+          year: parseInt(parts[2], 10)
+        };
+      }
+      return null;
+    }
+
+    function isSameDay(date1Str, date2Str) {
+      if (!date1Str || !date2Str) return false;
+      const d1 = parseDateDDMMYYYY(date1Str);
+      const d2 = parseDateDDMMYYYY(date2Str);
+      if (!d1 || !d2) return date1Str.trim() === date2Str.trim();
+      return d1.day === d2.day && d1.month === d2.month && d1.year === d2.year;
+    }
+
+    function getTripHour(trip) {
+      if (trip.time && typeof trip.time === 'string') {
+        const parts = trip.time.split(':');
+        if (parts.length > 0) {
+          const hour = parseInt(parts[0], 10);
+          if (!isNaN(hour) && hour >= 0 && hour <= 23) return hour;
+        }
+      }
+      if (trip.slot && typeof trip.slot === 'string') {
+        const parts = trip.slot.split(':');
+        if (parts.length > 0) {
+          const hour = parseInt(parts[0], 10);
+          if (!isNaN(hour) && hour >= 0 && hour <= 23) return hour;
+        }
+      }
+      return 0;
+    }
+
+    function getWaitTimeMinutes(trip) {
+      if (!trip.time) return 0;
+      const todayStr = getTodayString();
+      if (!isSameDay(trip.date, todayStr)) return 0;
+      
+      const parts = trip.time.split(':');
+      if (parts.length < 2) return 0;
+      
+      const tripHour = parseInt(parts[0], 10);
+      const tripMin = parseInt(parts[1], 10);
+      const tripSec = parts.length > 2 ? parseInt(parts[2], 10) : 0;
+      
+      const now = new Date();
+      const tzOffset = 7 * 60;
+      const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
+      
+      const tripDateObj = new Date(localTime);
+      tripDateObj.setHours(tripHour, tripMin, tripSec, 0);
+      
+      const diffMs = localTime - tripDateObj;
+      if (diffMs < 0) return 0;
+      return Math.floor(diffMs / (1000 * 60));
+    }
+
+    function getDockTAvg() {
+      const stored = localStorage.getItem('dock_sim_t_avg');
+      if (stored) {
+        const parsed = parseInt(stored, 10);
+        if (!isNaN(parsed) && parsed >= 15 && parsed <= 90) return parsed;
+      }
+      return 30;
+    }
+
+    function saveDockTAvg(val) {
+      localStorage.setItem('dock_sim_t_avg', val);
+    }
+
+    function getDockStations() {
+      const stored = localStorage.getItem('dock_sim_stations');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length === 24) {
+            return parsed.map(n => {
+              const num = parseInt(n, 10);
+              return isNaN(num) ? 0 : num;
+            });
+          }
+        } catch(e) {}
+      }
+      return Array(24).fill(0).map((_, h) => {
+        if (h >= 6 && h < 18) return 4;
+        if (h >= 18 && h < 24) return 3;
+        return 2;
+      });
+    }
+
+    function saveDockStations(stations) {
+      localStorage.setItem('dock_sim_stations', JSON.stringify(stations));
+    }
+
+    function getTodayTrips() {
+      const todayStr = getTodayString();
+      return tripScanData.filter(t => isSameDay(t.date, todayStr));
+    }
+
+    function getStatusBadge(status) {
+      if (!status) return '—';
+      const s = status.toLowerCase();
+      let bg = 'rgba(255,255,255,0.05)';
+      let fg = 'var(--text-muted)';
+      
+      if (s === 'đăng chờ' || s === 'đang chờ' || s === 'waiting') {
+        bg = 'rgba(251, 191, 36, 0.15)';
+        fg = 'var(--yellow)';
+      } else if (s === 'đang nhập' || s === 'đang xử lý' || s === 'unloading' || s === 'processing') {
+        bg = 'rgba(96, 165, 250, 0.15)';
+        fg = 'var(--blue-light)';
+      } else if (s === 'đã nhận' || s === 'đã giao' || s === 'completed' || s === 'received') {
+        bg = 'rgba(52, 211, 153, 0.15)';
+        fg = 'var(--green)';
+      }
+      
+      return `<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: ${bg}; color: ${fg};">${escapeHTML(status)}</span>`;
+    }
+
+    async function fetchTripScanData() {
+      const refreshBtn = document.getElementById('btn-refresh-trips');
+      if (refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = '⏳ ĐANG TẢI DỮ LIỆU...';
+      }
+
+      try {
+        const url = 'https://script.google.com/macros/s/AKfycbxpLqnIOLSV6MkEhss1vPVh7AxBZqVUv6F0xGmMGNtv1A55XVElUgBkoJuvJXgv2cHP/exec?action=getTrips';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('API request failed');
+        const result = await response.json();
+        
+        if (result && result.status === 'success' && Array.isArray(result.data)) {
+          tripScanData = result.data;
+          console.log(`Successfully fetched ${tripScanData.length} trips from TripScan.`);
+          runDockSimulation();
+        } else {
+          console.error('Invalid TripScan data structure:', result);
+        }
+      } catch (err) {
+        console.error('Failed to fetch TripScan data:', err);
+        const advisoryList = document.getElementById('dock-advisory-list');
+        if (advisoryList) {
+          advisoryList.innerHTML = `
+            <div class="kpi-card dock-advisory-card warning" style="padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 600; color: var(--red); margin-bottom: 4px;">⚠️ Lỗi Kết Nối</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Không thể tải dữ liệu từ TripScan. Vui lòng kiểm tra mạng và thử lại. (Lỗi: ${escapeHTML(err.message)})</div>
+            </div>
+          `;
+        }
+      } finally {
+        if (refreshBtn) {
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = '🔄 CẬP NHẬT DỮ LIỆU TRIPSCAN';
+        }
+      }
+    }
+
+    function runDockSimulation() {
+      const todayTrips = getTodayTrips();
+      const arrivals = Array(24).fill(0);
+      todayTrips.forEach(t => {
+        arrivals[getTripHour(t)]++;
+      });
+      
+      const stations = getDockStations();
+      const tAvg = getDockTAvg();
+      
+      const simulation = [];
+      let lastQueue = 0;
+      
+      for (let t = 0; t < 24; t++) {
+        const S_t = stations[t];
+        const A_t = arrivals[t];
+        
+        const capacity = S_t * (60 / tAvg); 
+        const totalLoad = A_t + lastQueue;
+        const processed = Math.min(capacity, totalLoad);
+        const queue = Math.max(0, totalLoad - capacity);
+        const utilization = capacity > 0 ? Math.min(100, (totalLoad / capacity) * 100) : 0;
+        
+        simulation.push({
+          hour: t,
+          arrived: A_t,
+          stations: S_t,
+          capacity: capacity,
+          processed: processed,
+          queue: queue,
+          utilization: utilization
+        });
+        
+        lastQueue = queue;
+      }
+      
+      renderDockKPIs(todayTrips);
+      renderFlowChart(simulation);
+      renderAdvisory(simulation, tAvg);
+      renderOverdueTable(todayTrips);
+      renderTodayTripsTable(todayTrips);
+    }
+
+    function renderDockKPIs(todayTrips) {
+      const totalTrips = todayTrips.length;
+      const waitingCount = todayTrips.filter(t => t.status === 'Đang Chờ' || t.status === 'Đang chờ' || t.status.toLowerCase() === 'waiting').length;
+      const enteringCount = todayTrips.filter(t => t.status === 'Đang nhập' || t.status === 'Đang xử lý' || t.status.toLowerCase() === 'unloading' || t.status.toLowerCase() === 'processing').length;
+      const receivedCount = todayTrips.filter(t => t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed').length;
+      
+      const totalTripsEl = document.getElementById('dock-total-trips');
+      const totalTripsSub = document.getElementById('dock-sub-total');
+      if (totalTripsEl) totalTripsEl.textContent = totalTrips;
+      if (totalTripsSub) totalTripsSub.textContent = `${totalTrips} xe tải hôm nay`;
+      
+      const waitingEl = document.getElementById('dock-total-waiting');
+      const waitingSub = document.getElementById('dock-sub-waiting');
+      if (waitingEl) waitingEl.textContent = waitingCount;
+      if (waitingSub) waitingSub.textContent = `${waitingCount} xe chờ dỡ`;
+      
+      const enteringEl = document.getElementById('dock-total-entering');
+      const enteringSub = document.getElementById('dock-sub-entering');
+      if (enteringEl) enteringEl.textContent = enteringCount;
+      if (enteringSub) enteringSub.textContent = `${enteringCount} xe đang nhập`;
+      
+      const receivedEl = document.getElementById('dock-total-received');
+      const receivedSub = document.getElementById('dock-sub-received');
+      if (receivedEl) receivedEl.textContent = receivedCount;
+      if (receivedSub) receivedSub.textContent = `${receivedCount} xe đã hoàn tất`;
+    }
+
+    function renderFlowChart(simulation) {
+      const chartContainer = document.getElementById('dock-flow-chart');
+      if (!chartContainer) return;
+      chartContainer.innerHTML = '';
+      
+      const maxVal = Math.max(...simulation.map(s => Math.max(s.capacity, s.processed + s.queue)), 1);
+      const scaleMax = maxVal * 1.15; // 15% padding top
+      
+      simulation.forEach(s => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flow-chart-bar-wrapper';
+        
+        const capBottom = (s.capacity / scaleMax) * 100;
+        const processedHeight = (s.processed / scaleMax) * 100;
+        const queueHeight = (s.queue / scaleMax) * 100;
+        
+        const hourStr = String(s.hour).padStart(2, '0') + 'h';
+        
+        const titleText = `Khung giờ: ${String(s.hour).padStart(2, '0')}:00\n` +
+                          `• Xe mới đến: ${s.arrived} xe\n` +
+                          `• Trạm nhập mở: ${s.stations} trạm\n` +
+                          `• Năng suất xử lý: ${s.capacity.toFixed(1)} xe/h\n` +
+                          `• Đã xử lý (dỡ): ${s.processed.toFixed(1)} xe\n` +
+                          `• Ùn ứ tồn đọng: ${s.queue.toFixed(1)} xe\n` +
+                          `• Hiệu suất cảng: ${s.utilization.toFixed(0)}%`;
+        
+        wrapper.title = titleText;
+        
+        wrapper.innerHTML = `
+          <div class="flow-chart-bar-cap-line" style="bottom: ${capBottom}%;"></div>
+          <div class="flow-chart-bar-stack">
+            <div class="flow-bar-segment queue" style="height: ${queueHeight}%;"></div>
+            <div class="flow-bar-segment processed" style="height: ${processedHeight}%;"></div>
+          </div>
+          <span class="flow-chart-label">${hourStr}</span>
+        `;
+        
+        chartContainer.appendChild(wrapper);
+      });
+    }
+
+    function renderAdvisory(simulation, tAvg) {
+      const container = document.getElementById('dock-advisory-list');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      const advisories = [];
+      
+      simulation.forEach(s => {
+        const hourStr = String(s.hour).padStart(2, '0') + ':00';
+        
+        if (s.queue > 0) {
+          const neededStations = Math.ceil((s.queue * tAvg) / 60);
+          advisories.push({
+            type: 'warning',
+            hour: s.hour,
+            title: `⚠️ Ùn Ứ Khung Giờ ${hourStr}`,
+            message: `Lượng xe dồn ứ là <strong>${s.queue.toFixed(1)} xe</strong>. Khuyến nghị mở thêm ít nhất <strong>${neededStations} trạm</strong> (tổng ${s.stations + neededStations} trạm) để giải tỏa nghẽn.`
+          });
+        }
+        else if (s.utilization < 30 && s.stations > 1 && s.arrived > 0) {
+          const optStations = Math.max(1, Math.ceil((s.arrived * tAvg) / 60));
+          const savedStations = s.stations - optStations;
+          if (savedStations > 0) {
+            advisories.push({
+              type: 'info',
+              hour: s.hour,
+              title: `💡 Dư Thừa Trạm Khung Giờ ${hourStr}`,
+              message: `Hiệu suất sử dụng cảng chỉ đạt <strong>${s.utilization.toFixed(0)}%</strong>. Có thể đóng bớt <strong>${savedStations} trạm</strong> (giảm về ${optStations} trạm) để tối ưu hóa nhân sự.`
+            });
+          }
+        }
+      });
+      
+      advisories.sort((a, b) => {
+        if (a.type === 'warning' && b.type !== 'warning') return -1;
+        if (a.type !== 'warning' && b.type === 'warning') return 1;
+        return a.hour - b.hour;
+      });
+      
+      const displayed = advisories.slice(0, 5);
+      
+      if (displayed.length > 0) {
+        displayed.forEach(adv => {
+          const card = document.createElement('div');
+          card.className = `kpi-card dock-advisory-card ${adv.type}`;
+          card.style.padding = '12px';
+          card.style.marginBottom = '8px';
+          card.style.display = 'flex';
+          card.style.flexDirection = 'column';
+          card.style.gap = '4px';
+          
+          let titleColor = 'var(--text-primary)';
+          if (adv.type === 'warning') titleColor = 'var(--red)';
+          else if (adv.type === 'info') titleColor = 'var(--yellow)';
+          
+          card.innerHTML = `
+            <div style="font-weight: 600; color: ${titleColor}; font-size: 0.76rem;">${adv.title}</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">${adv.message}</div>
+          `;
+          container.appendChild(card);
+        });
+      } else {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.76rem; border: 1px dashed var(--border); border-radius: var(--radius-sm);">
+            ✨ Vận hành tối ưu. Không có cảnh báo hoặc khuyến nghị điều phối nhân viên tại thời điểm này.
+          </div>
+        `;
+      }
+    }
+
+    function renderOverdueTable(todayTrips) {
+      const tbody = document.getElementById('dock-overdue-body');
+      const badge = document.getElementById('dock-overdue-badge');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      
+      const overdueTrips = todayTrips.filter(t => {
+        const isWaiting = t.status === 'Đang Chờ' || t.status === 'Đang chờ' || t.status.toLowerCase() === 'waiting';
+        if (!isWaiting) return false;
+        const waitMin = getWaitTimeMinutes(t);
+        return waitMin > 30;
+      });
+      
+      if (badge) {
+        badge.textContent = overdueTrips.length;
+      }
+      
+      const overdueKpi = document.getElementById('dock-overdue-count');
+      const overdueSub = document.getElementById('dock-sub-overdue');
+      if (overdueKpi) overdueKpi.textContent = overdueTrips.length;
+      if (overdueSub) overdueSub.textContent = `> 30p chờ (${overdueTrips.length} xe)`;
+      
+      if (overdueTrips.length > 0) {
+        overdueTrips.sort((a, b) => getWaitTimeMinutes(b) - getWaitTimeMinutes(a));
+        overdueTrips.forEach(t => {
+          const waitMin = getWaitTimeMinutes(t);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="text-align: left; padding: 6px 10px; font-weight: 600; color: var(--red);">${escapeHTML(t.vehicle || 'N/A')}</td>
+            <td style="text-align: right; padding: 6px 10px; font-family: 'JetBrains Mono', monospace; color: var(--yellow);">${waitMin} phút</td>
+            <td style="text-align: right; padding: 6px 10px; color: var(--text-muted);">${escapeHTML(t.slot || 'N/A')}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">Không có xe chờ lâu</td></tr>`;
+      }
+    }
+
+    function renderTodayTripsTable(todayTrips) {
+      const tbody = document.getElementById('dock-trips-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      
+      if (todayTrips.length > 0) {
+        todayTrips.sort((a, b) => {
+          const timeA = a.time || '';
+          const timeB = b.time || '';
+          return timeB.localeCompare(timeA);
+        });
+        
+        todayTrips.forEach(t => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="text-align: left; padding-left: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted);">${escapeHTML(t.code || 'N/A')}</td>
+            <td style="text-align: left; font-weight: 600; color: var(--text-primary);">${escapeHTML(t.vehicle || 'N/A')}</td>
+            <td style="text-align: left; font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(t.capacity || '—')}</td>
+            <td style="text-align: right; font-family: 'JetBrains Mono', monospace;">${escapeHTML(t.slot || '—')}</td>
+            <td style="text-align: right; font-family: 'JetBrains Mono', monospace;">${escapeHTML(t.time || '—')}</td>
+            <td style="text-align: right; font-size: 0.72rem; color: var(--text-muted);">${escapeHTML(t.username ? (t.username.split(' - ')[1] || t.username) : '—')}</td>
+            <td style="text-align: right; padding-right: 20px;">${getStatusBadge(t.status)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">Không có chuyến xe nào hôm nay</td></tr>`;
+      }
+    }
+
+    function renderDockConfigGrid() {
+      const container = document.getElementById('dock-config-inputs');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      const stations = getDockStations();
+      for (let h = 0; h < 24; h++) {
+        const hourStr = String(h).padStart(2, '0');
+        const item = document.createElement('div');
+        item.className = 'dock-config-item';
+        item.innerHTML = `
+          <label>${hourStr}:00</label>
+          <input type="number" min="0" max="20" value="${stations[h]}" data-hour="${h}" id="dock-stations-h${h}">
+        `;
+        container.appendChild(item);
+      }
+    }
 
     // Hàm render chính
     function renderDashboard(filterType) {
@@ -847,6 +1441,75 @@
 
       // Khởi chạy kiểm tra đăng nhập
       checkAuth();
+
+      // ── TripScan / Dock Control Events & Initialization ──
+      const tabBtnInventory = document.getElementById('tab-btn-inventory');
+      const tabBtnDock = document.getElementById('tab-btn-dock');
+      const tabContentInventory = document.getElementById('tab-content-inventory');
+      const tabContentDock = document.getElementById('tab-content-dock');
+      
+      if (tabBtnInventory && tabBtnDock && tabContentInventory && tabContentDock) {
+        tabBtnInventory.addEventListener('click', () => {
+          tabBtnInventory.classList.add('active');
+          tabBtnDock.classList.remove('active');
+          tabContentInventory.style.display = 'block';
+          tabContentDock.style.display = 'none';
+        });
+        
+        tabBtnDock.addEventListener('click', () => {
+          tabBtnDock.classList.add('active');
+          tabBtnInventory.classList.remove('active');
+          tabContentInventory.style.display = 'none';
+          tabContentDock.style.display = 'block';
+          
+          if (tripScanData.length === 0) {
+            fetchTripScanData();
+          } else {
+            runDockSimulation();
+          }
+        });
+      }
+
+      const refreshTripsBtn = document.getElementById('btn-refresh-trips');
+      if (refreshTripsBtn) {
+        refreshTripsBtn.addEventListener('click', fetchTripScanData);
+      }
+
+      const saveDocksBtn = document.getElementById('btn-save-docks');
+      if (saveDocksBtn) {
+        saveDocksBtn.addEventListener('click', () => {
+          const stations = [];
+          for (let h = 0; h < 24; h++) {
+            const input = document.getElementById(`dock-stations-h${h}`);
+            if (input) {
+              const val = parseInt(input.value, 10);
+              stations.push(isNaN(val) ? 0 : Math.max(0, val));
+            } else {
+              stations.push(0);
+            }
+          }
+          saveDockStations(stations);
+          runDockSimulation();
+          alert('💾 Đã lưu cấu hình số trạm nhập và áp dụng vào mô phỏng!');
+        });
+      }
+
+      const simTAvgInput = document.getElementById('sim-t-avg');
+      const simTAvgVal = document.getElementById('sim-t-avg-val');
+      if (simTAvgInput && simTAvgVal) {
+        const initialTAvg = getDockTAvg();
+        simTAvgInput.value = initialTAvg;
+        simTAvgVal.textContent = `${initialTAvg} phút`;
+        
+        simTAvgInput.addEventListener('input', () => {
+          const val = simTAvgInput.value;
+          simTAvgVal.textContent = `${val} phút`;
+          saveDockTAvg(val);
+          runDockSimulation();
+        });
+      }
+
+      renderDockConfigGrid();
     });
 
     // Khắc phục đề xuất 2: Tự động tải lại script dữ liệu mới mỗi 10 phút (không cần reload trang)
@@ -866,7 +1529,15 @@
         }
         checkSessionExpiry();
         renderDashboard(currentFilter);
-        console.log('🔄 Dashboard auto-refreshed successfully at ' + new Date().toLocaleTimeString());
+        console.log('🔄 Dashboard auto-refreshed inventory successfully at ' + new Date().toLocaleTimeString());
+        
+        // Cập nhật lại dữ liệu TripScan nếu đang ở tab giám sát cảng
+        const dockTabBtn = document.getElementById('tab-btn-dock');
+        if (dockTabBtn && dockTabBtn.classList.contains('active')) {
+          fetchTripScanData();
+        } else if (tripScanData.length > 0) {
+          runDockSimulation();
+        }
       };
       document.head.appendChild(script);
     }
