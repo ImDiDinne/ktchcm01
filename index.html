@@ -370,7 +370,7 @@
           if (currentRaw.session_expired) {
             banner.innerHTML = `⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Phiên đăng nhập Metabase (Session Token) đã HẾT HẠN. Ní vui lòng chạy file <strong>"🔄 Cập Nhật Session.command"</strong> ở local để cập nhật Session mới!`;
           } else {
-            banner.innerHTML = `⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Dữ liệu đã hơn 3 giờ chưa được cập nhật mới. Có khả năng phiên đăng nhập Metabase (Session Token) đã hết hạn. Ní vui lòng chạy file <strong>"🔄 Cập Nhật Session.command"</strong> ở local để cập nhật Session mới!`;
+            banner.innerHTML = `⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Dữ liệu đã hơn 3 giờ chưa được cập nhật mới. Hệ thống tự cập nhật mỗi 10 phút — nếu vẫn thấy cảnh báo này, vui lòng kiểm tra <strong>GitHub Actions</strong> hoặc <strong>Metabase Session</strong>.`;
           }
         } else {
           banner.style.display = 'none';

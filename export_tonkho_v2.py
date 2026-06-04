@@ -496,7 +496,7 @@ def build_hierarchical_data(df, pivot, params=None):
         'freight': data_freight,
         'title': f'BÁO CÁO TỒN KHO KTC HCM 01',
         'grand_total': len(df),
-        'updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'updated': datetime.now(__import__('datetime').timezone(__import__('datetime').timedelta(hours=7))).strftime('%d/%m/%Y %H:%M:%S'),
         'session_expired': False,
     }
     if params is not None:
