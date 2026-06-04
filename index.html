@@ -496,11 +496,10 @@
 
     async function fetchSupabaseUnloadingTrips() {
       unloadingTripsMap = {};
-      const config = JSON.parse(localStorage.getItem('ktc_supabase_config') || 'null');
-      if (!config || !config.url || !config.key) {
-        console.log("No Supabase configuration found in localStorage. Skipping Supabase fetch.");
-        return;
-      }
+      const config = {
+        url: 'https://baizmeqkxslajxuzyfnu.supabase.co',
+        key: 'sb_publishable_VRLqjdMb3uIie89vbRXloA_xdak8hgy'
+      };
       
       try {
         const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips?select=*`;
@@ -533,12 +532,16 @@
       const trips = tripScanData.filter(t => isSameDay(t.date, todayStr));
       const tAvg = getDockTAvg();
       
+      console.log(`[DEBUG] getTodayTrips: ${trips.length} trips today, unloadingTripsMap keys:`, Object.keys(unloadingTripsMap));
+      
       trips.forEach(t => {
         if (t.code && unloadingTripsMap[t.code]) {
+          console.log(`[DEBUG] MATCH found: ${t.code}, started_at: ${unloadingTripsMap[t.code]}, current status: ${t.status}`);
           const isCompleted = t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
           if (!isCompleted) {
             const startedAt = new Date(unloadingTripsMap[t.code]);
             const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
+            console.log(`[DEBUG] elapsedMin: ${elapsedMin}, tAvg: ${tAvg}`);
             
             if (elapsedMin >= tAvg) {
               t.status = 'Đã nhận';
@@ -547,6 +550,7 @@
               t.status = 'Đang nhập';
               t.remainingMinutes = tAvg - elapsedMin;
             }
+            console.log(`[DEBUG] New status: ${t.status}`);
           }
         }
       });

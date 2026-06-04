@@ -120,21 +120,6 @@ def main():
                         sub_resp = requests.post(sub_url, headers=sub_headers, json=sub_body, timeout=10)
                         if sub_resp.status_code in [200, 201]:
                             print(f"✅ Đã ghi nhận dỡ hàng cho xe {trip_code} lên Supabase!")
-                            
-                            # Gửi tin nhắn phản hồi xác nhận trên nhóm Telegram
-                            reply_text = (
-                                f"🤖 <b>[GHI NHẬN DỠ HÀNG]</b>\n"
-                                f"• Mã chuyến: <code>{trip_code}</code>\n"
-                                f"• Trạng thái: <b>Đang nhập hàng 📥</b>\n"
-                                f"• Bắt đầu lúc: <code>{now_local}</code>"
-                            )
-                            send_url = f"{api_url}/sendMessage"
-                            requests.post(send_url, json={
-                                "chat_id": chat_id,
-                                "text": reply_text,
-                                "parse_mode": "HTML",
-                                "reply_to_message_id": message.get('message_id')
-                            }, timeout=10)
                         else:
                             print(f"❌ Không thể lưu vào Supabase (HTTP {sub_resp.status_code}): {sub_resp.text}")
                     except Exception as e:
