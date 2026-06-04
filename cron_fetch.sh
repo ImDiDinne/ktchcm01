@@ -19,7 +19,19 @@ python3 auto_fetch_data.py --run-export >> "$LOG" 2>&1
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
-    echo "✅ $(date '+%H:%M:%S') — Hoàn tất!" >> "$LOG"
+    echo "✅ $(date '+%H:%M:%S') — Export hoàn tất! Đang push lên GitHub..." >> "$LOG"
+    
+    # Auto push lên GitHub Pages
+    git add -f tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx >> "$LOG" 2>&1
+    TIMESTAMP=$(date "+%d/%m/%Y %H:%M")
+    git commit -m "chore(data): auto-update $TIMESTAMP" >> "$LOG" 2>&1
+    git push origin main >> "$LOG" 2>&1
+    
+    if [ $? -eq 0 ]; then
+        echo "🚀 $(date '+%H:%M:%S') — Đã push lên GitHub thành công!" >> "$LOG"
+    else
+        echo "⚠️ $(date '+%H:%M:%S') — Lỗi push GitHub (có thể mạng bị ngắt)" >> "$LOG"
+    fi
 else
     echo "❌ $(date '+%H:%M:%S') — Lỗi (exit code: $EXIT_CODE)" >> "$LOG"
 fi
