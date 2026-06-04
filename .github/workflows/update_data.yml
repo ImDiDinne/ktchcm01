@@ -2,8 +2,8 @@ name: 🔄 Auto Update Inventory Data
 
 on:
   schedule:
-    # Tự động cập nhật mỗi 2 giờ
-    - cron: '0 */2 * * *'
+    # Tự động cập nhật mỗi 10 phút
+    - cron: '*/10 * * * *'
   workflow_dispatch: # Cho phép nhấn nút "Run workflow" để chạy cập nhật chủ động bất cứ lúc nào
 
 permissions:
