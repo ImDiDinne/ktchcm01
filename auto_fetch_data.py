@@ -10,7 +10,7 @@ Sử dụng:
     python3 auto_fetch_data.py --loop 10        # Tự động mỗi 10 phút
     python3 auto_fetch_data.py --output data.xlsx  # Lưu vào file cụ thể
 """
-import os, sys, json, time, argparse
+import os, sys, json, time, argparse, re
 from pathlib import Path
 from datetime import datetime
 
@@ -233,6 +233,60 @@ class MetabaseClient:
         return False
 
 
+# ── Helpers for Expiration Notifications ─────────────────
+def send_macos_notification(title, subtitle, message):
+    """Gửi thông báo hệ thống trên macOS"""
+    if sys.platform == 'darwin':
+        try:
+            import subprocess
+            safe_title = title.replace('\\', '\\\\').replace('"', '\\"')
+            safe_subtitle = subtitle.replace('\\', '\\\\').replace('"', '\\"')
+            safe_message = message.replace('\\', '\\\\').replace('"', '\\"')
+            script = f'display notification "{safe_message}" with title "{safe_title}" subtitle "{safe_subtitle}" sound name "Glass"'
+            subprocess.run(['osascript', '-e', script], check=True)
+            print("🔔 Đã hiển thị thông báo macOS.")
+        except Exception as e:
+            print(f"⚠️ Không thể gửi thông báo macOS: {e}")
+
+def set_session_expired_flag(is_expired=True):
+    """Cập nhật cờ session_expired vào file dữ liệu cũ để hiển thị trên dashboard"""
+    json_path = BASE_DIR / 'tonkho_tuyen.json'
+    js_path = BASE_DIR / 'tonkho_data.js'
+    
+    data = None
+    if json_path.exists():
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f"⚠️ Không thể đọc {json_path.name}: {e}")
+            
+    if not data and js_path.exists():
+        try:
+            js_content = js_path.read_text(encoding='utf-8')
+            match = re.search(r'var TONKHO_DATA=(.*);', js_content, re.DOTALL)
+            if match:
+                data = json.loads(match.group(1))
+        except Exception as e:
+            print(f"⚠️ Không thể đọc {js_path.name}: {e}")
+            
+    if data:
+        data['session_expired'] = is_expired
+        try:
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            print(f"✅ Đã ghi nhận cờ session_expired={is_expired} vào {json_path.name}")
+        except Exception as e:
+            print(f"⚠️ Lỗi ghi {json_path.name}: {e}")
+            
+        try:
+            js_text = f"// Auto-generated — {data.get('updated', '')}\nvar TONKHO_DATA={json.dumps(data, ensure_ascii=False).replace('</script>', '<' + '/script>')};\n"
+            js_path.write_text(js_text, encoding='utf-8')
+            print(f"✅ Đã ghi nhận cờ session_expired={is_expired} vào {js_path.name}")
+        except Exception as e:
+            print(f"⚠️ Lỗi ghi {js_path.name}: {e}")
+
+
 # ── Main ──────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description='🔄 Tự động tải dữ liệu tồn kho từ Metabase')
@@ -276,6 +330,13 @@ def main():
     client = MetabaseClient(METABASE_URL, username, password, session)
 
     if not client.login():
+        print("❌ Đăng nhập thất bại. Có thể Session Token đã hết hạn.")
+        set_session_expired_flag(True)
+        send_macos_notification(
+            title="KTC HCM 01 Dashboard",
+            subtitle="Phiên đăng nhập hết hạn",
+            message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
+        )
         sys.exit(1)
 
     output_path = Path(args.output)
@@ -300,7 +361,24 @@ def main():
         print(f"   Nhấn Ctrl+C để dừng.\n")
         while True:
             try:
-                fetch_once()
+                if not client.login():
+                    print("❌ Phiên đăng nhập hết hạn.")
+                    set_session_expired_flag(True)
+                    send_macos_notification(
+                        title="KTC HCM 01 Dashboard",
+                        subtitle="Phiên đăng nhập hết hạn",
+                        message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
+                    )
+                else:
+                    success = fetch_once()
+                    if not success:
+                        print("❌ Tải dữ liệu thất bại.")
+                        set_session_expired_flag(True)
+                        send_macos_notification(
+                            title="KTC HCM 01 Dashboard",
+                            subtitle="Lỗi tải dữ liệu",
+                            message="Không thể tải dữ liệu từ Metabase. Có thể Session Token đã hết hạn."
+                        )
                 print(f"\n⏰ Chờ {args.loop} phút đến lần tiếp theo...")
                 time.sleep(args.loop * 60)
             except KeyboardInterrupt:
@@ -308,7 +386,15 @@ def main():
                 break
     else:
         success = fetch_once()
-        sys.exit(0 if success else 1)
+        if not success:
+            set_session_expired_flag(True)
+            send_macos_notification(
+                title="KTC HCM 01 Dashboard",
+                subtitle="Phiên đăng nhập hết hạn",
+                message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
+            )
+            sys.exit(1)
+        sys.exit(0)
 
 
 if __name__ == '__main__':

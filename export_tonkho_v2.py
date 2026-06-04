@@ -497,6 +497,7 @@ def build_hierarchical_data(df, pivot, params=None):
         'title': f'BÁO CÁO TỒN KHO KTC HCM 01',
         'grand_total': len(df),
         'updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'session_expired': False,
     }
     if params is not None:
         try:

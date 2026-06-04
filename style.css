@@ -1086,3 +1086,26 @@ body::before {
     display: flex !important;
   }
 }
+
+/* ── Session Alert Banner ────────────────────────── */
+.session-alert-banner {
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  color: #fca5a5;
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  font-size: 0.82rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.3s ease both;
+  line-height: 1.4;
+  position: relative;
+  z-index: 10;
+}
+
+.session-alert-banner strong {
+  color: #ff8a80;
+}

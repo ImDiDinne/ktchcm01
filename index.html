@@ -23,6 +23,11 @@
 <body>
   <div class="dashboard" id="dashboard">
 
+    <!-- Banner cảnh báo hết hạn session (hiển thị khi dữ liệu quá 3 tiếng không cập nhật) -->
+    <div class="session-alert-banner" id="session-alert-banner" style="display: none;">
+      ⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Dữ liệu đã hơn 3 giờ chưa được cập nhật mới. Có khả năng phiên đăng nhập Metabase (Session Token) đã hết hạn. Ní vui lòng chạy file <strong>"🔄 Cập Nhật Session.command"</strong> ở local để cập nhật Session mới!
+    </div>
+
     <!-- ═══ Header ═══ -->
     <header class="header animate-in" id="header">
       <div class="header-left">
@@ -181,6 +186,49 @@
 
     // ── Update time ──
     document.getElementById('update-time').textContent = 'Cập nhật: ' + rawData.updated;
+
+    // ── Hàm kiểm tra hết hạn Session Metabase dựa trên thời gian cập nhật dữ liệu ──
+    function parseDate(str) {
+      if (!str) return null;
+      const parts = str.split(' ');
+      if (parts.length < 2) return null;
+      const dParts = parts[0].split('/');
+      const tParts = parts[1].split(':');
+      if (dParts.length < 3 || tParts.length < 3) return null;
+      return new Date(
+        parseInt(dParts[2], 10),
+        parseInt(dParts[1], 10) - 1,
+        parseInt(dParts[0], 10),
+        parseInt(tParts[0], 10),
+        parseInt(tParts[1], 10),
+        parseInt(tParts[2], 10)
+      );
+    }
+
+    function checkSessionExpiry() {
+      const currentRaw = window.TONKHO_DATA || rawData;
+      if (!currentRaw || !currentRaw.updated) return;
+      const updateDate = parseDate(currentRaw.updated);
+      if (!updateDate) return;
+      const elapsedMs = Date.now() - updateDate.getTime();
+      const elapsedHours = elapsedMs / (1000 * 60 * 60);
+      
+      const banner = document.getElementById('session-alert-banner');
+      if (banner) {
+        // Hiển thị nếu cờ session_expired được đặt là true HOẶC nếu dữ liệu đã quá 3 giờ chưa cập nhật
+        if (currentRaw.session_expired || elapsedHours > 3) {
+          banner.style.display = 'flex';
+          if (currentRaw.session_expired) {
+            banner.innerHTML = `⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Phiên đăng nhập Metabase (Session Token) đã HẾT HẠN. Ní vui lòng chạy file <strong>"🔄 Cập Nhật Session.command"</strong> ở local để cập nhật Session mới!`;
+          } else {
+            banner.innerHTML = `⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Dữ liệu đã hơn 3 giờ chưa được cập nhật mới. Có khả năng phiên đăng nhập Metabase (Session Token) đã hết hạn. Ní vui lòng chạy file <strong>"🔄 Cập Nhật Session.command"</strong> ở local để cập nhật Session mới!`;
+          }
+        } else {
+          banner.style.display = 'none';
+        }
+      }
+    }
+    checkSessionExpiry();
 
     // Hàm render chính
     function renderDashboard(filterType) {
@@ -816,6 +864,7 @@
         if (updateTimeEl && window.TONKHO_DATA) {
           updateTimeEl.textContent = 'Cập nhật: ' + window.TONKHO_DATA.updated;
         }
+        checkSessionExpiry();
         renderDashboard(currentFilter);
         console.log('🔄 Dashboard auto-refreshed successfully at ' + new Date().toLocaleTimeString());
       };
