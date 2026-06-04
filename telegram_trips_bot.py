@@ -42,6 +42,10 @@ def main():
     supabase_key = env.get('SUPABASE_KEY')
     allowed_chat_id = env.get('TELEGRAM_CHAT_ID')
 
+    allowed_chat_ids = []
+    if allowed_chat_id:
+        allowed_chat_ids = [cid.strip() for cid in allowed_chat_id.split(',') if cid.strip()]
+
     if not token:
         print("❌ Lỗi: Thiếu TELEGRAM_BOT_TOKEN trong file .env!")
         sys.exit(1)
@@ -54,8 +58,8 @@ def main():
 
     print("🤖 Bot đang lắng nghe tin nhắn...")
     print(f"🔗 Kết nối Supabase: {supabase_url}")
-    if allowed_chat_id:
-        print(f"🎯 Lọc nhóm chat ID: {allowed_chat_id}")
+    if allowed_chat_ids:
+        print(f"🎯 Lọc nhóm chat IDs: {', '.join(allowed_chat_ids)}")
     else:
         print("🌍 Đang lắng nghe tất cả các nhóm Bot được thêm vào.")
     print("--------------------------------------------------")
@@ -86,8 +90,8 @@ def main():
                 chat_id = str(chat.get('id', ''))
                 text = message.get('text', '').strip()
 
-                # Nếu cấu hình TELEGRAM_CHAT_ID, lọc chỉ xử lý tin nhắn từ nhóm đó
-                if allowed_chat_id and str(allowed_chat_id) != chat_id:
+                # Nếu cấu hình TELEGRAM_CHAT_ID, lọc chỉ xử lý tin nhắn từ các nhóm đó
+                if allowed_chat_ids and chat_id not in allowed_chat_ids:
                     continue
 
                 # Tìm mã chuyến đi trong tin nhắn
