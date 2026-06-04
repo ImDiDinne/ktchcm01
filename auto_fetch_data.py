@@ -248,6 +248,50 @@ def send_macos_notification(title, subtitle, message):
         except Exception as e:
             print(f"⚠️ Không thể gửi thông báo macOS: {e}")
 
+def send_telegram_notification(message):
+    """Gửi tin nhắn cảnh báo qua Telegram Bot nếu được cấu hình trong .env"""
+    env = load_env()
+    token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+    chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+    
+    if token and chat_id:
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            payload = {
+                "chat_id": chat_id,
+                "text": message,
+                "parse_mode": "HTML"
+            }
+            resp = requests.post(url, json=payload, timeout=15)
+            if resp.status_code == 200:
+                print("📨 Đã gửi cảnh báo qua Telegram thành công.")
+            else:
+                print(f"⚠️ Gửi Telegram thất bại (HTTP {resp.status_code}): {resp.text}")
+        except Exception as e:
+            print(f"⚠️ Không thể gửi cảnh báo Telegram: {e}")
+
+def open_terminal_for_session_update():
+    """Tự động mở file 🔄 Cập Nhật Session.command trên Terminal của macOS"""
+    if sys.platform == 'darwin':
+        try:
+            cmd = f'open "{BASE_DIR}/🔄 Cập Nhật Session.command"'
+            os.system(cmd)
+            print("🚀 Đã tự động kích hoạt Terminal để cập nhật Session.")
+        except Exception as e:
+            print(f"⚠️ Không thể tự động mở Terminal: {e}")
+
+def is_already_marked_expired():
+    """Kiểm tra xem file dữ liệu đã được đánh dấu là hết hạn trước đó chưa"""
+    json_path = BASE_DIR / 'tonkho_tuyen.json'
+    if json_path.exists():
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data.get('session_expired', False)
+        except:
+            pass
+    return False
+
 def set_session_expired_flag(is_expired=True):
     """Cập nhật cờ session_expired vào file dữ liệu cũ để hiển thị trên dashboard"""
     json_path = BASE_DIR / 'tonkho_tuyen.json'
@@ -331,12 +375,19 @@ def main():
 
     if not client.login():
         print("❌ Đăng nhập thất bại. Có thể Session Token đã hết hạn.")
+        already_expired = is_already_marked_expired()
         set_session_expired_flag(True)
         send_macos_notification(
             title="KTC HCM 01 Dashboard",
             subtitle="Phiên đăng nhập hết hạn",
             message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
         )
+        send_telegram_notification(
+            "⚠️ <b>KTC HCM 01: Metabase Session Hết Hạn!</b>\n"
+            "Dữ liệu dashboard dừng cập nhật. Vui lòng chạy file <code>🔄 Cập Nhật Session.command</code> ở local hoặc cập nhật METABASE_SESSION trong GitHub Secrets."
+        )
+        if not already_expired:
+            open_terminal_for_session_update()
         sys.exit(1)
 
     output_path = Path(args.output)
@@ -363,22 +414,36 @@ def main():
             try:
                 if not client.login():
                     print("❌ Phiên đăng nhập hết hạn.")
+                    already_expired = is_already_marked_expired()
                     set_session_expired_flag(True)
                     send_macos_notification(
                         title="KTC HCM 01 Dashboard",
                         subtitle="Phiên đăng nhập hết hạn",
                         message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
                     )
+                    send_telegram_notification(
+                        "⚠️ <b>KTC HCM 01: Metabase Session Hết Hạn!</b>\n"
+                        "Dữ liệu dashboard dừng cập nhật. Vui lòng chạy file <code>🔄 Cập Nhật Session.command</code> ở local hoặc cập nhật METABASE_SESSION trong GitHub Secrets."
+                    )
+                    if not already_expired:
+                        open_terminal_for_session_update()
                 else:
                     success = fetch_once()
                     if not success:
                         print("❌ Tải dữ liệu thất bại.")
+                        already_expired = is_already_marked_expired()
                         set_session_expired_flag(True)
                         send_macos_notification(
                             title="KTC HCM 01 Dashboard",
                             subtitle="Lỗi tải dữ liệu",
                             message="Không thể tải dữ liệu từ Metabase. Có thể Session Token đã hết hạn."
                         )
+                        send_telegram_notification(
+                            "⚠️ <b>KTC HCM 01: Lỗi Tải Dữ Liệu!</b>\n"
+                            "Không thể tải dữ liệu từ Metabase. Vui lòng kiểm tra lại Session Token hoặc kết nối mạng."
+                        )
+                        if not already_expired:
+                            open_terminal_for_session_update()
                 print(f"\n⏰ Chờ {args.loop} phút đến lần tiếp theo...")
                 time.sleep(args.loop * 60)
             except KeyboardInterrupt:
@@ -387,12 +452,19 @@ def main():
     else:
         success = fetch_once()
         if not success:
+            already_expired = is_already_marked_expired()
             set_session_expired_flag(True)
             send_macos_notification(
                 title="KTC HCM 01 Dashboard",
                 subtitle="Phiên đăng nhập hết hạn",
                 message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
             )
+            send_telegram_notification(
+                "⚠️ <b>KTC HCM 01: Metabase Session Hết Hạn!</b>\n"
+                "Dữ liệu dashboard dừng cập nhật. Vui lòng chạy file <code>🔄 Cập Nhật Session.command</code> ở local hoặc cập nhật METABASE_SESSION trong GitHub Secrets."
+            )
+            if not already_expired:
+                open_terminal_for_session_update()
             sys.exit(1)
         sys.exit(0)
 
