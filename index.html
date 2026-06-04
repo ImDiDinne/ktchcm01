@@ -574,16 +574,20 @@
       let fg = 'var(--text-muted)';
       let text = status;
       
-      if (s === 'đăng chờ' || s === 'đang chờ' || s === 'waiting') {
+      const isWaiting = s === 'đăng chờ' || s === 'đang chờ' || s === 'waiting';
+      const isUnloading = s === 'đang nhập' || s === 'đang xử lý' || s === 'unloading' || s === 'processing';
+      const isReceived = s === 'đã nhận' || s === 'đã giao' || s === 'completed' || s === 'received';
+
+      if (isWaiting) {
         bg = 'rgba(251, 191, 36, 0.15)';
         fg = 'var(--yellow)';
-      } else if (s === 'đang nhập' || s === 'đang xử lý' || s === 'unloading' || s === 'processing') {
+      } else if (isUnloading) {
         bg = 'rgba(96, 165, 250, 0.15)';
         fg = 'var(--blue-light)';
         if (trip && trip.remainingMinutes != null) {
           text = `Đang nhập (Còn ${trip.remainingMinutes}p)`;
         }
-      } else if (s === 'đã nhận' || s === 'đã giao' || s === 'completed' || s === 'received') {
+      } else if (isReceived) {
         bg = 'rgba(52, 211, 153, 0.15)';
         fg = 'var(--green)';
         if (trip && trip.autoCompleted) {
@@ -591,7 +595,110 @@
         }
       }
       
+      // Nếu đã đăng nhập và là xe hợp lệ, hiển thị dropdown chọn trạng thái thủ công
+      if (window.currentUser && trip && trip.code) {
+        const optionWaiting = `<option value="waiting" ${isWaiting ? 'selected' : ''} style="background: #1e293b; color: var(--yellow);">⏳ Đang Chờ</option>`;
+        const optionUnloading = `<option value="unloading" ${isUnloading ? 'selected' : ''} style="background: #1e293b; color: var(--blue-light);">🚚 Đang Nhập</option>`;
+        const optionReceived = `<option value="received" ${isReceived ? 'selected' : ''} style="background: #1e293b; color: var(--green);">✅ Đã Nhận</option>`;
+        
+        return `
+          <select 
+            class="status-select" 
+            data-trip-code="${escapeHTML(trip.code)}"
+            onchange="handleStatusChange(this)"
+            style="
+              display: inline-block; 
+              padding: 2px 20px 2px 8px; 
+              border-radius: 4px; 
+              font-size: 0.7rem; 
+              font-weight: 600; 
+              background: ${bg} url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;10&quot; height=&quot;6&quot; viewBox=&quot;0 0 10 6&quot;><path fill=&quot;${encodeURIComponent(fg)}&quot; d=&quot;M0 0l5 5 5-5z&quot;/></svg>') no-repeat right 6px center; 
+              background-size: 8px 5px;
+              color: ${fg};
+              border: 1px solid rgba(255,255,255,0.05);
+              outline: none;
+              cursor: pointer;
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              appearance: none;
+            "
+          >
+            ${optionWaiting}
+            ${optionUnloading}
+            ${optionReceived}
+          </select>
+        `;
+      }
+      
       return `<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: ${bg}; color: ${fg};">${escapeHTML(text)}</span>`;
+    }
+
+    async function handleStatusChange(selectEl) {
+      const code = selectEl.dataset.tripCode;
+      const val = selectEl.value;
+      
+      const config = {
+        url: 'https://baizmeqkxslajxuzyfnu.supabase.co',
+        key: 'sb_publishable_VRLqjdMb3uIie89vbRXloA_xdak8hgy'
+      };
+      
+      selectEl.disabled = true;
+      
+      try {
+        let resp;
+        const headers = {
+          "apikey": config.key,
+          "Authorization": `Bearer ${config.key}`,
+          "Content-Type": "application/json"
+        };
+        
+        if (val === 'waiting') {
+          // DELETE record from Supabase
+          const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips?code=eq.${encodeURIComponent(code)}`;
+          resp = await fetch(url, {
+            method: 'DELETE',
+            headers: headers
+          });
+        } else {
+          // UPSERT record into Supabase
+          const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips`;
+          let startedAt;
+          if (val === 'unloading') {
+            startedAt = new Date().toISOString(); // Bắt đầu dỡ hàng bây giờ
+          } else {
+            const tAvg = getDockTAvg();
+            // Đã nhận: Đặt thời gian lùi về quá khứ quá T_avg phút
+            startedAt = new Date(Date.now() - (tAvg + 5) * 60 * 1000).toISOString();
+          }
+          
+          resp = await fetch(url, {
+            method: 'POST',
+            headers: {
+              ...headers,
+              "Prefer": "resolution=merge-duplicates"
+            },
+            body: JSON.stringify({ code: code, started_at: startedAt })
+          });
+        }
+        
+        if (!resp.ok) {
+          const errText = await resp.text();
+          throw new Error(errText || resp.statusText);
+        }
+        
+        // Tải lại dữ liệu dỡ hàng từ Supabase và vẽ lại bảng
+        await fetchSupabaseUnloadingTrips();
+        runDockSimulation();
+        
+      } catch (e) {
+        console.error("Lỗi cập nhật trạng thái chuyến xe:", e);
+        alert(`❌ Cập nhật thất bại!\n\nLỗi: ${e.message}\n\nHướng dẫn: Hãy đảm bảo ní đã bật quyền ghi (RLS Policy) cho role 'anon' trên bảng 'unloading_trips' trong Supabase.`);
+        // Reload lại dữ liệu để phục hồi giao diện cũ
+        await fetchSupabaseUnloadingTrips();
+        runDockSimulation();
+      } finally {
+        selectEl.disabled = false;
+      }
     }
 
     async function fetchTripScanData() {
@@ -1256,6 +1363,7 @@
     }
     
     function setLoggedInUser(user) {
+      window.currentUser = user;
       document.getElementById('login-overlay').style.display = 'none';
       const profileEl = document.getElementById('user-profile');
       if (profileEl) {
@@ -1291,6 +1399,7 @@
     }
     
     function logout() {
+      window.currentUser = null;
       sessionStorage.removeItem(SESSION_KEY);
       const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
       if (supabaseConfig && window.supabase) {
@@ -1300,6 +1409,8 @@
         } catch(e) {}
       }
       showLoginOverlay();
+      const currentFilter = localStorage.getItem('ktc_filter_type') || 'all';
+      renderDashboard(currentFilter);
     }
     
     document.addEventListener('DOMContentLoaded', () => {
