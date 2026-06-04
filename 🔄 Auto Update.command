@@ -9,7 +9,7 @@ echo ""
 echo "[1/3] Đang đồng bộ dữ liệu từ GitHub..."
 # Bỏ các thay đổi của file tự sinh để tránh xung đột khi pull
 git checkout HEAD -- tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx 2>/dev/null
-git pull origin main
+git pull origin main --rebase
 if [ $? -ne 0 ]; then
     echo "⚠️ Không thể tự động pull từ GitHub. Bỏ qua và chạy tiếp..."
 fi
