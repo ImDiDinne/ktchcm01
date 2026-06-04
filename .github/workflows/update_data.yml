@@ -15,12 +15,14 @@ jobs:
 
     steps:
     - name: 📂 Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: 🐍 Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     - name: 📦 Install Dependencies
       run: |
@@ -36,15 +38,17 @@ jobs:
         python auto_fetch_data.py --run-export
 
     - name: 🚀 Commit & Push Changes
-      if: always()
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
         git add -f tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx
         if git diff --staged --quiet; then
-          echo "No changes in data files. Skipping commit."
+          echo "✅ No changes in data files. Skipping commit."
         else
           git commit -m "chore(data): auto-update inventory data [skip ci]"
+          # Pull rebase trước để tránh conflict với local pushes
+          git pull origin main --rebase --strategy-option=theirs || true
           git push origin main
+          echo "🚀 Data pushed successfully!"
         fi
