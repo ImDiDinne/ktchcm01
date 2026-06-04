@@ -18,16 +18,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 
-  <!-- Tải CSS và JS động bằng DOM manipulation thay vì document.write() để tránh lỗ hổng XSS -->
+  <!-- Tải CSS động và JS dữ liệu (cần đồng bộ để TONKHO_DATA sẵn sàng trước khi render) -->
   <script>
   (function() {
     var t = Date.now();
     var link = document.createElement('link');
     link.rel = 'stylesheet'; link.href = 'style.css?t=' + t;
     document.head.appendChild(link);
-    var script = document.createElement('script');
-    script.src = 'tonkho_data.js?t=' + t;
-    document.head.appendChild(script);
+    document.write('<script src="tonkho_data.js?t=' + t + '"><\/script>');
   })();
   </script>
 </head>
