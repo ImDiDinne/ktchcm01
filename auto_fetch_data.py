@@ -417,10 +417,6 @@ def main():
             subtitle="Phiên đăng nhập hết hạn",
             message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
         )
-        send_telegram_notification(
-            "⚠️ <b>KTC HCM 01: Metabase Session Hết Hạn!</b>\n"
-            "Dữ liệu dashboard dừng cập nhật. Vui lòng chạy file <code>🔄 Cập Nhật Session.command</code> ở local hoặc cập nhật METABASE_SESSION trong GitHub Secrets."
-        )
         if not already_expired:
             open_terminal_for_session_update()
         sys.exit(1)
@@ -456,10 +452,6 @@ def main():
                         subtitle="Phiên đăng nhập hết hạn",
                         message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
                     )
-                    send_telegram_notification(
-                        "⚠️ <b>KTC HCM 01: Metabase Session Hết Hạn!</b>\n"
-                        "Dữ liệu dashboard dừng cập nhật. Vui lòng chạy file <code>🔄 Cập Nhật Session.command</code> ở local hoặc cập nhật METABASE_SESSION trong GitHub Secrets."
-                    )
                     if not already_expired:
                         open_terminal_for_session_update()
                 else:
@@ -473,10 +465,6 @@ def main():
                                 title="KTC HCM 01 Dashboard",
                                 subtitle="Lỗi tải dữ liệu",
                                 message="Không thể tải dữ liệu từ Metabase. Có thể Session Token đã hết hạn."
-                            )
-                            send_telegram_notification(
-                                "⚠️ <b>KTC HCM 01: Lỗi Tải Dữ Liệu!</b>\n"
-                                "Không thể tải dữ liệu từ Metabase. Vui lòng kiểm tra lại Session Token hoặc kết nối mạng."
                             )
                             if not already_expired:
                                 open_terminal_for_session_update()
@@ -497,10 +485,6 @@ def main():
                     title="KTC HCM 01 Dashboard",
                     subtitle="Phiên đăng nhập hết hạn",
                     message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
-                )
-                send_telegram_notification(
-                    "⚠️ <b>KTC HCM 01: Metabase Session Hết Hạn!</b>\n"
-                    "Dữ liệu dashboard dừng cập nhật. Vui lòng chạy file <code>🔄 Cập Nhật Session.command</code> ở local hoặc cập nhật METABASE_SESSION trong GitHub Secrets."
                 )
                 if not already_expired:
                     open_terminal_for_session_update()
