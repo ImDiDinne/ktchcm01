@@ -551,7 +551,7 @@
       };
       
       try {
-        const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips?select=*`;
+        const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips?select=*&order=started_at.desc&limit=5000`;
         const resp = await fetch(url, {
           headers: {
             "apikey": config.key,
