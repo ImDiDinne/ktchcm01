@@ -1736,6 +1736,14 @@
     // Refresh mỗi 10 phút (600,000ms)
     setInterval(autoRefreshData, 600000);
 
+    // Tự động làm mới dữ liệu TripScan mỗi 30 giây để cập nhật trạng thái dỡ hàng tức thì
+    setInterval(() => {
+      const dockTabBtn = document.getElementById('tab-btn-dock');
+      if (dockTabBtn && dockTabBtn.classList.contains('active')) {
+        fetchTripScanData();
+      }
+    }, 30000);
+
   })();
   </script>
 
