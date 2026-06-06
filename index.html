@@ -202,8 +202,31 @@
         </div>
       </div>
 
+      <!-- Day Overview Summary Banner -->
+      <div id="dock-day-summary-banner" style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; margin-top: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.5rem;">📊</span>
+          <div>
+            <div style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem;" id="dock-summary-title">Tình Hình Tổng Quan</div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;" id="dock-summary-text">
+              Đang tải tình hình tổng quan...
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Settings & Controls Grid -->
       <div style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+        <!-- Date Selector -->
+        <div class="chart-card" style="flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;">
+          <div class="card-title">📅 Chọn Ngày Xem Báo Cáo Inbound</div>
+          <div style="margin-top: 8px;">
+            <select id="inbound-date-select" style="width: 100%; background: #1e293b; color: var(--text-primary); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.9rem; cursor: pointer; outline: none;">
+              <!-- Dates will be dynamically populated -->
+            </select>
+          </div>
+        </div>
+
         <!-- Average Unloading Time Slider -->
         <div class="chart-card" style="flex: 1; min-width: 320px; display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;">
           <div class="card-title">⏱️ Thời Gian Dỡ Hàng Trung Bình (T_avg)</div>
@@ -300,11 +323,12 @@
                 <th style="text-align: right;">Slot</th>
                 <th style="text-align: right;">Giờ Quét</th>
                 <th style="text-align: right;">Nhân Viên Ghi Nhận</th>
+                <th style="text-align: right;">Thời Gian Chờ/Dỡ</th>
                 <th style="text-align: right; padding-right: 20px;">Trạng Thái</th>
               </tr>
             </thead>
             <tbody id="dock-trips-body">
-              <tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">Đang tải danh sách...</td></tr>
+              <tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Đang tải danh sách...</td></tr>
             </tbody>
           </table>
         </div>
@@ -390,6 +414,7 @@
 
     // ── TripScan / Dock Control Logic variables & helpers ──
     let tripScanData = [];
+    let selectedInboundDate = ''; // 'DD/MM/YYYY' e.g. '06/06/2026'
 
     function getTodayString() {
       const now = new Date();
@@ -442,8 +467,11 @@
 
     function getWaitTimeMinutes(trip) {
       if (!trip.time) return 0;
+      
       const todayStr = getTodayString();
-      if (!isSameDay(trip.date, todayStr)) return 0;
+      const targetDateStr = selectedInboundDate || todayStr;
+      
+      if (!isSameDay(trip.date, targetDateStr)) return 0;
       
       const parts = trip.time.split(':');
       if (parts.length < 2) return 0;
@@ -452,16 +480,28 @@
       const tripMin = parseInt(parts[1], 10);
       const tripSec = parts.length > 2 ? parseInt(parts[2], 10) : 0;
       
-      const now = new Date();
-      const tzOffset = 7 * 60;
-      const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
-      
-      const tripDateObj = new Date(localTime);
-      tripDateObj.setHours(tripHour, tripMin, tripSec, 0);
-      
-      const diffMs = localTime - tripDateObj;
-      if (diffMs < 0) return 0;
-      return Math.floor(diffMs / (1000 * 60));
+      if (isSameDay(targetDateStr, todayStr)) {
+        const isCompleted = trip.status === 'Đã nhận' || trip.status === 'Đã giao' || trip.status.toLowerCase() === 'received' || trip.status.toLowerCase() === 'completed';
+        if (isCompleted && trip.syncedAt) {
+          return getDurationMinutes(trip.time, trip.syncedAt);
+        }
+        
+        const now = new Date();
+        const tzOffset = 7 * 60;
+        const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
+        
+        const tripDateObj = new Date(localTime);
+        tripDateObj.setHours(tripHour, tripMin, tripSec, 0);
+        
+        const diffMs = localTime - tripDateObj;
+        if (diffMs < 0) return 0;
+        return Math.floor(diffMs / (1000 * 60));
+      } else {
+        if (trip.syncedAt) {
+          return getDurationMinutes(trip.time, trip.syncedAt);
+        }
+        return 0;
+      }
     }
 
     function getDockTAvg() {
@@ -536,30 +576,123 @@
       }
     }
 
-    function getTodayTrips() {
+    function getDurationMinutes(arrivalTimeStr, syncedAtStr) {
+      if (!arrivalTimeStr || !syncedAtStr) return 0;
+      try {
+        const arrParts = arrivalTimeStr.split(':');
+        if (arrParts.length < 2) return 0;
+        const arrH = parseInt(arrParts[0], 10);
+        const arrM = parseInt(arrParts[1], 10);
+        const arrS = arrParts.length > 2 ? parseInt(arrParts[2], 10) : 0;
+        
+        const spaceParts = syncedAtStr.split(' ');
+        const syncTimeStr = spaceParts[0];
+        const syncParts = syncTimeStr.split(':');
+        if (syncParts.length < 2) return 0;
+        const syncH = parseInt(syncParts[0], 10);
+        const syncM = parseInt(syncParts[1], 10);
+        const syncS = syncParts.length > 2 ? parseInt(syncParts[2], 10) : 0;
+        
+        const arrTotalSeconds = arrH * 3600 + arrM * 60 + arrS;
+        const syncTotalSeconds = syncH * 3600 + syncM * 60 + syncS;
+        
+        let diffSeconds = syncTotalSeconds - arrTotalSeconds;
+        if (diffSeconds < 0) {
+          diffSeconds += 24 * 3600;
+        }
+        return Math.floor(diffSeconds / 60);
+      } catch(e) {
+        console.error("Error calculating duration:", e);
+        return 0;
+      }
+    }
+
+    function calculateAverageProcessingTime(trips) {
+      let totalMin = 0;
+      let count = 0;
+      trips.forEach(t => {
+        const isCompleted = t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
+        if (isCompleted && t.syncedAt) {
+          totalMin += getDurationMinutes(t.time, t.syncedAt);
+          count++;
+        } else if (t.code && unloadingTripsMap[t.code]) {
+          const startedAt = new Date(unloadingTripsMap[t.code]);
+          const elapsed = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
+          if (elapsed > 0) {
+            totalMin += elapsed;
+            count++;
+          }
+        }
+      });
+      return count > 0 ? (totalMin / count).toFixed(1) : '—';
+    }
+
+    function populateInboundDates() {
+      const selectEl = document.getElementById('inbound-date-select');
+      if (!selectEl) return;
+      
+      const uniqueDates = [...new Set(tripScanData.map(t => t.date))].filter(Boolean);
+      
+      uniqueDates.sort((a, b) => {
+        const d1 = parseDateDDMMYYYY(a);
+        const d2 = parseDateDDMMYYYY(b);
+        if (!d1 || !d2) return b.localeCompare(a);
+        const t1 = new Date(d1.year, d1.month, d1.day).getTime();
+        const t2 = new Date(d2.year, d2.month, d2.day).getTime();
+        return t2 - t1;
+      });
+      
+      const previousValue = selectEl.value || selectedInboundDate;
+      selectEl.innerHTML = '';
+      
       const todayStr = getTodayString();
-      const trips = tripScanData.filter(t => isSameDay(t.date, todayStr));
+      if (!uniqueDates.includes(todayStr)) {
+        uniqueDates.unshift(todayStr);
+      }
+      
+      uniqueDates.forEach(dateStr => {
+        const option = document.createElement('option');
+        option.value = dateStr;
+        option.textContent = dateStr === todayStr ? `Hôm nay (${dateStr})` : dateStr;
+        selectEl.appendChild(option);
+      });
+      
+      if (previousValue && uniqueDates.includes(previousValue)) {
+        selectEl.value = previousValue;
+        selectedInboundDate = previousValue;
+      } else {
+        selectEl.value = todayStr;
+        selectedInboundDate = todayStr;
+      }
+    }
+
+    function getTodayTrips() {
+      const targetDateStr = selectedInboundDate || getTodayString();
+      const trips = tripScanData.filter(t => isSameDay(t.date, targetDateStr));
       const tAvg = getDockTAvg();
       
-      console.log(`[DEBUG] getTodayTrips: ${trips.length} trips today, unloadingTripsMap keys:`, Object.keys(unloadingTripsMap));
+      const todayStr = getTodayString();
+      const isViewingToday = isSameDay(targetDateStr, todayStr);
+      
+      console.log(`[DEBUG] getTodayTrips for ${targetDateStr}: ${trips.length} trips, unloadingTripsMap keys:`, Object.keys(unloadingTripsMap));
       
       trips.forEach(t => {
         if (t.code && unloadingTripsMap[t.code]) {
-          console.log(`[DEBUG] MATCH found: ${t.code}, started_at: ${unloadingTripsMap[t.code]}, current status: ${t.status}`);
           const isCompleted = t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
           if (!isCompleted) {
-            const startedAt = new Date(unloadingTripsMap[t.code]);
-            const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
-            console.log(`[DEBUG] elapsedMin: ${elapsedMin}, tAvg: ${tAvg}`);
-            
-            if (elapsedMin >= tAvg) {
-              t.status = 'Đã nhận';
-              t.autoCompleted = true;
+            if (isViewingToday) {
+              const startedAt = new Date(unloadingTripsMap[t.code]);
+              const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
+              if (elapsedMin >= tAvg) {
+                t.status = 'Đã nhận';
+                t.autoCompleted = true;
+              } else {
+                t.status = 'Đang nhập';
+                t.remainingMinutes = tAvg - elapsedMin;
+              }
             } else {
-              t.status = 'Đang nhập';
-              t.remainingMinutes = tAvg - elapsedMin;
+              t.status = 'Đã nhận';
             }
-            console.log(`[DEBUG] New status: ${t.status}`);
           }
         }
       });
@@ -720,6 +853,7 @@
         if (result && result.status === 'success' && Array.isArray(result.data)) {
           tripScanData = result.data;
           console.log(`Successfully fetched ${tripScanData.length} trips from TripScan.`);
+          populateInboundDates();
           runDockSimulation();
         } else {
           console.error('Invalid TripScan data structure:', result);
@@ -780,22 +914,61 @@
       }
       
       renderDockKPIs(todayTrips);
+      updateDaySummaryBanner(todayTrips);
       renderFlowChart(simulation);
       renderAdvisory(simulation, tAvg);
       renderOverdueTable(todayTrips);
       renderTodayTripsTable(todayTrips);
     }
 
+    function updateDaySummaryBanner(todayTrips) {
+      const banner = document.getElementById('dock-day-summary-banner');
+      if (!banner) return;
+      
+      const targetDateStr = selectedInboundDate || getTodayString();
+      const isToday = isSameDay(targetDateStr, getTodayString());
+      const titleLabel = isToday ? `Hôm Nay (${targetDateStr})` : `Ngày ${targetDateStr}`;
+      
+      const totalTrips = todayTrips.length;
+      const overdueTripsCount = todayTrips.filter(t => getWaitTimeMinutes(t) > 30).length;
+      const slaPercent = totalTrips > 0 ? ((totalTrips - overdueTripsCount) / totalTrips * 100).toFixed(1) : '100.0';
+      const avgTime = calculateAverageProcessingTime(todayTrips);
+      
+      const titleEl = document.getElementById('dock-summary-title');
+      if (titleEl) titleEl.textContent = `📊 Tình Hình Tổng Quan ${titleLabel}`;
+      
+      const textEl = document.getElementById('dock-summary-text');
+      if (textEl) {
+        textEl.innerHTML = `
+          Tổng số xe đến trạm: <strong>${totalTrips} xe</strong>. 
+          Số xe chờ/xử lý quá hạn (>30p): <strong style="color: ${overdueTripsCount > 0 ? 'var(--red)' : 'var(--green)'};">${overdueTripsCount} xe</strong>. 
+          Tỷ lệ hoàn thành đúng hạn SLA: <strong style="color: ${parseFloat(slaPercent) >= 95 ? 'var(--green)' : 'var(--yellow)'};">${slaPercent}%</strong>. 
+          Thời gian chờ/dỡ trung bình: <strong>${avgTime} phút/xe</strong>.
+        `;
+      }
+    }
+
     function renderDockKPIs(todayTrips) {
+      const targetDateStr = selectedInboundDate || getTodayString();
+      const isToday = isSameDay(targetDateStr, getTodayString());
+      const titleLabel = isToday ? "Hôm Nay" : targetDateStr;
+
       const totalTrips = todayTrips.length;
       const waitingCount = todayTrips.filter(t => t.status === 'Đang Chờ' || t.status === 'Đang chờ' || t.status.toLowerCase() === 'waiting').length;
       const enteringCount = todayTrips.filter(t => t.status === 'Đang nhập' || t.status === 'Đang xử lý' || t.status.toLowerCase() === 'unloading' || t.status.toLowerCase() === 'processing').length;
       const receivedCount = todayTrips.filter(t => t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed').length;
-      
+      const overdueTripsCount = todayTrips.filter(t => getWaitTimeMinutes(t) > 30).length;
+
+      const kpiCards = document.querySelectorAll('#tab-content-dock .kpi-card');
+      if (kpiCards.length >= 5) {
+        kpiCards[0].querySelector('.kpi-label').textContent = `Tổng Chuyến ${titleLabel}`;
+        kpiCards[4].querySelector('.kpi-label').textContent = `Chờ Quá Hạn (>30p)`;
+      }
+
       const totalTripsEl = document.getElementById('dock-total-trips');
       const totalTripsSub = document.getElementById('dock-sub-total');
       if (totalTripsEl) totalTripsEl.textContent = totalTrips;
-      if (totalTripsSub) totalTripsSub.textContent = `${totalTrips} xe tải hôm nay`;
+      if (totalTripsSub) totalTripsSub.textContent = `${totalTrips} xe tải trong ngày`;
       
       const waitingEl = document.getElementById('dock-total-waiting');
       const waitingSub = document.getElementById('dock-sub-waiting');
@@ -811,6 +984,11 @@
       const receivedSub = document.getElementById('dock-sub-received');
       if (receivedEl) receivedEl.textContent = receivedCount;
       if (receivedSub) receivedSub.textContent = `${receivedCount} xe đã hoàn tất`;
+
+      const overdueKpi = document.getElementById('dock-overdue-count');
+      const overdueSub = document.getElementById('dock-sub-overdue');
+      if (overdueKpi) overdueKpi.textContent = overdueTripsCount;
+      if (overdueSub) overdueSub.textContent = `> 30p chờ (${overdueTripsCount} xe)`;
     }
 
     function renderFlowChart(simulation) {
@@ -931,8 +1109,6 @@
       tbody.innerHTML = '';
       
       const overdueTrips = todayTrips.filter(t => {
-        const isWaiting = t.status === 'Đang Chờ' || t.status === 'Đang chờ' || t.status.toLowerCase() === 'waiting';
-        if (!isWaiting) return false;
         const waitMin = getWaitTimeMinutes(t);
         return waitMin > 30;
       });
@@ -941,18 +1117,13 @@
         badge.textContent = overdueTrips.length;
       }
       
-      const overdueKpi = document.getElementById('dock-overdue-count');
-      const overdueSub = document.getElementById('dock-sub-overdue');
-      if (overdueKpi) overdueKpi.textContent = overdueTrips.length;
-      if (overdueSub) overdueSub.textContent = `> 30p chờ (${overdueTrips.length} xe)`;
-      
       if (overdueTrips.length > 0) {
         overdueTrips.sort((a, b) => getWaitTimeMinutes(b) - getWaitTimeMinutes(a));
         overdueTrips.forEach(t => {
           const waitMin = getWaitTimeMinutes(t);
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td style="text-align: left; padding: 6px 10px; font-weight: 600; color: var(--red);">${escapeHTML(t.vehicle || 'N/A')}</td>
+            <td style="text-align: left; padding: 6px 10px; font-weight: 600; color: var(--red);">${escapeHTML(t.vehicle || t.code || 'N/A')}</td>
             <td style="text-align: right; padding: 6px 10px; font-family: 'JetBrains Mono', monospace; color: var(--yellow);">${waitMin} phút</td>
             <td style="text-align: right; padding: 6px 10px; color: var(--text-muted);">${escapeHTML(t.slot || 'N/A')}</td>
           `;
@@ -964,6 +1135,15 @@
     }
 
     function renderTodayTripsTable(todayTrips) {
+      const targetDateStr = selectedInboundDate || getTodayString();
+      const isToday = isSameDay(targetDateStr, getTodayString());
+      const titleLabel = isToday ? "Hôm Nay" : targetDateStr;
+
+      const titleEl = document.querySelector('#tab-content-dock .table-card .card-title');
+      if (titleEl) {
+        titleEl.textContent = `📋 Danh Sách Chi Tiết Xe Tải ${titleLabel} (TripScan)`;
+      }
+
       const tbody = document.getElementById('dock-trips-body');
       if (!tbody) return;
       tbody.innerHTML = '';
@@ -976,6 +1156,7 @@
         });
         
         todayTrips.forEach(t => {
+          const waitMin = getWaitTimeMinutes(t);
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td style="text-align: left; padding-left: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted);">${escapeHTML(t.code || 'N/A')}</td>
@@ -984,12 +1165,13 @@
             <td style="text-align: right; font-family: 'JetBrains Mono', monospace;">${escapeHTML(t.slot || '—')}</td>
             <td style="text-align: right; font-family: 'JetBrains Mono', monospace;">${escapeHTML(t.time || '—')}</td>
             <td style="text-align: right; font-size: 0.72rem; color: var(--text-muted);">${escapeHTML(t.username ? (t.username.split(' - ')[1] || t.username) : '—')}</td>
+            <td style="text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: ${waitMin > 30 ? 'var(--red)' : 'var(--text-muted)'};">${waitMin} phút</td>
             <td style="text-align: right; padding-right: 20px;">${getStatusBadge(t.status, t)}</td>
           `;
           tbody.appendChild(tr);
         });
       } else {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">Không có chuyến xe nào hôm nay</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Không có chuyến xe nào trong ngày</td></tr>`;
       }
     }
 
@@ -1656,6 +1838,7 @@
           if (tripScanData.length === 0) {
             fetchTripScanData();
           } else {
+            populateInboundDates();
             runDockSimulation();
           }
         });
@@ -1696,6 +1879,14 @@
           const val = simTAvgInput.value;
           simTAvgVal.textContent = `${val} phút`;
           saveDockTAvg(val);
+          runDockSimulation();
+        });
+      }
+
+      const inboundDateSelect = document.getElementById('inbound-date-select');
+      if (inboundDateSelect) {
+        inboundDateSelect.addEventListener('change', (e) => {
+          selectedInboundDate = e.target.value;
           runDockSimulation();
         });
       }
