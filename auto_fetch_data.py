@@ -392,7 +392,7 @@ def main():
         print('  METABASE_SESSION="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"')
         print()
         print("  Lấy token: Mở data-bi.ghn.vn → F12 → Application")
-        print("  → Cookies → tìm 'metabase.DEVICE' → copy giá trị")
+        print("  → Cookies → tìm 'metabase.SESSION' → copy giá trị (dạng UUID)")
         print()
         print("─── Cách 2: Email/Password ───")
         print('  METABASE_USERNAME="email@ghn.vn"')

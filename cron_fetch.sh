@@ -14,6 +14,28 @@ echo "========================================" >> "$LOG"
 echo "🔄 $(date '+%d/%m/%Y %H:%M:%S') — Bắt đầu tải dữ liệu" >> "$LOG"
 echo "========================================" >> "$LOG"
 
+# Đồng bộ dữ liệu từ GitHub trước khi chạy để tránh xung đột
+echo "🔄 Đang đồng bộ dữ liệu từ GitHub..." >> "$LOG"
+git checkout HEAD -- tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx >> "$LOG" 2>&1
+
+if ! git diff --quiet || ! git diff --cached --quiet; then
+    HAS_CHANGES=1
+    git stash >> "$LOG" 2>&1
+else
+    HAS_CHANGES=0
+fi
+
+git pull origin main --rebase >> "$LOG" 2>&1
+PULL_STATUS=$?
+
+if [ $HAS_CHANGES -eq 1 ]; then
+    git stash pop >> "$LOG" 2>&1
+fi
+
+if [ $PULL_STATUS -ne 0 ]; then
+    echo "⚠️ Không thể pull từ GitHub, tiếp tục chạy..." >> "$LOG"
+fi
+
 # Tải dữ liệu từ Metabase + chạy export
 python3 auto_fetch_data.py --run-export >> "$LOG" 2>&1
 EXIT_CODE=$?
@@ -25,6 +47,7 @@ if [ $EXIT_CODE -eq 0 ]; then
     git add -f tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx >> "$LOG" 2>&1
     TIMESTAMP=$(date "+%d/%m/%Y %H:%M")
     git commit -m "chore(data): auto-update $TIMESTAMP" >> "$LOG" 2>&1
+    git pull origin main --rebase --strategy-option=ours >> "$LOG" 2>&1
     git push origin main >> "$LOG" 2>&1
     
     if [ $? -eq 0 ]; then
