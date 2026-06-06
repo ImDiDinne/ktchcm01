@@ -57,6 +57,7 @@ class MetabaseClient:
         self.username = username
         self.password = password
         self.session_token = session_token
+        self.auth_failed = False
 
     def login(self):
         """Đăng nhập Metabase, lấy session token."""
@@ -77,6 +78,7 @@ class MetabaseClient:
                     self.session_token = None
                     return self._login_with_credentials()
                 print("❌ Hãy lấy lại session token mới (xem hướng dẫn bên dưới).")
+                self.auth_failed = True
                 return False
 
         return self._login_with_credentials()
@@ -85,6 +87,7 @@ class MetabaseClient:
         """Đăng nhập bằng username/password."""
         if not self.username or not self.password:
             print("❌ Thiếu thông tin đăng nhập.")
+            self.auth_failed = True
             return False
 
         print(f"🔑 Đăng nhập Metabase ({self.base_url})...")
@@ -116,6 +119,7 @@ class MetabaseClient:
 
             print("❌ Đăng nhập thất bại. Nếu bạn đăng nhập bằng Google/SSO:")
             print("   → Dùng METABASE_SESSION trong .env (xem hướng dẫn)")
+            self.auth_failed = True
             return False
         except requests.exceptions.ConnectionError:
             print(f"❌ Không thể kết nối tới {self.base_url}. Kiểm tra mạng.")
@@ -462,19 +466,22 @@ def main():
                     success = fetch_once()
                     if not success:
                         print("❌ Tải dữ liệu thất bại.")
-                        already_expired = is_already_marked_expired()
-                        set_session_expired_flag(True)
-                        send_macos_notification(
-                            title="KTC HCM 01 Dashboard",
-                            subtitle="Lỗi tải dữ liệu",
-                            message="Không thể tải dữ liệu từ Metabase. Có thể Session Token đã hết hạn."
-                        )
-                        send_telegram_notification(
-                            "⚠️ <b>KTC HCM 01: Lỗi Tải Dữ Liệu!</b>\n"
-                            "Không thể tải dữ liệu từ Metabase. Vui lòng kiểm tra lại Session Token hoặc kết nối mạng."
-                        )
-                        if not already_expired:
-                            open_terminal_for_session_update()
+                        if client.auth_failed:
+                            already_expired = is_already_marked_expired()
+                            set_session_expired_flag(True)
+                            send_macos_notification(
+                                title="KTC HCM 01 Dashboard",
+                                subtitle="Lỗi tải dữ liệu",
+                                message="Không thể tải dữ liệu từ Metabase. Có thể Session Token đã hết hạn."
+                            )
+                            send_telegram_notification(
+                                "⚠️ <b>KTC HCM 01: Lỗi Tải Dữ Liệu!</b>\n"
+                                "Không thể tải dữ liệu từ Metabase. Vui lòng kiểm tra lại Session Token hoặc kết nối mạng."
+                            )
+                            if not already_expired:
+                                open_terminal_for_session_update()
+                        else:
+                            print("⚠️ Lỗi mạng hoặc Metabase phản hồi chậm (Timeout). Bỏ qua và giữ nguyên trạng thái cũ.")
                 print(f"\n⏰ Chờ {args.loop} phút đến lần tiếp theo...")
                 time.sleep(args.loop * 60)
             except KeyboardInterrupt:
@@ -483,19 +490,22 @@ def main():
     else:
         success = fetch_once()
         if not success:
-            already_expired = is_already_marked_expired()
-            set_session_expired_flag(True)
-            send_macos_notification(
-                title="KTC HCM 01 Dashboard",
-                subtitle="Phiên đăng nhập hết hạn",
-                message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
-            )
-            send_telegram_notification(
-                "⚠️ <b>KTC HCM 01: Metabase Session Hết Hạn!</b>\n"
-                "Dữ liệu dashboard dừng cập nhật. Vui lòng chạy file <code>🔄 Cập Nhật Session.command</code> ở local hoặc cập nhật METABASE_SESSION trong GitHub Secrets."
-            )
-            if not already_expired:
-                open_terminal_for_session_update()
+            if client.auth_failed:
+                already_expired = is_already_marked_expired()
+                set_session_expired_flag(True)
+                send_macos_notification(
+                    title="KTC HCM 01 Dashboard",
+                    subtitle="Phiên đăng nhập hết hạn",
+                    message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
+                )
+                send_telegram_notification(
+                    "⚠️ <b>KTC HCM 01: Metabase Session Hết Hạn!</b>\n"
+                    "Dữ liệu dashboard dừng cập nhật. Vui lòng chạy file <code>🔄 Cập Nhật Session.command</code> ở local hoặc cập nhật METABASE_SESSION trong GitHub Secrets."
+                )
+                if not already_expired:
+                    open_terminal_for_session_update()
+            else:
+                print("⚠️ Lỗi mạng hoặc Metabase phản hồi chậm (Timeout). Bỏ qua và giữ nguyên trạng thái cũ.")
             sys.exit(1)
         sys.exit(0)
 
