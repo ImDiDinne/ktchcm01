@@ -551,7 +551,10 @@
       };
       
       try {
-        const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips?select=*&order=started_at.desc&limit=5000`;
+        const dateLimit = new Date();
+        dateLimit.setDate(dateLimit.getDate() - 14); // Chỉ lấy dữ liệu trong 14 ngày qua để tối ưu dung lượng và tốc độ
+        const isoStr = dateLimit.toISOString();
+        const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips?select=*&started_at=gte.${isoStr}&order=started_at.desc&limit=5000`;
         const resp = await fetch(url, {
           headers: {
             "apikey": config.key,
