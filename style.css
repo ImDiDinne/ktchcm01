@@ -1268,3 +1268,27 @@ body::before {
 .dock-advisory-card.info {
   border-left-color: var(--yellow);
 }
+
+/* ── Dock Trips Table: fit all columns without horizontal scroll ── */
+#dock-trips-table th:first-child,
+#dock-trips-table td:first-child {
+  min-width: 0;
+  padding-left: 10px;
+}
+#dock-trips-table th,
+#dock-trips-table td {
+  padding: 6px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+}
+#dock-trips-table th:last-child,
+#dock-trips-table td:last-child {
+  padding-right: 6px;
+}
+#dock-trips-table .status-select {
+  max-width: 100%;
+  font-size: 0.65rem !important;
+  padding: 2px 16px 2px 4px !important;
+}

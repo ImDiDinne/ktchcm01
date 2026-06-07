@@ -313,18 +313,28 @@
         <div class="card-header">
           <div class="card-title">📋 Danh Sách Chi Tiết Xe Tải Hôm Ngay (TripScan)</div>
         </div>
-        <div class="table-wrapper" style="max-height: 380px; overflow-y: auto;">
-          <table class="pivot-table" id="dock-trips-table" style="width: 100%;">
+        <div class="table-wrapper" style="max-height: 380px; overflow-y: auto; overflow-x: hidden;">
+          <table class="pivot-table" id="dock-trips-table" style="width: 100%; table-layout: fixed; font-size: 0.72rem;">
+            <colgroup>
+              <col style="width: 10%;">
+              <col style="width: 12%;">
+              <col style="width: 9%;">
+              <col style="width: 7%;">
+              <col style="width: 10%;">
+              <col style="width: 18%;">
+              <col style="width: 14%;">
+              <col style="width: 10%;">
+            </colgroup>
             <thead>
               <tr>
-                <th style="text-align: left; padding-left: 20px;">Mã Chuyến Đi</th>
-                <th style="text-align: left;">Biển Số Xe</th>
-                <th style="text-align: left;">Tải Trọng</th>
-                <th style="text-align: right;">Slot</th>
-                <th style="text-align: right;">Giờ Quét</th>
-                <th style="text-align: right;">Nhân Viên Ghi Nhận</th>
-                <th style="text-align: right;">Thời Gian Chờ/Dỡ</th>
-                <th style="text-align: right; padding-right: 20px;">Trạng Thái</th>
+                <th style="text-align: left; padding-left: 10px;">Huyện Đi</th>
+                <th style="text-align: left;">Biển Số</th>
+                <th style="text-align: center;">Tải Trọng</th>
+                <th style="text-align: center;">Slot</th>
+                <th style="text-align: center;">Giờ Quét</th>
+                <th style="text-align: right;">NV Ghi Nhận</th>
+                <th style="text-align: right;">Chờ/Dỡ</th>
+                <th style="text-align: center; padding-right: 6px;">T.Thái</th>
               </tr>
             </thead>
             <tbody id="dock-trips-body">
@@ -744,12 +754,13 @@
             onchange="handleStatusChange(this)"
             style="
               display: inline-block; 
-              padding: 2px 20px 2px 8px; 
+              padding: 2px 16px 2px 4px; 
               border-radius: 4px; 
-              font-size: 0.7rem; 
+              font-size: 0.65rem; 
               font-weight: 600; 
-              background: ${bg} url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;10&quot; height=&quot;6&quot; viewBox=&quot;0 0 10 6&quot;><path fill=&quot;${encodeURIComponent(fg)}&quot; d=&quot;M0 0l5 5 5-5z&quot;/></svg>') no-repeat right 6px center; 
-              background-size: 8px 5px;
+              max-width: 100%;
+              background: ${bg} url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;10&quot; height=&quot;6&quot; viewBox=&quot;0 0 10 6&quot;><path fill=&quot;${encodeURIComponent(fg)}&quot; d=&quot;M0 0l5 5 5-5z&quot;/></svg>') no-repeat right 4px center; 
+              background-size: 7px 4px;
               color: ${fg};
               border: 1px solid rgba(255,255,255,0.05);
               outline: none;
@@ -766,7 +777,7 @@
         `;
       }
       
-      return `<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: ${bg}; color: ${fg};">${escapeHTML(text)}</span>`;
+      return `<span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; background: ${bg}; color: ${fg}; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(text)}</span>`;
     }
 
     async function handleStatusChange(selectEl) {
@@ -1162,14 +1173,14 @@
           const waitMin = getWaitTimeMinutes(t);
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td style="text-align: left; padding-left: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted);">${escapeHTML(t.code || 'N/A')}</td>
-            <td style="text-align: left; font-weight: 600; color: var(--text-primary);">${escapeHTML(t.vehicle || 'N/A')}</td>
-            <td style="text-align: left; font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(t.capacity || '—')}</td>
-            <td style="text-align: right; font-family: 'JetBrains Mono', monospace;">${escapeHTML(t.slot || '—')}</td>
-            <td style="text-align: right; font-family: 'JetBrains Mono', monospace;">${escapeHTML(t.time || '—')}</td>
-            <td style="text-align: right; font-size: 0.72rem; color: var(--text-muted);">${escapeHTML(t.username ? (t.username.split(' - ')[1] || t.username) : '—')}</td>
-            <td style="text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: ${waitMin > 30 ? 'var(--red)' : 'var(--text-muted)'};">${waitMin} phút</td>
-            <td style="text-align: right; padding-right: 20px;">${getStatusBadge(t.status, t)}</td>
+            <td style="text-align: left; padding-left: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(t.code || 'N/A')}">${escapeHTML(t.code || 'N/A')}</td>
+            <td style="text-align: left; font-weight: 600; font-size: 0.72rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(t.vehicle || 'N/A')}">${escapeHTML(t.vehicle || 'N/A')}</td>
+            <td style="text-align: center; font-size: 0.7rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(t.capacity || '—')}</td>
+            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">${escapeHTML(t.slot || '—')}</td>
+            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">${escapeHTML(t.time || '—')}</td>
+            <td style="text-align: right; font-size: 0.68rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(t.username || '')}">${escapeHTML(t.username ? (t.username.split(' - ')[1] || t.username) : '—')}</td>
+            <td style="text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.72rem; color: ${waitMin > 30 ? 'var(--red)' : 'var(--text-muted)'};">${waitMin} phút</td>
+            <td style="text-align: center; padding-right: 6px;">${getStatusBadge(t.status, t)}</td>
           `;
           tbody.appendChild(tr);
         });
