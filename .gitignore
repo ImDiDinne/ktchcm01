@@ -12,3 +12,4 @@ node_modules/
 .env
 logs/
 .session_token
+.browser_data/

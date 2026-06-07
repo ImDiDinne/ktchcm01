@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# 🔄 Auto Fetch Cron — Chạy tự động bởi cron
+# 🔄 Auto Fetch Cron — Chạy tự động bởi launchd
 # Logs ghi vào: ~/Desktop/AI dashboard/logs/
 # ============================================
 
@@ -34,6 +34,24 @@ fi
 
 if [ $PULL_STATUS -ne 0 ]; then
     echo "⚠️ Không thể pull từ GitHub, tiếp tục chạy..." >> "$LOG"
+fi
+
+# ── Auto Renew Session nếu cần ──
+# Kiểm tra session hiện tại, nếu hết hạn thì tự động renew bằng Playwright
+echo "🔑 Kiểm tra session token..." >> "$LOG"
+python3 auto_renew_session.py --check-only >> "$LOG" 2>&1
+CHECK_STATUS=$?
+
+if [ $CHECK_STATUS -ne 0 ]; then
+    echo "🔄 Session hết hạn — đang tự động renew..." >> "$LOG"
+    python3 auto_renew_session.py >> "$LOG" 2>&1
+    RENEW_STATUS=$?
+    if [ $RENEW_STATUS -ne 0 ]; then
+        echo "❌ Không thể tự động renew session. Cần mở browser đăng nhập lại." >> "$LOG"
+        echo "💡 Chạy: python3 auto_renew_session.py --force-login" >> "$LOG"
+    else
+        echo "✅ Đã tự động renew session thành công!" >> "$LOG"
+    fi
 fi
 
 # Tải dữ liệu từ Metabase + chạy export
