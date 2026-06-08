@@ -7,7 +7,7 @@
 → Inject vào ktc_health.html + xuất JSON/JS/XLSX
 """
 import pandas as pd
-import json, re, sys, warnings
+import json, re, sys, warnings, os, requests
 from datetime import datetime
 from pathlib import Path
 from collections import OrderedDict
@@ -622,6 +622,91 @@ def write_aux(data):
     JS_FILE.write_text(js, encoding='utf-8')
     print(f"✅ Đã xuất {JS_FILE.name}")
 
+def load_env():
+    """Đọc credentials từ file .env"""
+    env_vars = {}
+    env_file = BASE / '.env'
+    if env_file.exists():
+        try:
+            with open(env_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, val = line.split('=', 1)
+                        env_vars[key.strip()] = val.strip().strip('"').strip("'")
+        except Exception as e:
+            print(f"⚠️ Không thể đọc file .env: {e}")
+    return env_vars
+
+def upload_to_supabase(data, excel_path):
+    """Tải dữ liệu JSON và báo cáo excel lên Supabase REST API & Storage."""
+    env = load_env()
+    supabase_url = env.get('SUPABASE_URL') or os.environ.get('SUPABASE_URL')
+    # Ưu tiên service role key bảo mật, fallback về anon key
+    supabase_key = (
+        env.get('SUPABASE_SERVICE_ROLE_KEY') or 
+        os.environ.get('SUPABASE_SERVICE_ROLE_KEY') or 
+        env.get('SUPABASE_KEY') or 
+        os.environ.get('SUPABASE_KEY')
+    )
+    
+    if not supabase_url or not supabase_key:
+        print("⚠️ Không tìm thấy cấu hình Supabase URL/Key. Bỏ qua việc tải dữ liệu lên Supabase.")
+        return
+        
+    supabase_url = supabase_url.rstrip('/')
+    
+    # 1. Tải JSON dữ liệu lên bảng inventory_data (id=1)
+    table_url = f"{supabase_url}/rest/v1/inventory_data"
+    headers = {
+        "apikey": supabase_key,
+        "Authorization": f"Bearer {supabase_key}",
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates"
+    }
+    payload = {
+        "id": 1,
+        "data": data,
+        "updated_at": datetime.now().isoformat()
+    }
+    
+    print("🚀 Đang tải JSON dữ liệu lên Supabase...")
+    try:
+        resp = requests.post(table_url, headers=headers, json=payload, timeout=30)
+        if resp.status_code in [200, 201]:
+            print("✅ Đã cập nhật dữ liệu tồn kho lên Supabase (bảng: inventory_data) thành công!")
+        else:
+            print(f"❌ Cập nhật JSON lên Supabase thất bại (HTTP {resp.status_code}): {resp.text}")
+    except Exception as e:
+        print(f"❌ Lỗi khi tải dữ liệu lên Supabase: {e}")
+        
+    # 2. Tải BaoCao_TonKho.xlsx lên Storage bucket 'reports'
+    if excel_path and Path(excel_path).exists():
+        print("🚀 Đang tải file BaoCao_TonKho.xlsx lên Supabase Storage...")
+        storage_url = f"{supabase_url}/storage/v1/object/reports/BaoCao_TonKho.xlsx"
+        storage_headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {supabase_key}",
+            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "x-upsert": "true"
+        }
+        try:
+            with open(excel_path, 'rb') as f:
+                file_data = f.read()
+            # Thử POST trước
+            resp = requests.post(storage_url, headers=storage_headers, data=file_data, timeout=60)
+            if resp.status_code in [200, 201]:
+                print("✅ Đã cập nhật file BaoCao_TonKho.xlsx lên Supabase Storage (bucket: reports) thành công!")
+            else:
+                # Nếu POST lỗi, thử PUT (đè đè)
+                resp_put = requests.put(storage_url, headers=storage_headers, data=file_data, timeout=60)
+                if resp_put.status_code in [200, 201]:
+                    print("✅ Đã cập nhật file BaoCao_TonKho.xlsx lên Supabase Storage (PUT) thành công!")
+                else:
+                    print(f"❌ Cập nhật Excel lên Supabase Storage thất bại (HTTP {resp.status_code} / {resp_put.status_code}): {resp_put.text}")
+        except Exception as e:
+            print(f"❌ Lỗi khi tải Excel lên Supabase Storage: {e}")
+
 def print_summary(data):
     """In bảng tổng hợp giống PV."""
     # Hỗ trợ cấu trúc phân nhóm mới
@@ -731,6 +816,9 @@ def main():
         inject_into_html(data)
         write_aux(data)
         export_pivot_xlsx(df, pivot)
+        
+        # Tải dữ liệu lên Supabase bảo mật
+        upload_to_supabase(data, PIVOT_FILE)
 
         # In tổng hợp
         print_summary(data)

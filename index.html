@@ -6,56 +6,44 @@
   <title>KTC HCM 01 — Tổng Quan Hàng Hoá</title>
   <meta name="description" content="Dashboard tổng quan hàng hoá tại Kho Trung Chuyển Hồ Chí Minh 01 — GHN Express">
   
-  <!-- Chống cache trình duyệt dứt điểm -->
+  <!-- Anti-cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
-  <!-- Chính sách bảo mật nội dung — giới hạn nguồn tải tài nguyên -->
+  <!-- CSP Policy -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://script.google.com https://script.googleusercontent.com https://api.github.com https://imdidinne.github.io https://raw.githubusercontent.com; img-src 'self' data: blob:;">
 
-  <!-- Thư viện hỗ trợ Cloud Auth & SHA-256 mã hóa mật khẩu (hoạt động kể cả trên HTTP/LAN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
-
-  <!-- Tải CSS động và JS dữ liệu (cần đồng bộ để TONKHO_DATA sẵn sàng trước khi render) -->
-  <script>
-  (function() {
-    var t = Date.now();
-    var link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = 'style.css?t=' + t;
-    document.head.appendChild(link);
-    document.write('<script src="tonkho_data.js?t=' + t + '"><\/script>');
-  })();
-  </script>
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="dashboard" id="dashboard">
 
-    <!-- Banner cảnh báo hết hạn session (hiển thị khi dữ liệu quá 3 tiếng không cập nhật) -->
+    <!-- Session Expiration Banner -->
     <div class="session-alert-banner" id="session-alert-banner" style="display: none;">
-      ⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Dữ liệu đã hơn 3 giờ chưa được cập nhật mới. Có khả năng phiên đăng nhập Metabase (Session Token) đã hết hạn. Ní vui lòng chạy file <strong>"🔄 Cập Nhật Session.command"</strong> ở local để cập nhật Session mới!
+      ⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Dữ liệu đã hơn 3 giờ chưa được cập nhật mới. Có khả năng phiên đăng nhập Metabase (Session Token) đã hết hạn. Vui lòng chạy file <strong>"🔄 Cập Nhật Session.command"</strong> ở local để cập nhật Session mới!
     </div>
 
-    <!-- ═══ Header ═══ -->
+    <!-- Header -->
     <header class="header animate-in" id="header">
       <div class="header-left">
-        <div class="header-logo">📦</div>
+        <div class="header-logo">KTC</div>
         <div class="header-title">
           <h1>KTC HCM 01</h1>
           <div class="subtitle">Kho Trung Chuyển Hồ Chí Minh 01 — Tổng Quan Hàng Hoá</div>
         </div>
       </div>
       <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
-        <!-- Thẻ ROI Tác Động Kinh Doanh (Business ROI Badge) -->
+        <!-- Business ROI Badge -->
         <div class="filter-btn" style="background: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.4); color: rgb(74, 222, 128); font-size: 0.7rem; font-weight: 600; cursor: default; outline: none; border-radius: var(--radius-sm); border: 1px solid rgba(34, 197, 94, 0.4); padding: 5px 9px; display: flex; align-items: center; gap: 5px; user-select: none;">
-          ⏱️ Tiết kiệm: ~45h thủ công/tháng
+          Tiết kiệm: ~45h thủ công/tháng
         </div>
-        <a href="BaoCao_TonKho.xlsx" id="download-excel-btn" class="filter-btn" style="background: rgba(251, 146, 60, 0.15); border-color: var(--accent); color: var(--accent-light); font-weight: 600; text-decoration: none; display: none; align-items: center; gap: 6px;" download>
-          📥 Tải Báo Cáo Excel
+        <a href="#" id="download-excel-btn" class="filter-btn" style="background: rgba(251, 146, 60, 0.15); border-color: var(--accent); color: var(--accent-light); font-weight: 600; text-decoration: none; display: none; align-items: center; gap: 6px;">
+          Tải Báo Cáo Excel
         </a>
         <button id="open-settings-btn" class="filter-btn" style="display: none; align-items: center; gap: 6px; cursor: pointer; outline: none;">
-          ⚙️ Cấu Hình Mappings
+          Cấu Hình Mappings
         </button>
         <div class="update-badge" id="update-badge">
           <span class="dot"></span>
@@ -66,112 +54,115 @@
             <span class="user-name-label" id="user-name">—</span>
             <span class="user-role-label" id="user-role">—</span>
           </div>
-          <button class="logout-btn" id="logout-btn" title="Đăng xuất" style="cursor: pointer; outline: none; padding-left: 8px;">❌</button>
+          <button class="logout-btn" id="logout-btn" title="Đăng xuất" style="cursor: pointer; outline: none; padding-left: 8px; font-size: 0.75rem;">Đăng xuất</button>
         </div>
       </div>
     </header>
 
     <!-- Main Tabs Navigation -->
     <div class="nav-main-tabs animate-in">
-      <button class="nav-main-tab active" id="tab-btn-inventory">📦 TỒN KHO REALTIME</button>
-      <button class="nav-main-tab" id="tab-btn-dock">🚚 INBOUND REALTIME</button>
+      <button class="nav-main-tab active" id="tab-btn-inventory">TỒN KHO REALTIME</button>
+      <button class="nav-main-tab" id="tab-btn-dock">INBOUND REALTIME</button>
     </div>
 
-    <!-- ═══ Tab Content: Inventory ═══ -->
+    <!-- Tab Content: Inventory -->
     <div id="tab-content-inventory" class="tab-content-main">
-      <!-- ═══ Filter Container ═══ -->
-    <div class="filter-container animate-in delay-1" id="filter-container">
-      <div class="filter-label">
-        <span class="icon">🏷️</span> Phân Loại Hàng Hóa:
-      </div>
-      <div class="filter-group">
-        <button class="filter-btn active" data-filter="all">Tất Cả</button>
-        <button class="filter-btn" data-filter="normal">Normal</button>
-        <button class="filter-btn" data-filter="bulky">Bulky</button>
-        <button class="filter-btn" data-filter="freight">Freight</button>
-      </div>
-    </div>
-
-    <!-- ═══ KPI Cards ═══ -->
-    <div class="kpi-grid" id="kpi-grid"></div>
-
-    <!-- ═══ Main Content ═══ -->
-    <div class="content-grid">
-
-      <!-- Pivot Table -->
-      <div class="table-card animate-in delay-3">
-        <div class="card-header">
-          <div class="card-title">📋 Chi Tiết Theo Nhóm Kho × Thời Gian Tồn</div>
+      
+      <!-- Filter Container -->
+      <div class="filter-container animate-in delay-1" id="filter-container">
+        <div class="filter-label">Phân Loại Hàng Hóa:</div>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all">Tất Cả</button>
+          <button class="filter-btn" data-filter="normal">Normal</button>
+          <button class="filter-btn" data-filter="bulky">Bulky</button>
+          <button class="filter-btn" data-filter="freight">Freight</button>
         </div>
-        <div class="table-wrapper">
-          <table class="pivot-table" id="pivot-table">
-            <thead>
-              <tr>
-                <th>Đích đến</th>
-                <th>0-6h</th>
-                <th>6-12h</th>
-                <th>12-24h</th>
-                <th>24-36h</th>
-                <th>36-48h</th>
-                <th>48-72h</th>
-                <th>72-96h</th>
-                <th>96-120h</th>
-                <th>120h+</th>
-                <th>Tổng</th>
-              </tr>
-            </thead>
-            <tbody id="pivot-body"></tbody>
-          </table>
-        </div>
-        <div class="mobile-cards-container" id="mobile-cards-container"></div>
       </div>
 
-      <!-- Side Panel -->
-      <div class="side-panel">
-        <!-- Donut: Phân bổ theo nhóm -->
-        <div class="chart-card animate-in delay-4">
-          <div class="card-title">🎯 Phân Bổ Theo Nhóm Kho</div>
-          <div class="donut-container" id="donut-group"></div>
-        </div>
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpi-grid"></div>
 
-        <!-- Bar: Thời gian tồn -->
-        <div class="chart-card animate-in delay-5">
-          <div class="card-title">⏱️ Phân Bổ Thời Gian Tồn</div>
-          <div class="bar-chart" id="aging-bars"></div>
-        </div>
+      <!-- Action Insights / Top Risks Panel -->
+      <div id="action-insights-panel" class="section animate-in" style="display: none;"></div>
 
-        <!-- Table: Hàng nhập dưới 3 giờ -->
-        <div class="chart-card animate-in delay-6">
-          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-            <span>📥 Nguồn Nhập < 3h (Theo Nguồn Gửi)</span>
-            <span id="under3h-total-badge" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem; color: var(--accent);">0</span>
+      <!-- Main Content Grid -->
+      <div class="content-grid">
+        <!-- Pivot Table -->
+        <div class="table-card animate-in delay-3">
+          <div class="card-header">
+            <div class="card-title">Chi Tiết Theo Nhóm Kho × Thời Gian Tồn</div>
           </div>
-          <div class="table-wrapper" style="max-height: 220px; overflow-y: auto;">
-            <table class="pivot-table" id="under3h-table" style="font-size: 0.76rem; width: 100%;">
+          <div class="table-wrapper">
+            <table class="pivot-table" id="pivot-table">
               <thead>
                 <tr>
-                  <th style="text-align: left; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase;">Nguồn Gửi</th>
-                  <th style="text-align: right; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase; color: var(--accent-light);">Số Đơn</th>
-                  <th style="text-align: right; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase;">Tỷ Lệ</th>
+                  <th>Đích đến</th>
+                  <th>0-6h</th>
+                  <th>6-12h</th>
+                  <th>12-24h</th>
+                  <th>24-36h</th>
+                  <th>36-48h</th>
+                  <th>48-72h</th>
+                  <th>72-96h</th>
+                  <th>96-120h</th>
+                  <th>120h+</th>
+                  <th>Tổng</th>
                 </tr>
               </thead>
-              <tbody id="under3h-body"></tbody>
+              <tbody id="pivot-body">
+                <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-secondary);">Đang tải dữ liệu...</td></tr>
+              </tbody>
             </table>
+          </div>
+          <div class="mobile-cards-container" id="mobile-cards-container"></div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+          <!-- Donut: Phân bổ theo nhóm -->
+          <div class="chart-card animate-in delay-4">
+            <div class="card-title">Phân Bổ Theo Nhóm Kho</div>
+            <div class="donut-container" id="donut-group"></div>
+          </div>
+
+          <!-- Bar: Thời gian tồn -->
+          <div class="chart-card animate-in delay-5">
+            <div class="card-title">Phân Bổ Thời Gian Tồn</div>
+            <div class="bar-chart" id="aging-bars"></div>
+          </div>
+
+          <!-- Table: Hàng nhập dưới 3 giờ -->
+          <div class="chart-card animate-in delay-6">
+            <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Nguồn Nhập < 3h (Theo Nguồn Gửi)</span>
+              <span id="under3h-total-badge" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem; color: var(--accent);">0</span>
+            </div>
+            <div class="table-wrapper" style="max-height: 220px; overflow-y: auto;">
+              <table class="pivot-table" id="under3h-table" style="font-size: 0.76rem; width: 100%;">
+                <thead>
+                  <tr>
+                    <th style="text-align: left; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase;">Nguồn Gửi</th>
+                    <th style="text-align: right; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase; color: var(--accent-light);">Số Đơn</th>
+                    <th style="text-align: right; padding: 6px 10px; font-size: 0.7rem; text-transform: uppercase;">Tỷ Lệ</th>
+                  </tr>
+                </thead>
+                <tbody id="under3h-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ═══ Destination Detail ═══ -->
-    <div class="section" style="margin-top: 20px;">
-      <div class="section-header">
-        <div class="section-title"><span class="icon">🗺️</span> Chi Tiết Đích Đến Theo Nhóm</div>
+      <!-- Destination Detail -->
+      <div class="section" style="margin-top: 20px;">
+        <div class="section-header">
+          <div class="section-title">Chi Tiết Đích Đến Theo Nhóm</div>
+        </div>
+        <div class="dest-grid" id="dest-grid"></div>
       </div>
-      <div class="dest-grid" id="dest-grid"></div>
-    </div>
     </div> <!-- end of tab-content-inventory -->
 
-    <!-- ═══ Tab Content: Dock (TripScan) ═══ -->
+    <!-- Tab Content: Inbound (TripScan) -->
     <div id="tab-content-dock" class="tab-content-main" style="display: none;">
       <!-- Dock KPI Cards -->
       <div class="kpi-grid">
@@ -219,7 +210,7 @@
       <div style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px; flex-wrap: wrap;">
         <!-- Date Selector -->
         <div class="chart-card" style="flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;">
-          <div class="card-title">📅 Chọn Ngày Xem Báo Cáo Inbound</div>
+          <div class="card-title">Chọn Ngày Xem Báo Cáo Inbound</div>
           <div style="margin-top: 8px;">
             <select id="inbound-date-select" style="width: 100%; background: #1e293b; color: var(--text-primary); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.9rem; cursor: pointer; outline: none;">
               <!-- Dates will be dynamically populated -->
@@ -229,7 +220,7 @@
 
         <!-- Average Unloading Time Slider -->
         <div class="chart-card" style="flex: 1; min-width: 320px; display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;">
-          <div class="card-title">⏱️ Thời Gian Dỡ Hàng Trung Bình (T_avg)</div>
+          <div class="card-title">Thời Gian Dỡ Hàng Trung Bình (T_avg)</div>
           <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
             <input type="range" id="sim-t-avg" min="15" max="90" step="5" value="30" style="flex: 1; cursor: pointer;">
             <span id="sim-t-avg-val" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.1rem; color: var(--accent); width: 100px; text-align: right;">30 phút</span>
@@ -238,17 +229,16 @@
 
         <!-- Update Button -->
         <button class="filter-btn" id="btn-refresh-trips" style="display: flex; align-items: center; gap: 8px; font-weight: 600; border-color: var(--accent); color: var(--accent-light); cursor: pointer; padding: 0 24px;">
-          🔄 CẬP NHẬT DỮ LIỆU TRIPSCAN
+          CẬP NHẬT DỮ LIỆU TRIPSCAN
         </button>
       </div>
 
       <!-- Dock Operations Columns -->
       <div class="content-grid">
-        
         <!-- Left: Flow Simulation & Active Stations configuration -->
         <div class="table-card animate-in delay-2" style="flex: 2;">
           <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
-            <div class="card-title">📈 Mô Phỏng Dòng Chảy & Xe Ùn Ứ Theo Khung Giờ</div>
+            <div class="card-title">Mô Phỏng Dòng Chảy & Xe Ùn Ứ Theo Khung Giờ</div>
             <div style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 12px;">
               <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--green); display: inline-block; border-radius: 2px;"></span> Đã dỡ</span>
               <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--red); display: inline-block; border-radius: 2px;"></span> Ùn ứ</span>
@@ -264,8 +254,8 @@
           <!-- Active Stations Grid Configuration -->
           <div style="padding: 20px; border-top: 1px solid var(--border);">
             <div class="card-title" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-              <span>⚙️ Cấu Hình Số Cửa Tải / Trạm Nhập Mở Theo Khung Giờ (S_t)</span>
-              <button class="filter-btn" id="btn-save-docks" style="font-size: 0.72rem; padding: 4px 12px;">💾 Lưu & Áp Dụng</button>
+              <span>Cấu Hình Số Cửa Tải / Trạm Nhập Mở Theo Khung Giờ (S_t)</span>
+              <button class="filter-btn" id="btn-save-docks" style="font-size: 0.72rem; padding: 4px 12px;">Lưu & Áp Dụng</button>
             </div>
             <div class="dock-config-grid" id="dock-config-inputs">
               <!-- Inputs are dynamically generated here -->
@@ -277,7 +267,7 @@
         <div class="side-panel">
           <!-- AI Advisory Panel -->
           <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
-            <div class="card-title">💡 Khuyến Nghị Vận Hành (AI Dispatch Advisory)</div>
+            <div class="card-title">Khuyến Nghị Vận Hành (AI Dispatch Advisory)</div>
             <div style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;" id="dock-advisory-list">
               <!-- Recommendations go here -->
             </div>
@@ -286,7 +276,7 @@
           <!-- Overdue Waiting Trucks -->
           <div class="chart-card animate-in delay-4">
             <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-              <span>⚠️ Cảnh Báo Xe Chờ Quá Hạn (> 30p)</span>
+              <span>Cảnh Báo Xe Chờ Quá Hạn (> 30p)</span>
               <span id="dock-overdue-badge" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.9rem; color: var(--red);">0</span>
             </div>
             <div class="table-wrapper" style="max-height: 220px; overflow-y: auto;">
@@ -305,13 +295,12 @@
             </div>
           </div>
         </div>
-
       </div>
 
       <!-- Dock Detail Trip Table -->
       <div class="table-card animate-in delay-4" style="margin-top: 16px;">
         <div class="card-header">
-          <div class="card-title">📋 Danh Sách Chi Tiết Xe Tải Hôm Ngay (TripScan)</div>
+          <div class="card-title">Danh Sách Chi Tiết Xe Tải Trong Ngày (TripScan)</div>
         </div>
         <div class="table-wrapper" style="max-height: 380px; overflow-y: auto; overflow-x: hidden;">
           <table class="pivot-table" id="dock-trips-table" style="width: 100%; table-layout: fixed; font-size: 0.72rem;">
@@ -347,1612 +336,18 @@
 
   </div>
 
-  <script>
-  /* ═══════════════════════════════════════════════════
-     Dashboard Logic
-     ═══════════════════════════════════════════════════ */
-  (function() {
-    'use strict';
-
-    const rawData = window.TONKHO_DATA;
-    if (!rawData) { 
-      document.body.innerHTML = '<h2 style="color:#f87171;text-align:center;padding:80px">❌ Không có dữ liệu. Chạy: python3 export_tonkho_v2.py</h2>'; 
-      return; 
-    }
-
-    const AGING_KEYS = ['1. 0-6','2. 6-12','3. 12-24','4. 24-36','5. 36-48','6. 48-72','7. 72-96','8. 96-120','9. 120+'];
-    const COLORS = ['#fb923c','#60a5fa','#34d399','#a78bfa','#f87171','#22d3ee','#fbbf24'];
-
-    const fmt = n => n != null ? n.toLocaleString('vi-VN') : '0';
-    const pct = (n, t) => t ? ((n / t) * 100).toFixed(1) + '%' : '0%';
-    const escapeHTML = str => {
-      if (typeof str !== 'string') return str;
-      return str.replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;'
-      }[tag] || tag));
-    };
-
-    // ── Update time ──
-    document.getElementById('update-time').textContent = 'Cập nhật: ' + rawData.updated;
-
-    // ── Hàm kiểm tra hết hạn Session Metabase dựa trên thời gian cập nhật dữ liệu ──
-    function parseDate(str) {
-      if (!str) return null;
-      const parts = str.split(' ');
-      if (parts.length < 2) return null;
-      const dParts = parts[0].split('/');
-      const tParts = parts[1].split(':');
-      if (dParts.length < 3 || tParts.length < 3) return null;
-      return new Date(
-        parseInt(dParts[2], 10),
-        parseInt(dParts[1], 10) - 1,
-        parseInt(dParts[0], 10),
-        parseInt(tParts[0], 10),
-        parseInt(tParts[1], 10),
-        parseInt(tParts[2], 10)
-      );
-    }
-
-    function checkSessionExpiry() {
-      const currentRaw = window.TONKHO_DATA || rawData;
-      if (!currentRaw || !currentRaw.updated) return;
-      const updateDate = parseDate(currentRaw.updated);
-      if (!updateDate) return;
-      const elapsedMs = Date.now() - updateDate.getTime();
-      const elapsedHours = elapsedMs / (1000 * 60 * 60);
-      
-      const banner = document.getElementById('session-alert-banner');
-      if (banner) {
-        // Hiển thị nếu cờ session_expired được đặt là true HOẶC nếu dữ liệu đã quá 3 giờ chưa cập nhật
-        if (currentRaw.session_expired || elapsedHours > 3) {
-          banner.style.display = 'flex';
-          if (currentRaw.session_expired) {
-            banner.innerHTML = `⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Phiên đăng nhập Metabase (Session Token) đã HẾT HẠN. Ní vui lòng chạy file <strong>"🔄 Cập Nhật Session.command"</strong> ở local để cập nhật Session mới!`;
-          } else {
-            banner.innerHTML = `⚠️ &nbsp;<strong>CẢNH BÁO:</strong> &nbsp;Dữ liệu đã hơn 3 giờ chưa được cập nhật mới. Hệ thống tự cập nhật mỗi 10 phút — nếu vẫn thấy cảnh báo này, vui lòng kiểm tra <strong>GitHub Actions</strong> hoặc <strong>Metabase Session</strong>.`;
-          }
-        } else {
-          banner.style.display = 'none';
-        }
-      }
-    }
-    checkSessionExpiry();
-
-    // ── TripScan / Dock Control Logic variables & helpers ──
-    let tripScanData = [];
-    let selectedInboundDate = ''; // 'DD/MM/YYYY' e.g. '06/06/2026'
-
-    function getTodayString() {
-      const now = new Date();
-      const tzOffset = 7 * 60; // GMT+7 in minutes
-      const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
-      const day = String(localTime.getDate()).padStart(2, '0');
-      const month = String(localTime.getMonth() + 1).padStart(2, '0');
-      const year = localTime.getFullYear();
-      return `${day}/${month}/${year}`;
-    }
-
-    function parseDateDDMMYYYY(str) {
-      if (!str) return null;
-      const parts = str.split('/');
-      if (parts.length === 3) {
-        return {
-          day: parseInt(parts[0], 10),
-          month: parseInt(parts[1], 10) - 1,
-          year: parseInt(parts[2], 10)
-        };
-      }
-      return null;
-    }
-
-    function isSameDay(date1Str, date2Str) {
-      if (!date1Str || !date2Str) return false;
-      const d1 = parseDateDDMMYYYY(date1Str);
-      const d2 = parseDateDDMMYYYY(date2Str);
-      if (!d1 || !d2) return date1Str.trim() === date2Str.trim();
-      return d1.day === d2.day && d1.month === d2.month && d1.year === d2.year;
-    }
-
-    function getTripHour(trip) {
-      if (trip.time && typeof trip.time === 'string') {
-        const parts = trip.time.split(':');
-        if (parts.length > 0) {
-          const hour = parseInt(parts[0], 10);
-          if (!isNaN(hour) && hour >= 0 && hour <= 23) return hour;
-        }
-      }
-      if (trip.slot && typeof trip.slot === 'string') {
-        const parts = trip.slot.split(':');
-        if (parts.length > 0) {
-          const hour = parseInt(parts[0], 10);
-          if (!isNaN(hour) && hour >= 0 && hour <= 23) return hour;
-        }
-      }
-      return 0;
-    }
-
-    function getWaitTimeMinutes(trip) {
-      if (!trip.time) return 0;
-      
-      const todayStr = getTodayString();
-      const targetDateStr = selectedInboundDate || todayStr;
-      
-      if (!isSameDay(trip.date, targetDateStr)) return 0;
-      
-      const parts = trip.time.split(':');
-      if (parts.length < 2) return 0;
-      
-      const tripHour = parseInt(parts[0], 10);
-      const tripMin = parseInt(parts[1], 10);
-      const tripSec = parts.length > 2 ? parseInt(parts[2], 10) : 0;
-      
-      if (isSameDay(targetDateStr, todayStr)) {
-        const isCompleted = trip.status === 'Đã nhận' || trip.status === 'Đã giao' || trip.status.toLowerCase() === 'received' || trip.status.toLowerCase() === 'completed';
-        if (isCompleted && trip.syncedAt) {
-          return getDurationMinutes(trip.time, trip.syncedAt);
-        }
-        
-        const now = new Date();
-        const tzOffset = 7 * 60;
-        const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
-        
-        const tripDateObj = new Date(localTime);
-        tripDateObj.setHours(tripHour, tripMin, tripSec, 0);
-        
-        const diffMs = localTime - tripDateObj;
-        if (diffMs < 0) return 0;
-        return Math.floor(diffMs / (1000 * 60));
-      } else {
-        if (trip.syncedAt) {
-          return getDurationMinutes(trip.time, trip.syncedAt);
-        }
-        return 0;
-      }
-    }
-
-    function getDockTAvg() {
-      const stored = localStorage.getItem('dock_sim_t_avg');
-      if (stored) {
-        const parsed = parseInt(stored, 10);
-        if (!isNaN(parsed) && parsed >= 15 && parsed <= 90) return parsed;
-      }
-      return 30;
-    }
-
-    function saveDockTAvg(val) {
-      localStorage.setItem('dock_sim_t_avg', val);
-    }
-
-    function getDockStations() {
-      const stored = localStorage.getItem('dock_sim_stations');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length === 24) {
-            return parsed.map(n => {
-              const num = parseInt(n, 10);
-              return isNaN(num) ? 0 : num;
-            });
-          }
-        } catch(e) {}
-      }
-      return Array(24).fill(0).map((_, h) => {
-        if (h >= 6 && h < 18) return 4;
-        if (h >= 18 && h < 24) return 3;
-        return 2;
-      });
-    }
-
-    function saveDockStations(stations) {
-      localStorage.setItem('dock_sim_stations', JSON.stringify(stations));
-    }
-
-    let unloadingTripsMap = {}; // mapping tripCode -> started_at timestamp
-
-    async function fetchSupabaseUnloadingTrips() {
-      unloadingTripsMap = {};
-      const config = {
-        url: 'https://baizmeqkxslajxuzyfnu.supabase.co',
-        key: 'sb_publishable_VRLqjdMb3uIie89vbRXloA_xdak8hgy'
-      };
-      
-      try {
-        const dateLimit = new Date();
-        dateLimit.setDate(dateLimit.getDate() - 14); // Chỉ lấy dữ liệu trong 14 ngày qua để tối ưu dung lượng và tốc độ
-        const isoStr = dateLimit.toISOString();
-        const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips?select=*&started_at=gte.${isoStr}&order=started_at.desc&limit=5000`;
-        const resp = await fetch(url, {
-          headers: {
-            "apikey": config.key,
-            "Authorization": `Bearer ${config.key}`
-          }
-        });
-        if (!resp.ok) {
-          console.warn("Supabase fetch failed:", resp.statusText);
-          return;
-        }
-        const data = await resp.json();
-        if (Array.isArray(data)) {
-          data.forEach(item => {
-            if (item.code && item.started_at) {
-              unloadingTripsMap[item.code] = item.started_at;
-            }
-          });
-          console.log(`Successfully loaded ${data.length} unloading records from Supabase.`);
-        }
-      } catch(e) {
-        console.error("Error fetching unloading trips from Supabase:", e);
-      }
-    }
-
-    function getDurationMinutes(arrivalTimeStr, syncedAtStr) {
-      if (!arrivalTimeStr || !syncedAtStr) return 0;
-      try {
-        const arrParts = arrivalTimeStr.split(':');
-        if (arrParts.length < 2) return 0;
-        const arrH = parseInt(arrParts[0], 10);
-        const arrM = parseInt(arrParts[1], 10);
-        const arrS = arrParts.length > 2 ? parseInt(arrParts[2], 10) : 0;
-        
-        const spaceParts = syncedAtStr.split(' ');
-        const syncTimeStr = spaceParts[0];
-        const syncParts = syncTimeStr.split(':');
-        if (syncParts.length < 2) return 0;
-        const syncH = parseInt(syncParts[0], 10);
-        const syncM = parseInt(syncParts[1], 10);
-        const syncS = syncParts.length > 2 ? parseInt(syncParts[2], 10) : 0;
-        
-        const arrTotalSeconds = arrH * 3600 + arrM * 60 + arrS;
-        const syncTotalSeconds = syncH * 3600 + syncM * 60 + syncS;
-        
-        let diffSeconds = syncTotalSeconds - arrTotalSeconds;
-        if (diffSeconds < 0) {
-          diffSeconds += 24 * 3600;
-        }
-        return Math.floor(diffSeconds / 60);
-      } catch(e) {
-        console.error("Error calculating duration:", e);
-        return 0;
-      }
-    }
-
-    function calculateAverageProcessingTime(trips) {
-      let totalMin = 0;
-      let count = 0;
-      trips.forEach(t => {
-        const isCompleted = t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
-        if (isCompleted && t.syncedAt) {
-          totalMin += getDurationMinutes(t.time, t.syncedAt);
-          count++;
-        } else if (t.code && unloadingTripsMap[t.code]) {
-          const startedAt = new Date(unloadingTripsMap[t.code]);
-          const elapsed = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
-          if (elapsed > 0) {
-            totalMin += elapsed;
-            count++;
-          }
-        }
-      });
-      return count > 0 ? (totalMin / count).toFixed(1) : '—';
-    }
-
-    function populateInboundDates() {
-      const selectEl = document.getElementById('inbound-date-select');
-      if (!selectEl) return;
-      
-      const uniqueDates = [...new Set(tripScanData.map(t => t.date))].filter(Boolean);
-      
-      uniqueDates.sort((a, b) => {
-        const d1 = parseDateDDMMYYYY(a);
-        const d2 = parseDateDDMMYYYY(b);
-        if (!d1 || !d2) return b.localeCompare(a);
-        const t1 = new Date(d1.year, d1.month, d1.day).getTime();
-        const t2 = new Date(d2.year, d2.month, d2.day).getTime();
-        return t2 - t1;
-      });
-      
-      const previousValue = selectEl.value || selectedInboundDate;
-      selectEl.innerHTML = '';
-      
-      const todayStr = getTodayString();
-      if (!uniqueDates.includes(todayStr)) {
-        uniqueDates.unshift(todayStr);
-      }
-      
-      uniqueDates.forEach(dateStr => {
-        const option = document.createElement('option');
-        option.value = dateStr;
-        option.textContent = dateStr === todayStr ? `Hôm nay (${dateStr})` : dateStr;
-        selectEl.appendChild(option);
-      });
-      
-      if (previousValue && uniqueDates.includes(previousValue)) {
-        selectEl.value = previousValue;
-        selectedInboundDate = previousValue;
-      } else {
-        selectEl.value = todayStr;
-        selectedInboundDate = todayStr;
-      }
-    }
-
-    function getTodayTrips() {
-      const targetDateStr = selectedInboundDate || getTodayString();
-      const trips = tripScanData.filter(t => isSameDay(t.date, targetDateStr));
-      const tAvg = getDockTAvg();
-      
-      const todayStr = getTodayString();
-      const isViewingToday = isSameDay(targetDateStr, todayStr);
-      
-      console.log(`[DEBUG] getTodayTrips for ${targetDateStr}: ${trips.length} trips, unloadingTripsMap keys:`, Object.keys(unloadingTripsMap));
-      
-      trips.forEach(t => {
-        if (t.code && unloadingTripsMap[t.code]) {
-          const isCompleted = t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
-          if (!isCompleted) {
-            if (isViewingToday) {
-              const startedAt = new Date(unloadingTripsMap[t.code]);
-              const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
-              if (elapsedMin >= tAvg) {
-                t.status = 'Đã nhận';
-                t.autoCompleted = true;
-              } else {
-                t.status = 'Đang nhập';
-                t.remainingMinutes = tAvg - elapsedMin;
-              }
-            } else {
-              t.status = 'Đã nhận';
-            }
-          }
-        }
-      });
-      
-      return trips;
-    }
-
-    function getStatusBadge(status, trip) {
-      if (!status) return '—';
-      const s = status.toLowerCase();
-      let bg = 'rgba(255,255,255,0.05)';
-      let fg = 'var(--text-muted)';
-      let text = status;
-      
-      const isWaiting = s === 'đăng chờ' || s === 'đang chờ' || s === 'waiting';
-      const isUnloading = s === 'đang nhập' || s === 'đang xử lý' || s === 'unloading' || s === 'processing';
-      const isReceived = s === 'đã nhận' || s === 'đã giao' || s === 'completed' || s === 'received';
-
-      if (isWaiting) {
-        bg = 'rgba(251, 191, 36, 0.15)';
-        fg = 'var(--yellow)';
-      } else if (isUnloading) {
-        bg = 'rgba(96, 165, 250, 0.15)';
-        fg = 'var(--blue-light)';
-        if (trip && trip.remainingMinutes != null) {
-          text = `Đang nhập (Còn ${trip.remainingMinutes}p)`;
-        }
-      } else if (isReceived) {
-        bg = 'rgba(52, 211, 153, 0.15)';
-        fg = 'var(--green)';
-        if (trip && trip.autoCompleted) {
-          text = `Đã nhận (Tự động)`;
-        }
-      }
-      
-      // Nếu đã đăng nhập và là xe hợp lệ, hiển thị dropdown chọn trạng thái thủ công
-      if (window.currentUser && trip && trip.code) {
-        const optionWaiting = `<option value="waiting" ${isWaiting ? 'selected' : ''} style="background: #1e293b; color: var(--yellow);">⏳ Đang Chờ</option>`;
-        const optionUnloading = `<option value="unloading" ${isUnloading ? 'selected' : ''} style="background: #1e293b; color: var(--blue-light);">🚚 Đang Nhập</option>`;
-        const optionReceived = `<option value="received" ${isReceived ? 'selected' : ''} style="background: #1e293b; color: var(--green);">✅ Đã Nhận</option>`;
-        
-        return `
-          <select 
-            class="status-select" 
-            data-trip-code="${escapeHTML(trip.code)}"
-            onchange="handleStatusChange(this)"
-            style="
-              display: inline-block; 
-              padding: 2px 16px 2px 4px; 
-              border-radius: 4px; 
-              font-size: 0.65rem; 
-              font-weight: 600; 
-              max-width: 100%;
-              background: ${bg} url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;10&quot; height=&quot;6&quot; viewBox=&quot;0 0 10 6&quot;><path fill=&quot;${encodeURIComponent(fg)}&quot; d=&quot;M0 0l5 5 5-5z&quot;/></svg>') no-repeat right 4px center; 
-              background-size: 7px 4px;
-              color: ${fg};
-              border: 1px solid rgba(255,255,255,0.05);
-              outline: none;
-              cursor: pointer;
-              -webkit-appearance: none;
-              -moz-appearance: none;
-              appearance: none;
-            "
-          >
-            ${optionWaiting}
-            ${optionUnloading}
-            ${optionReceived}
-          </select>
-        `;
-      }
-      
-      return `<span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; background: ${bg}; color: ${fg}; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(text)}</span>`;
-    }
-
-    async function handleStatusChange(selectEl) {
-      const code = selectEl.dataset.tripCode;
-      const val = selectEl.value;
-      
-      const config = {
-        url: 'https://baizmeqkxslajxuzyfnu.supabase.co',
-        key: 'sb_publishable_VRLqjdMb3uIie89vbRXloA_xdak8hgy'
-      };
-      
-      selectEl.disabled = true;
-      
-      try {
-        let resp;
-        const headers = {
-          "apikey": config.key,
-          "Authorization": `Bearer ${config.key}`,
-          "Content-Type": "application/json"
-        };
-        
-        if (val === 'waiting') {
-          // DELETE record from Supabase
-          const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips?code=eq.${encodeURIComponent(code)}`;
-          resp = await fetch(url, {
-            method: 'DELETE',
-            headers: headers
-          });
-        } else {
-          // UPSERT record into Supabase
-          const url = `${config.url.replace(/\/$/, '')}/rest/v1/unloading_trips`;
-          let startedAt;
-          if (val === 'unloading') {
-            startedAt = new Date().toISOString(); // Bắt đầu dỡ hàng bây giờ
-          } else {
-            const tAvg = getDockTAvg();
-            // Đã nhận: Đặt thời gian lùi về quá khứ quá T_avg phút
-            startedAt = new Date(Date.now() - (tAvg + 5) * 60 * 1000).toISOString();
-          }
-          
-          resp = await fetch(url, {
-            method: 'POST',
-            headers: {
-              ...headers,
-              "Prefer": "resolution=merge-duplicates"
-            },
-            body: JSON.stringify({ code: code, started_at: startedAt })
-          });
-        }
-        
-        if (!resp.ok) {
-          const errText = await resp.text();
-          throw new Error(errText || resp.statusText);
-        }
-        
-        // Tải lại dữ liệu dỡ hàng từ Supabase và vẽ lại bảng
-        await fetchSupabaseUnloadingTrips();
-        runDockSimulation();
-        
-      } catch (e) {
-        console.error("Lỗi cập nhật trạng thái chuyến xe:", e);
-        alert(`❌ Cập nhật thất bại!\n\nLỗi: ${e.message}\n\nHướng dẫn: Hãy đảm bảo ní đã bật quyền ghi (RLS Policy) cho role 'anon' trên bảng 'unloading_trips' trong Supabase.`);
-        // Reload lại dữ liệu để phục hồi giao diện cũ
-        await fetchSupabaseUnloadingTrips();
-        runDockSimulation();
-      } finally {
-        selectEl.disabled = false;
-      }
-    }
-
-    async function fetchTripScanData() {
-      const refreshBtn = document.getElementById('btn-refresh-trips');
-      if (refreshBtn) {
-        refreshBtn.disabled = true;
-        refreshBtn.textContent = '⏳ ĐANG TẢI DỮ LIỆU...';
-      }
-
-      try {
-        // Tải thông tin dỡ hàng phụ từ Supabase trước
-        await fetchSupabaseUnloadingTrips();
-
-        const url = 'https://script.google.com/macros/s/AKfycbxpLqnIOLSV6MkEhss1vPVh7AxBZqVUv6F0xGmMGNtv1A55XVElUgBkoJuvJXgv2cHP/exec?action=getTrips';
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('API request failed');
-        const result = await response.json();
-        
-        if (result && result.status === 'success' && Array.isArray(result.data)) {
-          tripScanData = result.data;
-          console.log(`Successfully fetched ${tripScanData.length} trips from TripScan.`);
-          populateInboundDates();
-          runDockSimulation();
-        } else {
-          console.error('Invalid TripScan data structure:', result);
-        }
-      } catch (err) {
-        console.error('Failed to fetch TripScan data:', err);
-        const advisoryList = document.getElementById('dock-advisory-list');
-        if (advisoryList) {
-          advisoryList.innerHTML = `
-            <div class="kpi-card dock-advisory-card warning" style="padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 600; color: var(--red); margin-bottom: 4px;">⚠️ Lỗi Kết Nối</div>
-              <div style="font-size: 0.72rem; color: var(--text-muted);">Không thể tải dữ liệu từ TripScan. Vui lòng kiểm tra mạng và thử lại. (Lỗi: ${escapeHTML(err.message)})</div>
-            </div>
-          `;
-        }
-      } finally {
-        if (refreshBtn) {
-          refreshBtn.disabled = false;
-          refreshBtn.textContent = '🔄 CẬP NHẬT DỮ LIỆU TRIPSCAN';
-        }
-      }
-    }
-
-    function runDockSimulation() {
-      const todayTrips = getTodayTrips();
-      const arrivals = Array(24).fill(0);
-      todayTrips.forEach(t => {
-        arrivals[getTripHour(t)]++;
-      });
-      
-      const stations = getDockStations();
-      const tAvg = getDockTAvg();
-      
-      const simulation = [];
-      let lastQueue = 0;
-      
-      for (let t = 0; t < 24; t++) {
-        const S_t = stations[t];
-        const A_t = arrivals[t];
-        
-        const capacity = S_t * (60 / tAvg); 
-        const totalLoad = A_t + lastQueue;
-        const processed = Math.min(capacity, totalLoad);
-        const queue = Math.max(0, totalLoad - capacity);
-        const utilization = capacity > 0 ? Math.min(100, (totalLoad / capacity) * 100) : 0;
-        
-        simulation.push({
-          hour: t,
-          arrived: A_t,
-          stations: S_t,
-          capacity: capacity,
-          processed: processed,
-          queue: queue,
-          utilization: utilization
-        });
-        
-        lastQueue = queue;
-      }
-      
-      renderDockKPIs(todayTrips);
-      updateDaySummaryBanner(todayTrips);
-      renderFlowChart(simulation);
-      renderAdvisory(simulation, tAvg);
-      renderOverdueTable(todayTrips);
-      renderTodayTripsTable(todayTrips);
-    }
-
-    function updateDaySummaryBanner(todayTrips) {
-      const banner = document.getElementById('dock-day-summary-banner');
-      if (!banner) return;
-      
-      const targetDateStr = selectedInboundDate || getTodayString();
-      const isToday = isSameDay(targetDateStr, getTodayString());
-      const titleLabel = isToday ? `Hôm Nay (${targetDateStr})` : `Ngày ${targetDateStr}`;
-      
-      const totalTrips = todayTrips.length;
-      const overdueTripsCount = todayTrips.filter(t => getWaitTimeMinutes(t) > 30).length;
-      const slaPercent = totalTrips > 0 ? ((totalTrips - overdueTripsCount) / totalTrips * 100).toFixed(1) : '100.0';
-      const avgTime = calculateAverageProcessingTime(todayTrips);
-      
-      const titleEl = document.getElementById('dock-summary-title');
-      if (titleEl) titleEl.textContent = `📊 Tình Hình Tổng Quan ${titleLabel}`;
-      
-      const textEl = document.getElementById('dock-summary-text');
-      if (textEl) {
-        textEl.innerHTML = `
-          Tổng số xe đến trạm: <strong>${totalTrips} xe</strong>. 
-          Số xe chờ/xử lý quá hạn (>30p): <strong style="color: ${overdueTripsCount > 0 ? 'var(--red)' : 'var(--green)'};">${overdueTripsCount} xe</strong>. 
-          Tỷ lệ hoàn thành đúng hạn SLA: <strong style="color: ${parseFloat(slaPercent) >= 95 ? 'var(--green)' : 'var(--yellow)'};">${slaPercent}%</strong>. 
-          Thời gian chờ/dỡ trung bình: <strong>${avgTime} phút/xe</strong>.
-        `;
-      }
-    }
-
-    function renderDockKPIs(todayTrips) {
-      const targetDateStr = selectedInboundDate || getTodayString();
-      const isToday = isSameDay(targetDateStr, getTodayString());
-      const titleLabel = isToday ? "Hôm Nay" : targetDateStr;
-
-      const totalTrips = todayTrips.length;
-      const waitingCount = todayTrips.filter(t => t.status === 'Đang Chờ' || t.status === 'Đang chờ' || t.status.toLowerCase() === 'waiting').length;
-      const enteringCount = todayTrips.filter(t => t.status === 'Đang nhập' || t.status === 'Đang xử lý' || t.status.toLowerCase() === 'unloading' || t.status.toLowerCase() === 'processing').length;
-      const receivedCount = todayTrips.filter(t => t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed').length;
-      const overdueTripsCount = todayTrips.filter(t => getWaitTimeMinutes(t) > 30).length;
-
-      const kpiCards = document.querySelectorAll('#tab-content-dock .kpi-card');
-      if (kpiCards.length >= 5) {
-        kpiCards[0].querySelector('.kpi-label').textContent = `Tổng Chuyến ${titleLabel}`;
-        kpiCards[4].querySelector('.kpi-label').textContent = `Chờ Quá Hạn (>30p)`;
-      }
-
-      const totalTripsEl = document.getElementById('dock-total-trips');
-      const totalTripsSub = document.getElementById('dock-sub-total');
-      if (totalTripsEl) totalTripsEl.textContent = totalTrips;
-      if (totalTripsSub) totalTripsSub.textContent = `${totalTrips} xe tải trong ngày`;
-      
-      const waitingEl = document.getElementById('dock-total-waiting');
-      const waitingSub = document.getElementById('dock-sub-waiting');
-      if (waitingEl) waitingEl.textContent = waitingCount;
-      if (waitingSub) waitingSub.textContent = `${waitingCount} xe chờ dỡ`;
-      
-      const enteringEl = document.getElementById('dock-total-entering');
-      const enteringSub = document.getElementById('dock-sub-entering');
-      if (enteringEl) enteringEl.textContent = enteringCount;
-      if (enteringSub) enteringSub.textContent = `${enteringCount} xe đang nhập`;
-      
-      const receivedEl = document.getElementById('dock-total-received');
-      const receivedSub = document.getElementById('dock-sub-received');
-      if (receivedEl) receivedEl.textContent = receivedCount;
-      if (receivedSub) receivedSub.textContent = `${receivedCount} xe đã hoàn tất`;
-
-      const overdueKpi = document.getElementById('dock-overdue-count');
-      const overdueSub = document.getElementById('dock-sub-overdue');
-      if (overdueKpi) overdueKpi.textContent = overdueTripsCount;
-      if (overdueSub) overdueSub.textContent = `> 30p chờ (${overdueTripsCount} xe)`;
-    }
-
-    function renderFlowChart(simulation) {
-      const chartContainer = document.getElementById('dock-flow-chart');
-      if (!chartContainer) return;
-      chartContainer.innerHTML = '';
-      
-      const maxVal = Math.max(...simulation.map(s => Math.max(s.capacity, s.processed + s.queue)), 1);
-      const scaleMax = maxVal * 1.15; // 15% padding top
-      
-      simulation.forEach(s => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'flow-chart-bar-wrapper';
-        
-        const capBottom = (s.capacity / scaleMax) * 100;
-        const processedHeight = (s.processed / scaleMax) * 100;
-        const queueHeight = (s.queue / scaleMax) * 100;
-        
-        const hourStr = String(s.hour).padStart(2, '0') + 'h';
-        
-        const titleText = `Khung giờ: ${String(s.hour).padStart(2, '0')}:00\n` +
-                          `• Xe mới đến: ${s.arrived} xe\n` +
-                          `• Trạm nhập mở: ${s.stations} trạm\n` +
-                          `• Năng suất xử lý: ${s.capacity.toFixed(1)} xe/h\n` +
-                          `• Đã xử lý (dỡ): ${s.processed.toFixed(1)} xe\n` +
-                          `• Ùn ứ tồn đọng: ${s.queue.toFixed(1)} xe\n` +
-                          `• Hiệu suất cảng: ${s.utilization.toFixed(0)}%`;
-        
-        wrapper.title = titleText;
-        
-        wrapper.innerHTML = `
-          <div class="flow-chart-bar-cap-line" style="bottom: ${capBottom}%;"></div>
-          <div class="flow-chart-bar-stack">
-            <div class="flow-bar-segment queue" style="height: ${queueHeight}%;"></div>
-            <div class="flow-bar-segment processed" style="height: ${processedHeight}%;"></div>
-          </div>
-          <span class="flow-chart-label">${hourStr}</span>
-        `;
-        
-        chartContainer.appendChild(wrapper);
-      });
-    }
-
-    function renderAdvisory(simulation, tAvg) {
-      const container = document.getElementById('dock-advisory-list');
-      if (!container) return;
-      container.innerHTML = '';
-      
-      const advisories = [];
-      
-      simulation.forEach(s => {
-        const hourStr = String(s.hour).padStart(2, '0') + ':00';
-        
-        if (s.queue > 0) {
-          const neededStations = Math.ceil((s.queue * tAvg) / 60);
-          advisories.push({
-            type: 'warning',
-            hour: s.hour,
-            title: `⚠️ Ùn Ứ Khung Giờ ${hourStr}`,
-            message: `Lượng xe dồn ứ là <strong>${s.queue.toFixed(1)} xe</strong>. Khuyến nghị mở thêm ít nhất <strong>${neededStations} trạm</strong> (tổng ${s.stations + neededStations} trạm) để giải tỏa nghẽn.`
-          });
-        }
-        else if (s.utilization < 30 && s.stations > 1 && s.arrived > 0) {
-          const optStations = Math.max(1, Math.ceil((s.arrived * tAvg) / 60));
-          const savedStations = s.stations - optStations;
-          if (savedStations > 0) {
-            advisories.push({
-              type: 'info',
-              hour: s.hour,
-              title: `💡 Dư Thừa Trạm Khung Giờ ${hourStr}`,
-              message: `Hiệu suất sử dụng cảng chỉ đạt <strong>${s.utilization.toFixed(0)}%</strong>. Có thể đóng bớt <strong>${savedStations} trạm</strong> (giảm về ${optStations} trạm) để tối ưu hóa nhân sự.`
-            });
-          }
-        }
-      });
-      
-      advisories.sort((a, b) => {
-        if (a.type === 'warning' && b.type !== 'warning') return -1;
-        if (a.type !== 'warning' && b.type === 'warning') return 1;
-        return a.hour - b.hour;
-      });
-      
-      const displayed = advisories.slice(0, 5);
-      
-      if (displayed.length > 0) {
-        displayed.forEach(adv => {
-          const card = document.createElement('div');
-          card.className = `kpi-card dock-advisory-card ${adv.type}`;
-          card.style.padding = '12px';
-          card.style.marginBottom = '8px';
-          card.style.display = 'flex';
-          card.style.flexDirection = 'column';
-          card.style.gap = '4px';
-          
-          let titleColor = 'var(--text-primary)';
-          if (adv.type === 'warning') titleColor = 'var(--red)';
-          else if (adv.type === 'info') titleColor = 'var(--yellow)';
-          
-          card.innerHTML = `
-            <div style="font-weight: 600; color: ${titleColor}; font-size: 0.76rem;">${adv.title}</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">${adv.message}</div>
-          `;
-          container.appendChild(card);
-        });
-      } else {
-        container.innerHTML = `
-          <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.76rem; border: 1px dashed var(--border); border-radius: var(--radius-sm);">
-            ✨ Vận hành tối ưu. Không có cảnh báo hoặc khuyến nghị điều phối nhân viên tại thời điểm này.
-          </div>
-        `;
-      }
-    }
-
-    function renderOverdueTable(todayTrips) {
-      const tbody = document.getElementById('dock-overdue-body');
-      const badge = document.getElementById('dock-overdue-badge');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      
-      const overdueTrips = todayTrips.filter(t => {
-        const waitMin = getWaitTimeMinutes(t);
-        return waitMin > 30;
-      });
-      
-      if (badge) {
-        badge.textContent = overdueTrips.length;
-      }
-      
-      if (overdueTrips.length > 0) {
-        overdueTrips.sort((a, b) => getWaitTimeMinutes(b) - getWaitTimeMinutes(a));
-        overdueTrips.forEach(t => {
-          const waitMin = getWaitTimeMinutes(t);
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td style="text-align: left; padding: 6px 10px; font-weight: 600; color: var(--red);">${escapeHTML(t.vehicle || t.code || 'N/A')}</td>
-            <td style="text-align: right; padding: 6px 10px; font-family: 'JetBrains Mono', monospace; color: var(--yellow);">${waitMin} phút</td>
-            <td style="text-align: right; padding: 6px 10px; color: var(--text-muted);">${escapeHTML(t.slot || 'N/A')}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } else {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">Không có xe chờ lâu</td></tr>`;
-      }
-    }
-
-    function renderTodayTripsTable(todayTrips) {
-      const targetDateStr = selectedInboundDate || getTodayString();
-      const isToday = isSameDay(targetDateStr, getTodayString());
-      const titleLabel = isToday ? "Hôm Nay" : targetDateStr;
-
-      const titleEl = document.querySelector('#tab-content-dock .table-card .card-title');
-      if (titleEl) {
-        titleEl.textContent = `📋 Danh Sách Chi Tiết Xe Tải ${titleLabel} (TripScan)`;
-      }
-
-      const tbody = document.getElementById('dock-trips-body');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      
-      if (todayTrips.length > 0) {
-        todayTrips.sort((a, b) => {
-          const timeA = a.time || '';
-          const timeB = b.time || '';
-          return timeB.localeCompare(timeA);
-        });
-        
-        todayTrips.forEach(t => {
-          const waitMin = getWaitTimeMinutes(t);
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td style="text-align: left; padding-left: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(t.code || 'N/A')}">${escapeHTML(t.code || 'N/A')}</td>
-            <td style="text-align: left; font-weight: 600; font-size: 0.72rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(t.vehicle || 'N/A')}">${escapeHTML(t.vehicle || 'N/A')}</td>
-            <td style="text-align: center; font-size: 0.7rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(t.capacity || '—')}</td>
-            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">${escapeHTML(t.slot || '—')}</td>
-            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">${escapeHTML(t.time || '—')}</td>
-            <td style="text-align: right; font-size: 0.68rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(t.username || '')}">${escapeHTML(t.username ? (t.username.split(' - ')[1] || t.username) : '—')}</td>
-            <td style="text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.72rem; color: ${waitMin > 30 ? 'var(--red)' : 'var(--text-muted)'};">${waitMin} phút</td>
-            <td style="text-align: center; padding-right: 6px;">${getStatusBadge(t.status, t)}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } else {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Không có chuyến xe nào trong ngày</td></tr>`;
-      }
-    }
-
-    function renderDockConfigGrid() {
-      const container = document.getElementById('dock-config-inputs');
-      if (!container) return;
-      container.innerHTML = '';
-      
-      const stations = getDockStations();
-      for (let h = 0; h < 24; h++) {
-        const hourStr = String(h).padStart(2, '0');
-        const item = document.createElement('div');
-        item.className = 'dock-config-item';
-        item.innerHTML = `
-          <label>${hourStr}:00</label>
-          <input type="number" min="0" max="40" value="${stations[h]}" data-hour="${h}" id="dock-stations-h${h}">
-        `;
-        container.appendChild(item);
-      }
-    }
-
-    // Hàm render chính
-    function renderDashboard(filterType) {
-      const currentRaw = window.TONKHO_DATA || rawData;
-      let D = currentRaw;
-      if (currentRaw[filterType]) {
-        D = currentRaw[filterType];
-      } else if (filterType !== 'all') {
-        D = { grand_total: 0, routes: [], destinations: {} };
-      }
-
-      // ── KPI Cards ──
-      const vung = D.destinations?.by_vung || {};
-      const totalGT24 = D.routes ? D.routes.reduce((s, r) => {
-        const a = r.aging || {};
-        return s + (a['4. 24-36']||0) + (a['5. 36-48']||0) + (a['6. 48-72']||0) + (a['7. 72-96']||0) + (a['8. 96-120']||0) + (a['9. 120+']||0);
-      }, 0) : 0;
-
-      const kpis = [
-        { label: 'Tổng Đơn Tồn', value: fmt(D.grand_total), sub: (D.routes ? D.routes.length : 0) + ' nhóm kho' },
-        { label: 'Liên Vùng', value: fmt(vung['Liên Vùng']||0), sub: pct(vung['Liên Vùng']||0, D.grand_total) + ' tổng' },
-        { label: 'Nội Vùng', value: fmt(vung['Nội vùng']||0), sub: pct(vung['Nội vùng']||0, D.grand_total) + ' tổng' },
-        { label: 'Nội Thành', value: fmt(vung['Nội thành']||0), sub: pct(vung['Nội thành']||0, D.grand_total) + ' tổng' },
-        { label: 'Tồn > 24h', value: fmt(totalGT24), sub: pct(totalGT24, D.grand_total) + ' — cần xử lý' },
-      ];
-
-      const kpiGrid = document.getElementById('kpi-grid');
-      kpiGrid.innerHTML = ''; 
-      kpis.forEach((k, i) => {
-        const card = document.createElement('div');
-        card.className = 'kpi-card animate-in delay-' + (i + 1);
-        card.innerHTML = `
-          <div class="kpi-label">${k.label}</div>
-          <div class="kpi-value">${k.value}</div>
-          <div class="kpi-sub">${k.sub}</div>`;
-        kpiGrid.appendChild(card);
-      });
-
-      // ── Pivot Table ──
-      const tbody = document.getElementById('pivot-body');
-      tbody.innerHTML = ''; 
-      if (D.routes && D.routes.length > 0) {
-        D.routes.forEach((route, ri) => {
-          // Parent row
-          const pr = document.createElement('tr');
-          pr.className = 'group-parent';
-          pr.dataset.group = ri;
-          let cells = `<td><span class="group-toggle" id="toggle-${ri}">▼</span> ${escapeHTML(route.name)}</td>`;
-          AGING_KEYS.forEach(k => {
-            const v = (route.aging || {})[k] || 0;
-            cells += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}">${v ? fmt(v) : '—'}</td>`;
-          });
-          cells += `<td>${fmt(route.total)}</td>`;
-          pr.innerHTML = cells;
-          pr.addEventListener('click', () => toggleGroup(ri));
-          tbody.appendChild(pr);
-
-          // Children
-          route.children.forEach(child => {
-            const cr = document.createElement('tr');
-            cr.className = 'group-child group-' + ri;
-            let cc = `<td>${escapeHTML(child.short_name || child.name)}</td>`;
-            AGING_KEYS.forEach(k => {
-              const v = (child.aging || {})[k] || 0;
-              cc += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}">${v ? fmt(v) : '—'}</td>`;
-            });
-            cc += `<td>${fmt(child.total)}</td>`;
-            cr.innerHTML = cc;
-            tbody.appendChild(cr);
-          });
-        });
-
-        // Grand total
-        const gtr = document.createElement('tr');
-        gtr.className = 'grand-total';
-        let gtCells = '<td>Grand Total</td>';
-        AGING_KEYS.forEach(k => {
-          const v = D.routes.reduce((s, r) => s + ((r.aging || {})[k] || 0), 0);
-          gtCells += `<td>${fmt(v)}</td>`;
-        });
-        gtCells += `<td>${fmt(D.grand_total)}</td>`;
-        gtr.innerHTML = gtCells;
-        tbody.appendChild(gtr);
-      } else {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-muted);font-family:\'Inter\',sans-serif">Không có đơn hàng nào thuộc nhóm này</td></tr>';
-      }
-
-      // ── Populate Mobile Cards ──
-      const mobileContainer = document.getElementById('mobile-cards-container');
-      if (mobileContainer) {
-        mobileContainer.innerHTML = '';
-        if (D.routes && D.routes.length > 0) {
-          D.routes.forEach(route => {
-            const card = document.createElement('div');
-            card.className = 'mobile-card';
-            
-            const a = route.aging || {};
-            const critical = (a['4. 24-36']||0) + (a['5. 36-48']||0) + (a['6. 48-72']||0) + (a['7. 72-96']||0) + (a['8. 96-120']||0) + (a['9. 120+']||0);
-            
-            card.innerHTML = `
-              <div class="mobile-card-header">
-                <span class="mobile-card-title">📦 ${escapeHTML(route.name)}</span>
-                <span class="mobile-card-total">${fmt(route.total)}</span>
-              </div>
-              <div class="mobile-card-grid">
-                <div class="mobile-card-item">
-                  <div class="mobile-card-label">0 - 12h</div>
-                  <div class="mobile-card-value">${fmt((a['1. 0-6']||0) + (a['2. 6-12']||0))}</div>
-                </div>
-                <div class="mobile-card-item">
-                  <div class="mobile-card-label">12 - 24h</div>
-                  <div class="mobile-card-value">${fmt(a['3. 12-24']||0)}</div>
-                </div>
-                <div class="mobile-card-item">
-                  <div class="mobile-card-label">> 24h (Trễ)</div>
-                  <div class="mobile-card-value${critical > 0 ? ' highlight' : ''}">${fmt(critical)}</div>
-                </div>
-              </div>
-            `;
-            mobileContainer.appendChild(card);
-          });
-        } else {
-          mobileContainer.innerHTML = '<div style="text-align:center;padding:25px;color:var(--text-muted);font-size:0.75rem;">Không có đơn hàng nào thuộc nhóm này</div>';
-        }
-      }
-
-      // ── Donut Chart ──
-      const donutEl = document.getElementById('donut-group');
-      donutEl.innerHTML = ''; 
-      const total = D.grand_total;
-      
-      if (total > 0 && D.routes && D.routes.length > 0) {
-        let angleStart = 0;
-        const slices = D.routes.map((r, i) => ({
-          name: r.name, value: r.total, color: COLORS[i % COLORS.length],
-          pct: (r.total / total * 100)
-        }));
-
-        let svgPaths = '';
-        slices.forEach(s => {
-          let angle = (s.value / total) * 360;
-          if (angle >= 360) angle = 359.99; // Tránh lỗi góc 360 độ khiến SVG biến mất
-          svgPaths += describeArc(70, 70, 52, angleStart, angleStart + angle - (angle >= 359.99 ? 0 : 0.5), s.color);
-          angleStart += angle;
-        });
-
-        donutEl.innerHTML = `
-          <svg class="donut-svg" viewBox="0 0 140 140">
-            ${svgPaths}
-            <circle cx="70" cy="70" r="36" fill="var(--bg-secondary)"/>
-            <text x="70" y="66" text-anchor="middle" fill="var(--text-primary)" font-size="15" font-weight="800" font-family="JetBrains Mono">${(total/1000).toFixed(0)}K</text>
-            <text x="70" y="82" text-anchor="middle" fill="var(--text-muted)" font-size="9" font-family="Inter">đơn hàng</text>
-          </svg>
-          <div class="donut-legend">
-            ${slices.map(s => `
-              <div class="legend-item">
-                <span class="legend-color" style="background:${s.color}"></span>
-                <span class="legend-name">${escapeHTML(s.name)}</span>
-                <span class="legend-value">${fmt(s.value)}</span>
-                <span class="legend-pct">${s.pct.toFixed(1)}%</span>
-              </div>
-            `).join('')}
-          </div>`;
-      } else {
-        donutEl.innerHTML = '<div style="margin:auto;color:var(--text-muted);font-size:0.9rem">Không có dữ liệu biểu đồ</div>';
-      }
-
-      // ── Aging Bars ──
-      const agingEl = document.getElementById('aging-bars');
-      agingEl.innerHTML = ''; 
-      if (total > 0 && D.routes && D.routes.length > 0) {
-        const agingTotals = AGING_KEYS.map(k => D.routes.reduce((s, r) => s + ((r.aging || {})[k] || 0), 0));
-        const maxAging = Math.max(...agingTotals);
-
-        agingTotals.forEach((v, i) => {
-          const barClass = i <= 1 ? 'safe' : i <= 3 ? 'warn' : 'danger';
-          const width = maxAging ? (v / maxAging * 100) : 0;
-          const item = document.createElement('div');
-          item.className = 'bar-item';
-          item.innerHTML = `
-            <span class="bar-label">${AGING_KEYS[i].replace(/^\d+\.\s*/, '')}h</span>
-            <div class="bar-track">
-              <div class="bar-fill ${barClass}" style="width:0%"></div>
-            </div>
-            <span class="bar-count">${fmt(v)}</span>`;
-          agingEl.appendChild(item);
-          // Animate
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              const el = item.querySelector('.bar-fill');
-              if (el) el.style.width = width + '%';
-            }, 100 + i * 40);
-          });
-        });
-      } else {
-        agingEl.innerHTML = '<div style="margin:auto;color:var(--text-muted);font-size:0.9rem">Không có dữ liệu thời gian tồn</div>';
-      }
-
-      // ── Under 3h Origins Table ──
-      const under3hBody = document.getElementById('under3h-body');
-      const badgeEl = document.getElementById('under3h-total-badge');
-      if (badgeEl) {
-        const totalUnder3h = D.total_under_3h || 0;
-        badgeEl.textContent = fmt(totalUnder3h);
-      }
-      if (under3hBody) {
-        under3hBody.innerHTML = '';
-        const under3hData = D.under_3h_origins || [];
-        const totalUnder3h = D.total_under_3h || 0;
-        
-        if (totalUnder3h > 0 && under3hData.length > 0) {
-          under3hData.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td style="text-align: left; padding: 6px 10px; font-family: 'Inter', sans-serif;">${escapeHTML(item.province)}</td>
-              <td style="text-align: right; padding: 6px 10px; font-weight: 600; color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">${fmt(item.count)}</td>
-              <td style="text-align: right; padding: 6px 10px; color: var(--text-muted); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">${item.pct.toFixed(1)}%</td>
-            `;
-            under3hBody.appendChild(tr);
-          });
-        } else {
-          under3hBody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted);font-family:\'Inter\',sans-serif">Không có hàng tồn < 3h</td></tr>';
-        }
-      }
-
-      // ── Destination Cards ──
-      const destGrid = document.getElementById('dest-grid');
-      destGrid.innerHTML = ''; 
-      if (D.routes && D.routes.length > 0) {
-        D.routes.forEach((route, ri) => {
-          const card = document.createElement('div');
-          card.className = 'dest-card animate-in';
-          card.style.animationDelay = (0.05 + ri * 0.03) + 's';
-
-          const childrenSorted = [...route.children].sort((a, b) => b.total - a.total);
-          const childrenHtml = childrenSorted.map(c => `
-            <div class="dest-row">
-              <span class="name">${escapeHTML(c.short_name || c.name)}</span>
-              <span class="count">${fmt(c.total)}</span>
-              <span class="pct">${pct(c.total, route.total)}</span>
-            </div>`).join('');
-
-          card.innerHTML = `
-            <div class="dest-card-header">
-              <h3>${escapeHTML(route.name)}</h3>
-              <span class="total">${fmt(route.total)}</span>
-            </div>
-            <div class="dest-list">${childrenHtml}</div>`;
-          destGrid.appendChild(card);
-        });
-      }
-    }
-
-    function agingClass(key, val) {
-      if (!val) return '';
-      const idx = AGING_KEYS.indexOf(key);
-      if (idx <= 1) return 'aging-safe';
-      if (idx <= 3) return 'aging-warn';
-      return 'aging-danger';
-    }
-
-    function toggleGroup(gi) {
-      const rows = document.querySelectorAll('.group-' + gi);
-      const toggle = document.getElementById('toggle-' + gi);
-      const hidden = rows[0]?.style.display === 'none';
-      rows.forEach(r => r.style.display = hidden ? '' : 'none');
-      if (toggle) {
-        toggle.textContent = hidden ? '▼' : '▶';
-        toggle.classList.toggle('collapsed', !hidden);
-      }
-    }
-
-    function describeArc(cx, cy, r, startAngle, endAngle, color) {
-      const s = polarToCartesian(cx, cy, r, endAngle);
-      const e = polarToCartesian(cx, cy, r, startAngle);
-      const large = endAngle - startAngle > 180 ? 1 : 0;
-      return `<path d="M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 0 ${e.x} ${e.y}" fill="none" stroke="${color}" stroke-width="14" stroke-linecap="round"/>`;
-    }
-
-    function polarToCartesian(cx, cy, r, deg) {
-      const rad = (deg - 90) * Math.PI / 180;
-      return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
-    }
-
-    // ── Setup Filter Event Listeners ──
-    const filterContainer = document.getElementById('filter-container');
-    if (filterContainer) {
-      filterContainer.addEventListener('click', (e) => {
-        const btn = e.target.closest('.filter-btn');
-        if (!btn || btn.classList.contains('active')) return;
-        
-        filterContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        const filterVal = btn.dataset.filter;
-        localStorage.setItem('ktc_filter_type', filterVal); // Khắc phục đề xuất 1
-        renderDashboard(filterVal);
-      });
-    }
-
-    // Khắc phục đề xuất 1: Đọc và kích hoạt bộ lọc đã chọn trước đó
-    const savedFilter = localStorage.getItem('ktc_filter_type') || 'all';
-    if (filterContainer) {
-      const targetBtn = filterContainer.querySelector(`[data-filter="${savedFilter}"]`);
-      if (targetBtn) {
-        filterContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        targetBtn.classList.add('active');
-      }
-    }
-
-    // ── Auth & Session Management ──
-    const SESSION_KEY = 'ktc_auth_session';
-    const CLOUD_AUTH_KEY = 'ktc_supabase_config';
-    
-    async function hashSHA256(str) {
-      if (window.sha256) {
-        return window.sha256(str);
-      }
-      const msgBuffer = new TextEncoder().encode(str);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-    
-    async function checkAuth() {
-      // 1. Kiểm tra cấu hình Supabase Cloud Auth
-      const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
-      if (supabaseConfig && window.supabase) {
-        try {
-          const client = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
-          const { data: { session } } = await client.auth.getSession();
-          if (session) {
-            const user = session.user;
-            const role = user.user_metadata?.role || 'operator';
-            const name = user.user_metadata?.name || user.email;
-            setLoggedInUser({ username: user.email, name, role });
-            return;
-          }
-        } catch (e) {
-          console.error("Supabase Auth error:", e);
-        }
-      }
-      
-      // 2. Fallback sang Local Auth Session
-      const localSession = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
-      if (localSession) {
-        setLoggedInUser(localSession);
-      } else {
-        showLoginOverlay();
-      }
-    }
-    
-    function setLoggedInUser(user) {
-      window.currentUser = user;
-      document.getElementById('login-overlay').style.display = 'none';
-      const profileEl = document.getElementById('user-profile');
-      if (profileEl) {
-        profileEl.style.display = 'flex';
-        document.getElementById('user-name').textContent = user.name;
-        document.getElementById('user-role').textContent = user.role === 'manager' ? 'Hub Manager' : 'Nhân Viên';
-      }
-      
-      applyRBAC(user.role);
-      
-      const currentFilter = localStorage.getItem('ktc_filter_type') || 'all';
-      renderDashboard(currentFilter);
-    }
-    
-    function applyRBAC(role) {
-      const downloadBtn = document.getElementById('download-excel-btn');
-      const settingsBtn = document.getElementById('open-settings-btn');
-      
-      if (role === 'manager') {
-        if (downloadBtn) downloadBtn.style.display = 'flex';
-        if (settingsBtn) settingsBtn.style.display = 'flex';
-      } else {
-        if (downloadBtn) downloadBtn.style.display = 'none';
-        if (settingsBtn) settingsBtn.style.display = 'none';
-      }
-    }
-    
-    function showLoginOverlay() {
-      document.getElementById('login-overlay').style.display = 'flex';
-      document.getElementById('user-profile').style.display = 'none';
-      if (document.getElementById('download-excel-btn')) document.getElementById('download-excel-btn').style.display = 'none';
-      if (document.getElementById('open-settings-btn')) document.getElementById('open-settings-btn').style.display = 'none';
-    }
-    
-    function logout() {
-      window.currentUser = null;
-      sessionStorage.removeItem(SESSION_KEY);
-      const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
-      if (supabaseConfig && window.supabase) {
-        try {
-          const client = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
-          client.auth.signOut();
-        } catch(e) {}
-      }
-      showLoginOverlay();
-      const currentFilter = localStorage.getItem('ktc_filter_type') || 'all';
-      renderDashboard(currentFilter);
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      // Đăng xuất
-      document.getElementById('logout-btn').addEventListener('click', logout);
-      
-      // Xử lý Login Form
-      document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const uname = document.getElementById('login-username').value.trim();
-        const pass = document.getElementById('login-password').value;
-        const errorEl = document.getElementById('login-error');
-        errorEl.style.display = 'none';
-        
-        const unameLower = uname.toLowerCase();
-        const userHashes = {
-          'manager': '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5',
-          'operator': 'ec6e1c25258002eb1c67d15c7f45da7945fa4c58778fd7d88faa5e53e3b4698d'
-        };
-
-        // 1. Ưu tiên xác thực tài khoản Local trước để tránh bị cấu hình Cloud làm kẹt
-        if (userHashes[unameLower]) {
-          const inputHash = await hashSHA256(pass);
-          if (inputHash === userHashes[unameLower]) {
-            const sessionUser = {
-              username: unameLower,
-              name: unameLower === 'manager' ? 'Hub Manager' : 'Staff / Operator',
-              role: unameLower === 'manager' ? 'manager' : 'operator'
-            };
-            sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
-            setLoggedInUser(sessionUser);
-          } else {
-            errorEl.textContent = '❌ Mật khẩu local không chính xác.';
-            errorEl.style.display = 'block';
-          }
-          return;
-        }
-        
-        // 2. Chạy xác thực Cloud Auth nếu tên đăng nhập không phải account local
-        const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || 'null');
-        if (supabaseConfig && window.supabase) {
-          try {
-            const client = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
-            const { data, error } = await client.auth.signInWithPassword({
-              email: uname,
-              password: pass
-            });
-            if (error) throw error;
-            const user = data.user;
-            const role = user.user_metadata?.role || 'operator';
-            const name = user.user_metadata?.name || user.email;
-            setLoggedInUser({ username: user.email, name, role });
-            return;
-          } catch (err) {
-            errorEl.textContent = '❌ Lỗi Cloud Auth: ' + err.message;
-            errorEl.style.display = 'block';
-            return;
-          }
-        }
-        
-        errorEl.textContent = '❌ Tên đăng nhập không tồn tại hoặc chưa kết nối Cloud Auth.';
-        errorEl.style.display = 'block';
-      });
-
-      // Toggle hiển thị panel Supabase
-      document.getElementById('toggle-cloud-auth-btn').addEventListener('click', (e) => {
-        e.preventDefault();
-        const panel = document.getElementById('cloud-auth-panel');
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        if (panel.style.display === 'block') {
-          const config = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY) || '{"url":"","key":""}');
-          document.getElementById('supabase-url').value = config.url || '';
-          document.getElementById('supabase-key').value = config.key || '';
-        }
-      });
-
-      // Lưu cấu hình Supabase
-      document.getElementById('save-cloud-auth-btn').addEventListener('click', () => {
-        const url = document.getElementById('supabase-url').value.trim();
-        const key = document.getElementById('supabase-key').value.trim();
-        
-        if (url && key) {
-          localStorage.setItem(CLOUD_AUTH_KEY, JSON.stringify({ url, key }));
-          alert('✅ Đã cấu hình Supabase Cloud Auth! Trình duyệt sẽ khởi động lại để kết nối.');
-          location.reload();
-        } else {
-          localStorage.removeItem(CLOUD_AUTH_KEY);
-          alert('🗑️ Đã xóa cấu hình Supabase. Hệ thống quay về dùng tài khoản cục bộ.');
-          location.reload();
-        }
-      });
-
-      // ── Settings Parameter Mapping Panel ──
-      function renderParamsList() {
-        const listBody = document.getElementById('params-list-body');
-        if (!listBody) return;
-        listBody.innerHTML = '';
-        
-        const currentRaw = window.TONKHO_DATA || rawData;
-        const params = currentRaw.mapping_params || [];
-        
-        params.forEach((p, idx) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="tinh_giao" value="${escapeHTML(p['Tỉnh giao'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
-            <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="lv2" value="${escapeHTML(p['LV-2'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
-            <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="kho_den" value="${escapeHTML(p['Kho Đến'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
-            <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="loai_kho" value="${escapeHTML(p['Loại kho'])}" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;"></td>
-          `;
-          listBody.appendChild(tr);
-        });
-      }
-
-      document.getElementById('open-settings-btn').addEventListener('click', () => {
-        document.getElementById('settings-panel').classList.add('open');
-        renderParamsList();
-        const pat = sessionStorage.getItem('github_pat') || '';
-        document.getElementById('github-pat').value = pat;
-      });
-
-      document.getElementById('settings-close-btn').addEventListener('click', () => {
-        document.getElementById('settings-panel').classList.remove('open');
-      });
-
-      document.getElementById('add-param-row-btn').addEventListener('click', () => {
-        const listBody = document.getElementById('params-list-body');
-        if (!listBody) return;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="tinh_giao" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Tỉnh mới"></td>
-          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="lv2" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="LV-2"></td>
-          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="kho_den" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Kho Đến"></td>
-          <td style="padding: 4px 6px;"><input type="text" class="param-input" data-col="loai_kho" value="" style="width: 100%; border: none; background: transparent; color: var(--text-primary); font-size: 0.72rem;" placeholder="Loại kho"></td>
-        `;
-        listBody.appendChild(tr);
-        listBody.parentElement.scrollTop = listBody.parentElement.scrollHeight;
-      });
-
-      document.getElementById('save-params-btn').addEventListener('click', async () => {
-        const pat = document.getElementById('github-pat').value.trim();
-        if (!pat) {
-          alert('⚠️ Vui lòng nhập GitHub Personal Access Token (PAT) để xác thực quyền ghi!');
-          return;
-        }
-        
-        sessionStorage.setItem('github_pat', pat);
-        
-        const rows = document.querySelectorAll('#params-list-body tr');
-        let csvContent = 'Tỉnh giao,Loại hàng,Vùng,LV-1,LV-2,Kho Đến,Loại kho,Phân vùng,Miền\n';
-        
-        rows.forEach(tr => {
-          const tinh_giao_el = tr.querySelector('[data-col="tinh_giao"]');
-          const lv2_el = tr.querySelector('[data-col="lv2"]');
-          const kho_den_el = tr.querySelector('[data-col="kho_den"]');
-          const loai_kho_el = tr.querySelector('[data-col="loai_kho"]');
-          
-          if (tinh_giao_el && lv2_el && kho_den_el && loai_kho_el) {
-            const tg = tinh_giao_el.value.trim();
-            const l2 = lv2_el.value.trim();
-            const kd = kho_den_el.value.trim();
-            const lk = loai_kho_el.value.trim();
-            
-            if (tg) {
-              csvContent += `"${tg}","","Liên vùng","${tg}","${l2}","${kd}","${lk}","${lk}","Trung"\n`;
-            }
-          }
-        });
-        
-        const btn = document.getElementById('save-params-btn');
-        btn.textContent = '⏳ Đang lưu lên GitHub...';
-        btn.disabled = true;
-        
-        try {
-          const repo = 'ImDiDinne/ktchcm01';
-          const path = 'mapping_params.csv';
-          const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-          
-          const getResp = await fetch(url);
-          if (!getResp.ok) throw new Error('Không thể tải file hiện tại từ GitHub.');
-          const fileData = await getResp.json();
-          const sha = fileData.sha;
-          
-          const utf8Bytes = new TextEncoder().encode(csvContent);
-          let binary = '';
-          const len = utf8Bytes.byteLength;
-          for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(utf8Bytes[i]);
-          }
-          const base64Content = btoa(binary);
-          
-          const putResp = await fetch(url, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${pat}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: 'chore(config): update mapping parameters via dashboard Settings UI',
-              content: base64Content,
-              sha: sha,
-              branch: 'main'
-            })
-          });
-          
-          if (!putResp.ok) {
-            const errData = await putResp.json();
-            throw new Error(errData.message || 'Lỗi đẩy file.');
-          }
-          
-          alert('✨ Lưu thành công! Tiến trình cập nhật dữ liệu tự động trên GitHub Cloud sẽ kích hoạt sau vài giây để đồng bộ báo cáo.');
-          document.getElementById('settings-panel').classList.remove('open');
-        } catch (err) {
-          alert('❌ Thất bại: ' + err.message);
-        } finally {
-          btn.textContent = '💾 Lưu Tham Số Lên Cloud';
-          btn.disabled = false;
-        }
-      });
-
-      // Khởi chạy kiểm tra đăng nhập
-      checkAuth();
-
-      // ── TripScan / Dock Control Events & Initialization ──
-      const tabBtnInventory = document.getElementById('tab-btn-inventory');
-      const tabBtnDock = document.getElementById('tab-btn-dock');
-      const tabContentInventory = document.getElementById('tab-content-inventory');
-      const tabContentDock = document.getElementById('tab-content-dock');
-      
-      if (tabBtnInventory && tabBtnDock && tabContentInventory && tabContentDock) {
-        tabBtnInventory.addEventListener('click', () => {
-          tabBtnInventory.classList.add('active');
-          tabBtnDock.classList.remove('active');
-          tabContentInventory.style.display = 'block';
-          tabContentDock.style.display = 'none';
-        });
-        
-        tabBtnDock.addEventListener('click', () => {
-          tabBtnDock.classList.add('active');
-          tabBtnInventory.classList.remove('active');
-          tabContentInventory.style.display = 'none';
-          tabContentDock.style.display = 'block';
-          
-          if (tripScanData.length === 0) {
-            fetchTripScanData();
-          } else {
-            populateInboundDates();
-            runDockSimulation();
-          }
-        });
-      }
-
-      const refreshTripsBtn = document.getElementById('btn-refresh-trips');
-      if (refreshTripsBtn) {
-        refreshTripsBtn.addEventListener('click', fetchTripScanData);
-      }
-
-      const saveDocksBtn = document.getElementById('btn-save-docks');
-      if (saveDocksBtn) {
-        saveDocksBtn.addEventListener('click', () => {
-          const stations = [];
-          for (let h = 0; h < 24; h++) {
-            const input = document.getElementById(`dock-stations-h${h}`);
-            if (input) {
-              const val = parseInt(input.value, 10);
-              stations.push(isNaN(val) ? 0 : Math.max(0, val));
-            } else {
-              stations.push(0);
-            }
-          }
-          saveDockStations(stations);
-          runDockSimulation();
-          alert('💾 Đã lưu cấu hình số trạm nhập và áp dụng vào mô phỏng!');
-        });
-      }
-
-      const simTAvgInput = document.getElementById('sim-t-avg');
-      const simTAvgVal = document.getElementById('sim-t-avg-val');
-      if (simTAvgInput && simTAvgVal) {
-        const initialTAvg = getDockTAvg();
-        simTAvgInput.value = initialTAvg;
-        simTAvgVal.textContent = `${initialTAvg} phút`;
-        
-        simTAvgInput.addEventListener('input', () => {
-          const val = simTAvgInput.value;
-          simTAvgVal.textContent = `${val} phút`;
-          saveDockTAvg(val);
-          runDockSimulation();
-        });
-      }
-
-      const inboundDateSelect = document.getElementById('inbound-date-select');
-      if (inboundDateSelect) {
-        inboundDateSelect.addEventListener('change', (e) => {
-          selectedInboundDate = e.target.value;
-          runDockSimulation();
-        });
-      }
-
-      renderDockConfigGrid();
-    });
-
-    // Khắc phục đề xuất 2: Tự động tải lại script dữ liệu mới mỗi 10 phút (không cần reload trang)
-    function autoRefreshData() {
-      const oldScript = document.getElementById('tonkho-data-script');
-      if (oldScript) oldScript.remove();
-      
-      const script = document.createElement('script');
-      script.id = 'tonkho-data-script';
-      script.src = 'tonkho_data.js?t=' + Date.now();
-      script.onload = () => {
-        const activeBtn = document.querySelector('.filter-btn.active');
-        const currentFilter = activeBtn ? activeBtn.dataset.filter : 'all';
-        const updateTimeEl = document.getElementById('update-time');
-        if (updateTimeEl && window.TONKHO_DATA) {
-          updateTimeEl.textContent = 'Cập nhật: ' + window.TONKHO_DATA.updated;
-        }
-        checkSessionExpiry();
-        renderDashboard(currentFilter);
-        console.log('🔄 Dashboard auto-refreshed inventory successfully at ' + new Date().toLocaleTimeString());
-        
-        // Cập nhật lại dữ liệu TripScan nếu đang ở tab giám sát cảng
-        const dockTabBtn = document.getElementById('tab-btn-dock');
-        if (dockTabBtn && dockTabBtn.classList.contains('active')) {
-          fetchTripScanData();
-        } else if (tripScanData.length > 0) {
-          runDockSimulation();
-        }
-      };
-      document.head.appendChild(script);
-    }
-    
-    // Refresh mỗi 10 phút (600,000ms)
-    setInterval(autoRefreshData, 600000);
-
-    // Tự động làm mới dữ liệu TripScan mỗi 30 giây để cập nhật trạng thái dỡ hàng tức thì
-    setInterval(() => {
-      const dockTabBtn = document.getElementById('tab-btn-dock');
-      if (dockTabBtn && dockTabBtn.classList.contains('active')) {
-        fetchTripScanData();
-      }
-    }, 30000);
-
-  })();
-  </script>
-
-  <!-- ═══ Login Overlay (Modal) ═══ -->
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+
+  <!-- Modular Scripts -->
+  <script src="js/auth.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/inbound.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Login Overlay (Modal) -->
   <div id="login-overlay" class="login-overlay">
     <div class="login-card">
       <div class="login-logo">📦</div>
@@ -1973,8 +368,6 @@
         <button type="submit" class="login-btn">Đăng Nhập</button>
       </form>
       
-      <!-- Đã xoá thông tin đăng nhập demo để tránh lộ mật khẩu dạng plaintext -->
-      
       <div class="cloud-auth-toggle">
         <a href="#" id="toggle-cloud-auth-btn" style="color: var(--text-muted); font-size: 0.7rem; text-decoration: underline;">⚙️ Kết nối Supabase Cloud Auth</a>
       </div>
@@ -1988,15 +381,15 @@
           <label style="font-size: 0.7rem;">Supabase Anon Key</label>
           <input type="password" id="supabase-key" placeholder="eyJhbGciOi..." style="font-size: 0.75rem; padding: 6px 10px;">
         </div>
-        <button type="button" id="save-cloud-auth-btn" class="login-btn" style="background: var(--accent-alpha); color: var(--accent-light); font-size: 0.7rem; padding: 6px 12px; margin-top: 5px;">Lưu Cấu Hình</button>
+        <button type="button" id="save-cloud-auth-btn" class="login-btn" style="background: rgba(251, 146, 60, 0.15); color: var(--accent-light); font-size: 0.7rem; padding: 6px 12px; margin-top: 5px;">Lưu Cấu Hình</button>
       </div>
     </div>
   </div>
 
-  <!-- ═══ Settings Slide-Out Panel ═══ -->
+  <!-- Settings Slide-Out Panel -->
   <div id="settings-panel" class="settings-panel">
     <div class="settings-header">
-      <h2>⚙️ Cấu Hình Tham Số Mapping</h2>
+      <h2>Cấu Hình Tham Số Mapping</h2>
       <button id="settings-close-btn" class="settings-close-btn">&times;</button>
     </div>
     <div class="settings-body">
@@ -2028,8 +421,8 @@
       </div>
     </div>
     <div class="settings-footer">
-      <button id="save-params-btn" class="login-btn" style="margin: 0; flex: 1;">💾 Lưu Tham Số Lên Cloud</button>
-      <button id="add-param-row-btn" class="login-btn" style="margin: 0; background: var(--bg-glass); border: 1px solid var(--border); color: var(--text-primary); width: auto;">➕ Thêm</button>
+      <button id="save-params-btn" class="login-btn" style="margin: 0; flex: 1;">Lưu Tham Số Lên Cloud</button>
+      <button id="add-param-row-btn" class="login-btn" style="margin: 0; background: var(--bg-glass); border: 1px solid var(--border); color: var(--text-primary); width: auto;">Thêm</button>
     </div>
   </div>
 </body>

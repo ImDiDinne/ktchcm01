@@ -353,7 +353,38 @@ def main():
                     js_text = f"// Auto-generated — {data.get('updated', '')}\nvar TONKHO_DATA={json.dumps(data, ensure_ascii=False)};\n"
                     js_path.write_text(js_text, encoding='utf-8')
         except Exception as e:
-            print(f"⚠️ Lỗi xóa cờ session_expired: {e}")
+            print(f"⚠️ Lỗi xóa cờ session_expired cục bộ: {e}")
+
+        # Xóa cờ session_expired trên Supabase
+        supabase_url = env.get('SUPABASE_URL') or os.environ.get('SUPABASE_URL')
+        supabase_key = env.get('SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('SUPABASE_SERVICE_ROLE_KEY') or env.get('SUPABASE_KEY') or os.environ.get('SUPABASE_KEY')
+        if supabase_url and supabase_key:
+            try:
+                import requests
+                supabase_url = supabase_url.rstrip('/')
+                headers = {
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}",
+                    "Content-Type": "application/json"
+                }
+                get_url = f"{supabase_url}/rest/v1/inventory_data?id=eq.1"
+                resp = requests.get(get_url, headers=headers, timeout=15)
+                if resp.status_code == 200 and len(resp.json()) > 0:
+                    row = resp.json()[0]
+                    row_data = row.get('data', {})
+                    row_data['session_expired'] = False
+                    
+                    put_url = f"{supabase_url}/rest/v1/inventory_data"
+                    headers_upsert = {**headers, "Prefer": "resolution=merge-duplicates"}
+                    payload = {
+                        "id": 1,
+                        "data": row_data,
+                        "updated_at": datetime.now().isoformat()
+                    }
+                    requests.post(put_url, headers=headers_upsert, json=payload, timeout=15)
+                    print("✅ Đã xóa cờ session_expired trên Supabase thành công!")
+            except Exception as se_err:
+                print(f"⚠️ Không thể xóa cờ session_expired trên Supabase: {se_err}")
 
         send_notification(
             "KTC HCM 01 ✅",

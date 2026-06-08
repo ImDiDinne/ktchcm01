@@ -365,6 +365,37 @@ def set_session_expired_flag(is_expired=True):
         except Exception as e:
             print(f"⚠️ Lỗi ghi {js_path.name}: {e}")
 
+    # Cập nhật cờ session_expired lên Supabase
+    env = load_env()
+    supabase_url = env.get('SUPABASE_URL') or os.environ.get('SUPABASE_URL')
+    supabase_key = env.get('SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('SUPABASE_SERVICE_ROLE_KEY') or env.get('SUPABASE_KEY') or os.environ.get('SUPABASE_KEY')
+    if supabase_url and supabase_key:
+        supabase_url = supabase_url.rstrip('/')
+        headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {supabase_key}",
+            "Content-Type": "application/json"
+        }
+        try:
+            get_url = f"{supabase_url}/rest/v1/inventory_data?id=eq.1"
+            resp = requests.get(get_url, headers=headers, timeout=15)
+            if resp.status_code == 200 and len(resp.json()) > 0:
+                row = resp.json()[0]
+                row_data = row.get('data', {})
+                row_data['session_expired'] = is_expired
+                
+                put_url = f"{supabase_url}/rest/v1/inventory_data"
+                headers_upsert = {**headers, "Prefer": "resolution=merge-duplicates"}
+                payload = {
+                    "id": 1,
+                    "data": row_data,
+                    "updated_at": datetime.now().isoformat()
+                }
+                requests.post(put_url, headers=headers_upsert, json=payload, timeout=15)
+                print(f"✅ Đã cập nhật cờ session_expired={is_expired} trên Supabase thành công!")
+        except Exception as se_err:
+            print(f"⚠️ Không thể cập nhật cờ session_expired lên Supabase: {se_err}")
+
 
 # ── Main ──────────────────────────────────────────────────
 def main():

@@ -13,3 +13,5 @@ node_modules/
 logs/
 .session_token
 .browser_data/
+tonkho_data.js
+tonkho_tuyen.json

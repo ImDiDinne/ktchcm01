@@ -16,7 +16,7 @@ echo "========================================" >> "$LOG"
 
 # Đồng bộ dữ liệu từ GitHub trước khi chạy để tránh xung đột
 echo "🔄 Đang đồng bộ dữ liệu từ GitHub..." >> "$LOG"
-git checkout HEAD -- tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx >> "$LOG" 2>&1
+git checkout HEAD -- mapping_params.csv >> "$LOG" 2>&1
 
 if ! git diff --quiet || ! git diff --cached --quiet; then
     HAS_CHANGES=1
@@ -61,12 +61,16 @@ EXIT_CODE=$?
 if [ $EXIT_CODE -eq 0 ]; then
     echo "✅ $(date '+%H:%M:%S') — Export hoàn tất! Đang push lên GitHub..." >> "$LOG"
     
-    # Auto push lên GitHub Pages
-    git add -f tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx >> "$LOG" 2>&1
+    # Auto push parameters if updated
+    git add mapping_params.csv >> "$LOG" 2>&1
     TIMESTAMP=$(date "+%d/%m/%Y %H:%M")
-    git commit -m "chore(data): auto-update $TIMESTAMP" >> "$LOG" 2>&1
-    git pull origin main --rebase --strategy-option=ours >> "$LOG" 2>&1
-    git push origin main >> "$LOG" 2>&1
+    if ! git diff --staged --quiet; then
+        git commit -m "chore(config): auto-update mapping parameters $TIMESTAMP" >> "$LOG" 2>&1
+        git pull origin main --rebase --strategy-option=ours >> "$LOG" 2>&1
+        git push origin main >> "$LOG" 2>&1
+    else
+        echo "ℹ️ Không có thay đổi về mapping. Bỏ qua commit." >> "$LOG"
+    fi
     
     if [ $? -eq 0 ]; then
         echo "🚀 $(date '+%H:%M:%S') — Đã push lên GitHub thành công!" >> "$LOG"

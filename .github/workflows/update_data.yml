@@ -34,6 +34,9 @@ jobs:
         METABASE_USERNAME: ${{ secrets.METABASE_USERNAME }}
         METABASE_PASSWORD: ${{ secrets.METABASE_PASSWORD }}
         METABASE_SESSION: ${{ secrets.METABASE_SESSION }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       run: |
         python auto_fetch_data.py --run-export
 
@@ -67,13 +70,13 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
-        git add -f tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx
+        git add mapping_params.csv
         if git diff --staged --quiet; then
-          echo "✅ No changes in data files. Skipping commit."
+          echo "✅ No config changes. Skipping commit."
         else
-          git commit -m "chore(data): auto-update inventory data [skip ci]"
+          git commit -m "chore(config): auto-update mapping parameters [skip ci]"
           # Pull rebase trước để tránh conflict với local pushes
           git pull origin main --rebase --strategy-option=theirs || true
           git push origin main
-          echo "🚀 Data pushed successfully!"
+          echo "🚀 Config pushed successfully!"
         fi

@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 echo ""
 echo "[1/3] Đang đồng bộ dữ liệu từ GitHub..."
 # Bỏ các thay đổi của file tự sinh để tránh xung đột khi pull
-git checkout HEAD -- tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx 2>/dev/null
+git checkout HEAD -- mapping_params.csv 2>/dev/null
 git pull origin main --rebase
 if [ $? -ne 0 ]; then
     echo "⚠️ Không thể tự động pull từ GitHub. Bỏ qua và chạy tiếp..."
@@ -26,7 +26,7 @@ fi
 
 echo ""
 echo "[3/3] Đang push dữ liệu mới lên GitHub..."
-git add -f tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx mapping_params.csv index.html style.css export_tonkho_v2.py auto_fetch_data.py api/metabase_proxy.js
+git add mapping_params.csv index.html style.css export_tonkho_v2.py auto_fetch_data.py api/metabase_proxy.js js/*.js
 
 TIMESTAMP=$(date "+%d/%m/%Y %H:%M")
 git commit -m "chore(data): auto-update inventory data: $TIMESTAMP"
