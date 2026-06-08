@@ -98,6 +98,16 @@
         const { data: { session } } = await window.supabaseClient.auth.getSession();
         if (session) {
           const user = session.user;
+          const isApproved = user.user_metadata?.approved === true;
+          if (!isApproved) {
+            const errorEl = document.getElementById('login-error');
+            if (errorEl) {
+              errorEl.textContent = 'Tài khoản của bạn đang chờ quản trị viên phê duyệt.';
+              errorEl.style.display = 'block';
+            }
+            showLoginOverlay();
+            return;
+          }
           const role = user.user_metadata?.role || 'operator';
           const name = user.user_metadata?.name || user.email;
           setLoggedInUser({ username: user.email, name, role });
@@ -143,15 +153,100 @@
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
     
-    // Handle login form submission
+    // Toggle between Login and Signup Forms
+    const goToSignupBtn = document.getElementById('go-to-signup-btn');
+    const goToLoginBtn = document.getElementById('go-to-login-btn');
     const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const errorEl = document.getElementById('login-error');
+    const successEl = document.getElementById('login-success');
+
+    if (goToSignupBtn && goToLoginBtn && loginForm && signupForm) {
+      goToSignupBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+        goToSignupBtn.style.display = 'none';
+        goToLoginBtn.style.display = 'inline';
+        if (errorEl) errorEl.style.display = 'none';
+        if (successEl) successEl.style.display = 'none';
+      });
+
+      goToLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+        goToSignupBtn.style.display = 'inline';
+        goToLoginBtn.style.display = 'none';
+        if (errorEl) errorEl.style.display = 'none';
+        if (successEl) successEl.style.display = 'none';
+      });
+    }
+
+    // Handle signup form submission
+    if (signupForm) {
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const sName = document.getElementById('signup-name').value.trim();
+        const sEmail = document.getElementById('signup-email').value.trim();
+        const sPass = document.getElementById('signup-password').value;
+
+        if (errorEl) errorEl.style.display = 'none';
+        if (successEl) successEl.style.display = 'none';
+
+        if (!window.supabaseClient) {
+          if (errorEl) {
+            errorEl.textContent = 'Supabase chưa được kết nối. Vui lòng bật cấu hình Cloud Auth ở dưới.';
+            errorEl.style.display = 'block';
+          }
+          return;
+        }
+
+        try {
+          const { data, error } = await window.supabaseClient.auth.signUp({
+            email: sEmail,
+            password: sPass,
+            options: {
+              data: {
+                name: sName,
+                role: 'operator',
+                approved: false
+              }
+            }
+          });
+
+          if (error) throw error;
+          
+          if (successEl) {
+            successEl.textContent = 'Đăng ký thành công! Vui lòng liên hệ Admin để được phê duyệt tài khoản.';
+            successEl.style.display = 'block';
+          }
+          
+          // Clear form
+          signupForm.reset();
+          
+          // Switch back to login form automatically
+          setTimeout(() => {
+            if (goToLoginBtn) goToLoginBtn.click();
+          }, 3000);
+
+        } catch (err) {
+          if (errorEl) {
+            errorEl.textContent = 'Lỗi đăng ký: ' + err.message;
+            errorEl.style.display = 'block';
+          }
+        }
+      });
+    }
+    
+    // Handle login form submission
     if (loginForm) {
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const uname = document.getElementById('login-username').value.trim();
         const pass = document.getElementById('login-password').value;
-        const errorEl = document.getElementById('login-error');
-        errorEl.style.display = 'none';
+        if (errorEl) errorEl.style.display = 'none';
+        if (successEl) successEl.style.display = 'none';
         
         const unameLower = uname.toLowerCase();
         const userHashes = {
@@ -171,8 +266,10 @@
             sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
             setLoggedInUser(sessionUser);
           } else {
-            errorEl.textContent = 'Mật khẩu cục bộ không chính xác.';
-            errorEl.style.display = 'block';
+            if (errorEl) {
+              errorEl.textContent = 'Mật khẩu cục bộ không chính xác.';
+              errorEl.style.display = 'block';
+            }
           }
           return;
         }
@@ -187,18 +284,34 @@
             });
             if (error) throw error;
             const user = data.user;
+            
+            const isApproved = user.user_metadata?.approved === true;
+            if (!isApproved) {
+              if (errorEl) {
+                errorEl.textContent = 'Đăng nhập thành công nhưng tài khoản của bạn đang chờ phê duyệt. Vui lòng liên hệ Admin.';
+                errorEl.style.display = 'block';
+              }
+              // Sign out immediately to avoid leaving session active locally
+              await window.supabaseClient.auth.signOut();
+              return;
+            }
+            
             const role = user.user_metadata?.role || 'operator';
             const name = user.user_metadata?.name || user.email;
             setLoggedInUser({ username: user.email, name, role });
           } catch (err) {
-            errorEl.textContent = 'Lỗi Cloud Auth: ' + err.message;
-            errorEl.style.display = 'block';
+            if (errorEl) {
+              errorEl.textContent = 'Lỗi Cloud Auth: ' + err.message;
+              errorEl.style.display = 'block';
+            }
           }
           return;
         }
         
-        errorEl.textContent = 'Tên đăng nhập không tồn tại hoặc chưa kết nối Cloud Auth.';
-        errorEl.style.display = 'block';
+        if (errorEl) {
+          errorEl.textContent = 'Tên đăng nhập không tồn tại hoặc chưa kết nối Cloud Auth.';
+          errorEl.style.display = 'block';
+        }
       });
     }
 
