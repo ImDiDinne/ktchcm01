@@ -352,9 +352,101 @@
     }
   });
 
+  async function loadPendingUsers() {
+    const section = document.getElementById('pending-users-section');
+    const listContainer = document.getElementById('pending-users-list');
+    const badge = document.getElementById('pending-count-badge');
+    
+    if (!section || !listContainer) return;
+    
+    // Hide by default unless user is manager
+    if (!window.currentUser || window.currentUser.role !== 'manager') {
+      section.style.display = 'none';
+      return;
+    }
+    
+    section.style.display = 'block';
+    listContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 10px 0;">⏳ Đang tải danh sách...</p>';
+    
+    if (!window.supabaseClient) {
+      listContainer.innerHTML = '<p style="color: var(--red); text-align: center; padding: 10px 0;">❌ Lỗi: Chưa kết nối Supabase.</p>';
+      return;
+    }
+    
+    try {
+      const { data, error } = await window.supabaseClient.rpc('get_pending_users');
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        listContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 10px 0;">✅ Không có tài khoản nào chờ duyệt.</p>';
+        if (badge) badge.style.display = 'none';
+        return;
+      }
+      
+      if (badge) {
+        badge.textContent = data.length;
+        badge.style.display = 'inline';
+      }
+      
+      listContainer.innerHTML = '';
+      data.forEach(user => {
+        const item = document.createElement('div');
+        item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); gap: 10px;';
+        
+        const info = document.createElement('div');
+        info.style.cssText = 'flex: 1; overflow: hidden;';
+        
+        const nameText = user.name ? `<strong>${user.name}</strong><br>` : '';
+        info.innerHTML = `${nameText}<span style="color: var(--text-muted); font-size: 0.65rem; display: block; text-overflow: ellipsis; overflow: hidden;">${user.email}</span>`;
+        
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display: flex; gap: 5px;';
+        
+        const approveStaff = document.createElement('button');
+        approveStaff.textContent = 'Duyệt Staff';
+        approveStaff.style.cssText = 'background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: var(--text-primary); font-size: 0.62rem; padding: 4px 8px; border-radius: var(--radius-sm); cursor: pointer;';
+        approveStaff.addEventListener('click', () => handleApproveClick(user.id, 'operator', user.email));
+        
+        const approveManager = document.createElement('button');
+        approveManager.textContent = 'Duyệt Mgr';
+        approveManager.style.cssText = 'background: var(--accent); border: none; color: white; font-size: 0.62rem; padding: 4px 8px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;';
+        approveManager.addEventListener('click', () => handleApproveClick(user.id, 'manager', user.email));
+        
+        actions.appendChild(approveStaff);
+        actions.appendChild(approveManager);
+        
+        item.appendChild(info);
+        item.appendChild(actions);
+        listContainer.appendChild(item);
+      });
+      
+    } catch (err) {
+      console.error("Lỗi tải danh sách chờ duyệt:", err);
+      listContainer.innerHTML = `<p style="color: var(--red); text-align: center; padding: 10px 0;">❌ Lỗi: ${err.message}<br><br><small>Gợi ý: Đảm bảo đã chạy SQL tạo hàm get_pending_users.</small></p>`;
+    }
+  }
+
+  async function handleApproveClick(userId, role, email) {
+    if (!confirm(`Phê duyệt tài khoản ${email} với vai trò ${role === 'manager' ? 'Quản lý' : 'Nhân viên'}?`)) return;
+    
+    try {
+      const { data, error } = await window.supabaseClient.rpc('approve_user', {
+        target_user_id: userId,
+        target_role: role
+      });
+      if (error) throw error;
+      
+      alert(`Đã phê duyệt thành công tài khoản ${email}!`);
+      loadPendingUsers();
+    } catch (err) {
+      alert(`❌ Lỗi phê duyệt: ${err.message}`);
+    }
+  }
+
   // Expose global methods
   window.checkAuth = checkAuth;
   window.logout = logout;
   window.initSupabase = initSupabase;
+  window.loadPendingUsers = loadPendingUsers;
 
 })();

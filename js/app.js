@@ -305,6 +305,9 @@
         renderParamsList();
         const pat = sessionStorage.getItem('github_pat') || '';
         document.getElementById('github-pat').value = pat;
+        if (window.loadPendingUsers) {
+          window.loadPendingUsers();
+        }
       });
     }
 
