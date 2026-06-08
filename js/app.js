@@ -443,6 +443,5 @@
 
   // Expose global methods
   window.fetchAndRenderDashboard = fetchAndRenderDashboard;
-  window.inbound.handleStatusChange = handleStatusChange; // Overwrite select listener callback
 
 })();
