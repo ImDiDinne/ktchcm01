@@ -69,6 +69,14 @@
     
     applyRBAC(user.role);
     
+    // Check pending users and show badge if manager
+    if (user.role === 'manager') {
+      // Small timeout to make sure DOM is updated first
+      setTimeout(() => {
+        loadPendingUsers();
+      }, 500);
+    }
+    
     // Trigger dashboard data fetch after login
     if (window.fetchAndRenderDashboard) {
       window.fetchAndRenderDashboard();
@@ -377,15 +385,21 @@
       const { data, error } = await window.supabaseClient.rpc('get_pending_users');
       if (error) throw error;
       
+      const settingsBadge = document.getElementById('settings-badge');
+
       if (!data || data.length === 0) {
         listContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 10px 0;">✅ Không có tài khoản nào chờ duyệt.</p>';
         if (badge) badge.style.display = 'none';
+        if (settingsBadge) settingsBadge.style.display = 'none';
         return;
       }
       
       if (badge) {
         badge.textContent = data.length;
         badge.style.display = 'inline';
+      }
+      if (settingsBadge) {
+        settingsBadge.style.display = 'block';
       }
       
       listContainer.innerHTML = '';

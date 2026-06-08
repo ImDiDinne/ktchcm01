@@ -42,8 +42,9 @@
         <a href="#" id="download-excel-btn" class="filter-btn" style="background: rgba(251, 146, 60, 0.15); border-color: var(--accent); color: var(--accent-light); font-weight: 600; text-decoration: none; display: none; align-items: center; gap: 6px;">
           Tải Báo Cáo Excel
         </a>
-        <button id="open-settings-btn" class="filter-btn" style="display: none; align-items: center; gap: 6px; cursor: pointer; outline: none;">
+        <button id="open-settings-btn" class="filter-btn" style="display: none; align-items: center; gap: 6px; cursor: pointer; outline: none; position: relative;">
           Cấu Hình Mappings
+          <span id="settings-badge" style="background: var(--red); color: white; border-radius: 50%; width: 8px; height: 8px; position: absolute; top: -3px; right: -3px; display: none; box-shadow: 0 0 0 2px var(--bg); animation: pulse 2s infinite;"></span>
         </button>
         <div class="update-badge" id="update-badge">
           <span class="dot"></span>
