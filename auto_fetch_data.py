@@ -329,6 +329,9 @@ def is_already_marked_expired():
 
 def set_session_expired_flag(is_expired=True):
     """Cập nhật cờ session_expired vào file dữ liệu cũ để hiển thị trên dashboard"""
+    if os.environ.get('CI') == 'true':
+        print("⚠️ Chạy trong môi trường CI (GitHub Actions) — không ghi đè cờ session_expired lên Supabase.")
+        return
     json_path = BASE_DIR / 'tonkho_tuyen.json'
     js_path = BASE_DIR / 'tonkho_data.js'
     
