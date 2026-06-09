@@ -347,7 +347,7 @@
                           `• Dự báo xe về: ${h.avgArrivals.toFixed(2)} xe/h\n` +
                           `• Khối lượng hàng (ước tính): ~${h.avgCapacity.toFixed(1)} tấn\n` +
                           `• Cửa tải khuyên mở: ${h.recDocks} cửa\n` +
-                          `• Tổng workload: ${h.workloadMinutes.toFixed(0)} phút dỡ hàng`;
+                          `• Tổng thời gian dỡ: ${h.workloadMinutes.toFixed(0)} phút`;
 
       wrapper.title = tooltipText;
 
