@@ -163,12 +163,17 @@ def classify_by_params(df, params):
     # Xây dựng các mapping case-insensitive (không strip() để khớp chính xác như Excel VLOOKUP)
     map_tinh_to_lv2 = {}
     map_tinh_to_phanvung = {}
+    has_phanvung = 'Phân vùng' in params.columns
+    has_loaikho = 'Loại kho' in params.columns
     for _, r in params.iterrows():
         k = str(r['Tỉnh giao']).lower()
         if k not in map_tinh_to_lv2:
             map_tinh_to_lv2[k] = r['LV-2']
         if k not in map_tinh_to_phanvung:
-            map_tinh_to_phanvung[k] = r['Phân vùng']
+            val = r['Phân vùng'] if has_phanvung else None
+            if pd.isna(val) or val == '' or val is None:
+                val = r['Loại kho'] if has_loaikho else 'Liên vùng'
+            map_tinh_to_phanvung[k] = val
 
     map_lv2_to_khoden = {}
     for _, r in params.iterrows():
