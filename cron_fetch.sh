@@ -36,22 +36,15 @@ if [ $PULL_STATUS -ne 0 ]; then
     echo "⚠️ Không thể pull từ GitHub, tiếp tục chạy..." >> "$LOG"
 fi
 
-# ── Auto Renew Session nếu cần ──
-# Kiểm tra session hiện tại, nếu hết hạn thì tự động renew bằng Playwright
+# ── Kiểm tra Session ──
+# Kiểm tra session hiện tại, nếu hết hạn thì ghi log cảnh báo (không tự động renew bằng Playwright)
 echo "🔑 Kiểm tra session token..." >> "$LOG"
 python3 auto_renew_session.py --check-only >> "$LOG" 2>&1
 CHECK_STATUS=$?
 
 if [ $CHECK_STATUS -ne 0 ]; then
-    echo "🔄 Session hết hạn — đang tự động renew..." >> "$LOG"
-    python3 auto_renew_session.py >> "$LOG" 2>&1
-    RENEW_STATUS=$?
-    if [ $RENEW_STATUS -ne 0 ]; then
-        echo "❌ Không thể tự động renew session. Cần mở browser đăng nhập lại." >> "$LOG"
-        echo "💡 Chạy: python3 auto_renew_session.py --force-login" >> "$LOG"
-    else
-        echo "✅ Đã tự động renew session thành công!" >> "$LOG"
-    fi
+    echo "❌ Session hết hạn. Tự động renew đã bị tắt theo yêu cầu." >> "$LOG"
+    echo "💡 Hãy chạy '🔄 Cập Nhật Session.command' thủ công để cập nhật session mới." >> "$LOG"
 fi
 
 # Tải dữ liệu từ Metabase + chạy export

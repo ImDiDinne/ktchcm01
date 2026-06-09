@@ -100,7 +100,7 @@
     initSupabase();
     
     // 1. Check Cloud Auth Session first
-    const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY));
+    const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)) || DEFAULT_SUPABASE;
     if (supabaseConfig && window.supabaseClient) {
       try {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
@@ -283,7 +283,7 @@
         }
         
         // 2. Verify Cloud Auth
-        const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY));
+        const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)) || DEFAULT_SUPABASE;
         if (supabaseConfig && window.supabaseClient) {
           try {
             const { data, error } = await window.supabaseClient.auth.signInWithPassword({
