@@ -746,15 +746,20 @@
     try {
       await fetchSupabaseUnloadingTrips();
 
-      const url = 'https://script.google.com/macros/s/AKfycbxpLqnIOLSV6MkEhss1vPVh7AxBZqVUv6F0xGmMGNtv1A55XVElUgBkoJuvJXgv2cHP/exec?action=getTrips';
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('API request failed');
-      const result = await response.json();
+      if (!window.supabaseClient) {
+        throw new Error('Supabase client is not initialised.');
+      }
+
+      const { data, error } = await window.supabaseClient
+        .from('trips_cache')
+        .select('*');
+
+      if (error) throw error;
       
-      if (result && result.status === 'success' && Array.isArray(result.data)) {
-        window.tripScanData = result.data;
+      if (Array.isArray(data)) {
+        window.tripScanData = data;
         window.inboundLastFetched = Date.now(); // Record sync timestamp
-        console.log(`Fetched ${window.tripScanData.length} trips from TripScan.`);
+        console.log(`Fetched ${window.tripScanData.length} trips from Supabase cache.`);
         populateInboundDates();
         runDockSimulation();
       } else {

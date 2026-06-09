@@ -58,6 +58,10 @@ fi
 python3 auto_fetch_data.py --run-export >> "$LOG" 2>&1
 EXIT_CODE=$?
 
+# Đồng bộ dữ liệu TripScan sang Supabase cache làm dự phòng
+echo "🔄 Đồng bộ dữ liệu TripScan sang Supabase cache..." >> "$LOG"
+python3 sync_trips_daemon.py --once >> "$LOG" 2>&1
+
 if [ $EXIT_CODE -eq 0 ]; then
     echo "✅ $(date '+%H:%M:%S') — Export hoàn tất! Đang push lên GitHub..." >> "$LOG"
     
