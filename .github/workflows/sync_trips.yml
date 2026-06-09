@@ -1,0 +1,30 @@
+name: 🔄 Auto Sync Inbound Trips
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Tự động chạy mỗi 10 phút (giới hạn tối thiểu của GitHub)
+  workflow_dispatch:       # Cho phép bấm nút kích hoạt chạy tay trên GitHub UI
+
+jobs:
+  sync-trips:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📂 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🐍 Cài đặt Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Cài đặt thư viện
+      run: |
+        pip install requests
+
+    - name: 🔄 Chạy Script đồng bộ dữ liệu
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      run: |
+        python3 sync_trips_daemon.py --once
