@@ -736,6 +736,81 @@
     }
   }
 
+  async function checkAndTriggerCloudSync() {
+    const pat = localStorage.getItem('ktc_github_pat') || sessionStorage.getItem('github_pat');
+    if (!pat) {
+      console.log("No GitHub PAT found, skipping auto cloud sync trigger.");
+      return;
+    }
+
+    // Tìm timestamp cập nhật mới nhất từ dữ liệu cache
+    let latestUpdate = 0;
+    window.tripScanData.forEach(t => {
+      if (t.updated_at) {
+        const ms = new Date(t.updated_at).getTime();
+        if (ms > latestUpdate) latestUpdate = ms;
+      }
+    });
+
+    const now = Date.now();
+    const staleTimeMs = 5 * 60 * 1000; // 5 phút
+
+    if (latestUpdate > 0 && (now - latestUpdate) > staleTimeMs) {
+      const lastTriggered = parseInt(localStorage.getItem('last_github_sync_trigger') || '0', 10);
+      if (now - lastTriggered > 3 * 60 * 1000) { // Cooldown 3 phút
+        localStorage.setItem('last_github_sync_trigger', String(now));
+        console.log(`Dữ liệu TripScan cũ (${Math.round((now - latestUpdate) / 60000)} phút trước). Tự động gửi yêu cầu GitHub Actions đồng bộ...`);
+        
+        // Hiển thị trạng thái đang đồng bộ trên Heartbeat
+        const heartbeatEl = document.getElementById('inbound-heartbeat');
+        if (heartbeatEl) {
+          heartbeatEl.innerHTML = `<span class="pulse-dot yellow"></span><span>TripScan: 🔄 Đang gửi yêu cầu đồng bộ dữ liệu mới...</span>`;
+        }
+
+        try {
+          const repo = 'ImDiDinne/ktchcm01';
+          const response = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/sync_trips.yml/dispatches`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${pat}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              ref: 'main'
+            })
+          });
+
+          if (response.ok) {
+            console.log("Successfully triggered GitHub Actions sync workflow!");
+            // Đợi 15 giây rồi tự động tải lại dữ liệu mới từ Supabase
+            setTimeout(async () => {
+              try {
+                await fetchSupabaseUnloadingTrips();
+                const { data: freshData, error: freshErr } = await window.supabaseClient
+                  .from('trips_cache')
+                  .select('*');
+                if (!freshErr && Array.isArray(freshData)) {
+                  window.tripScanData = freshData;
+                  window.inboundLastFetched = Date.now();
+                  populateInboundDates();
+                  runDockSimulation();
+                  console.log("Dữ liệu đã tự động cập nhật sau đồng bộ đám mây.");
+                }
+              } catch (e) {
+                console.error("Lỗi tự động tải lại dữ liệu sau sync:", e);
+              }
+            }, 15000);
+          } else {
+            console.error("Failed to trigger GitHub Actions sync:", await response.text());
+          }
+        } catch (e) {
+          console.error("Error triggering GitHub Actions sync:", e);
+        }
+      }
+    }
+  }
+
   async function fetchTripScanData() {
     const refreshBtn = document.getElementById('btn-refresh-trips');
     if (refreshBtn) {
@@ -762,8 +837,11 @@
         console.log(`Fetched ${window.tripScanData.length} trips from Supabase cache.`);
         populateInboundDates();
         runDockSimulation();
+        
+        // Kích hoạt cơ chế tự động đồng bộ đám mây nếu dữ liệu bị cũ
+        checkAndTriggerCloudSync();
       } else {
-        console.error('Invalid TripScan data structure:', result);
+        console.error('Invalid TripScan data structure:', data);
       }
     } catch (err) {
       console.error('Failed to fetch TripScan data:', err);

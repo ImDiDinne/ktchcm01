@@ -497,7 +497,7 @@
       openSettingsBtn.addEventListener('click', () => {
         document.getElementById('settings-panel').classList.add('open');
         renderParamsList();
-        const pat = sessionStorage.getItem('github_pat') || '';
+        const pat = sessionStorage.getItem('github_pat') || localStorage.getItem('ktc_github_pat') || '';
         document.getElementById('github-pat').value = pat;
         
         // Load Telegram settings
@@ -554,6 +554,7 @@
         btn.textContent = '⏳ Đang lưu...';
         btn.disabled = true;
 
+        localStorage.setItem('ktc_github_pat', pat);
         sessionStorage.setItem('github_pat', pat);
 
         try {
