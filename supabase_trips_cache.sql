@@ -23,8 +23,9 @@ CREATE TABLE IF NOT EXISTS public.trips_cache (
 ALTER TABLE public.trips_cache ENABLE ROW LEVEL SECURITY;
 
 -- Tạo Policy cho phép Đọc dữ liệu công khai (dành cho client/frontend gọi hiển thị)
+DROP POLICY IF EXISTS "Allow public read on trips_cache" ON public.trips_cache;
 CREATE POLICY "Allow public read on trips_cache" ON public.trips_cache
-    FOR SELECT TO anon USING (true);
+    FOR SELECT USING (true);
 
 -- Tạo Policy cho phép Ghi/Chèn dữ liệu (dành cho Python daemon/cronjob sử dụng service_role_key)
 CREATE POLICY "Allow service_role write on trips_cache" ON public.trips_cache
