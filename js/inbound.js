@@ -789,7 +789,9 @@
                 await fetchSupabaseUnloadingTrips();
                 const { data: freshData, error: freshErr } = await window.supabaseClient
                   .from('trips_cache')
-                  .select('*');
+                  .select('*')
+                  .order('id', { ascending: false })
+                  .limit(3000);
                 if (!freshErr && Array.isArray(freshData)) {
                   window.tripScanData = freshData;
                   window.inboundLastFetched = Date.now();
@@ -827,7 +829,9 @@
 
       const { data, error } = await window.supabaseClient
         .from('trips_cache')
-        .select('*');
+        .select('*')
+        .order('id', { ascending: false })
+        .limit(3000);
 
       if (error) throw error;
       
