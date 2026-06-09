@@ -52,11 +52,11 @@ def chunk_list(lst, n):
 def sync_trips():
     """Gọi API Google Sheets và đẩy vào Supabase"""
     env = load_env()
-    supabase_url = env.get('SUPABASE_URL')
-    supabase_key = env.get('SUPABASE_SERVICE_ROLE_KEY') or env.get('SUPABASE_KEY')
+    supabase_url = env.get('SUPABASE_URL') or os.environ.get('SUPABASE_URL')
+    supabase_key = env.get('SUPABASE_SERVICE_ROLE_KEY') or env.get('SUPABASE_KEY') or os.environ.get('SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('SUPABASE_KEY')
 
     if not supabase_url or not supabase_key:
-        log("❌ Lỗi: Thiếu SUPABASE_URL hoặc SUPABASE_KEY/SERVICE_ROLE_KEY trong file .env!")
+        log("❌ Lỗi: Thiếu SUPABASE_URL hoặc SUPABASE_SERVICE_ROLE_KEY/SUPABASE_KEY trong file .env và môi trường!")
         return False
 
     supabase_url = supabase_url.rstrip('/')
@@ -142,6 +142,8 @@ def main():
 if __name__ == '__main__':
     # Hỗ trợ chạy một lần duy nhất nếu truyền tham số --once
     if len(sys.argv) > 1 and sys.argv[1] == '--once':
-        sync_trips()
+        success = sync_trips()
+        if not success:
+            sys.exit(1)
     else:
         main()
