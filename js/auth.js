@@ -74,6 +74,7 @@
       // Small timeout to make sure DOM is updated first
       setTimeout(() => {
         loadPendingUsers();
+        loadAllUsers();
       }, 500);
     }
     
@@ -457,10 +458,166 @@
     }
   }
 
+  async function loadAllUsers() {
+    const section = document.getElementById('all-users-section');
+    const listContainer = document.getElementById('all-users-list');
+    
+    if (!section || !listContainer) return;
+    
+    if (!window.currentUser || window.currentUser.role !== 'manager') {
+      section.style.display = 'none';
+      return;
+    }
+    
+    section.style.display = 'block';
+    listContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 10px 0;">⏳ Đang tải danh sách...</p>';
+    
+    if (!window.supabaseClient) {
+      listContainer.innerHTML = '<p style="color: var(--red); text-align: center; padding: 10px 0;">❌ Lỗi: Chưa kết nối Supabase.</p>';
+      return;
+    }
+    
+    try {
+      const { data, error } = await window.supabaseClient.rpc('get_all_users');
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        listContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 10px 0;">Không có người dùng nào trong hệ thống.</p>';
+        return;
+      }
+      
+      listContainer.innerHTML = '';
+      data.forEach(user => {
+        const item = document.createElement('div');
+        item.style.cssText = 'display: flex; flex-direction: column; padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); gap: 6px; background: rgba(255, 255, 255, 0.01); border-radius: var(--radius-sm); margin-bottom: 4px;';
+        
+        const header = document.createElement('div');
+        header.style.cssText = 'display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;';
+        
+        const userInfo = document.createElement('div');
+        userInfo.style.cssText = 'flex: 1; overflow: hidden;';
+        
+        const nameText = user.name ? `<strong>${user.name}</strong>` : '<em>No Name</em>';
+        const roleBadge = user.role === 'manager' 
+          ? '<span style="background: var(--accent); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 3px; font-weight: bold; margin-left: 6px;">Mgr</span>' 
+          : '<span style="background: rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.55rem; padding: 1px 4px; border-radius: 3px; margin-left: 6px;">Staff</span>';
+          
+        const approveBadge = user.approved 
+          ? '<span style="background: rgba(34, 197, 94, 0.15); color: rgb(74, 222, 128); border: 1px solid rgba(34,197,94,0.3); font-size: 0.55rem; padding: 1px 4px; border-radius: 3px; margin-left: 6px;">Active</span>' 
+          : '<span style="background: rgba(239, 68, 68, 0.15); color: rgb(248, 113, 113); border: 1px solid rgba(239,68,68,0.3); font-size: 0.55rem; padding: 1px 4px; border-radius: 3px; margin-left: 6px;">Blocked</span>';
+          
+        userInfo.innerHTML = `<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">${nameText} ${roleBadge} ${approveBadge}</div><span style="color: var(--text-muted); font-size: 0.65rem; display: block; text-overflow: ellipsis; overflow: hidden; margin-top: 2px;">${user.email}</span>`;
+        
+        header.appendChild(userInfo);
+        
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display: flex; gap: 6px; justify-content: flex-end; align-items: center; margin-top: 4px; border-top: 1px dashed rgba(255, 255, 255, 0.03); padding-top: 6px;';
+        
+        const approveBtn = document.createElement('button');
+        approveBtn.textContent = user.approved ? 'Khoá' : 'Duyệt';
+        approveBtn.style.cssText = user.approved
+          ? 'background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: rgb(248, 113, 113); font-size: 0.6rem; padding: 3px 6px; border-radius: var(--radius-sm); cursor: pointer;'
+          : 'background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); color: rgb(74, 222, 128); font-size: 0.6rem; padding: 3px 6px; border-radius: var(--radius-sm); cursor: pointer;';
+        approveBtn.addEventListener('click', () => handleToggleApprove(user.id, user.approved, user.email));
+        
+        const roleBtn = document.createElement('button');
+        roleBtn.textContent = user.role === 'manager' ? 'Sét Staff' : 'Sét Mgr';
+        roleBtn.style.cssText = 'background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: var(--text-primary); font-size: 0.6rem; padding: 3px 6px; border-radius: var(--radius-sm); cursor: pointer;';
+        roleBtn.addEventListener('click', () => handleToggleRole(user.id, user.role, user.email));
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Xoá';
+        deleteBtn.style.cssText = 'background: rgba(239, 68, 68, 0.15); border: none; color: rgb(248, 113, 113); font-size: 0.6rem; padding: 3px 6px; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold;';
+        deleteBtn.addEventListener('click', () => handleDeleteUser(user.id, user.email));
+        
+        if (window.currentUser && window.currentUser.username === user.email) {
+          approveBtn.disabled = true;
+          approveBtn.style.opacity = '0.5';
+          approveBtn.style.cursor = 'not-allowed';
+          roleBtn.disabled = true;
+          roleBtn.style.opacity = '0.5';
+          roleBtn.style.cursor = 'not-allowed';
+          deleteBtn.disabled = true;
+          deleteBtn.style.opacity = '0.5';
+          deleteBtn.style.cursor = 'not-allowed';
+        }
+        
+        actions.appendChild(approveBtn);
+        actions.appendChild(roleBtn);
+        actions.appendChild(deleteBtn);
+        
+        item.appendChild(header);
+        item.appendChild(actions);
+        listContainer.appendChild(item);
+      });
+    } catch (err) {
+      console.error("Lỗi tải danh sách người dùng:", err);
+      listContainer.innerHTML = `<p style="color: var(--red); text-align: center; padding: 10px 0;">❌ Lỗi: ${err.message}<br><br><small>Gợi ý: Đảm bảo đã chạy các SQL tạo hàm trong file supabase_user_management.sql.</small></p>`;
+    }
+  }
+
+  async function handleToggleApprove(userId, currentStatus, email) {
+    const newStatus = !currentStatus;
+    const actionName = newStatus ? 'Phê duyệt' : 'Khoá/Thu hồi';
+    if (!confirm(`${actionName} tài khoản ${email}?`)) return;
+    
+    try {
+      const { error } = await window.supabaseClient.rpc('update_user_approved', {
+        target_user_id: userId,
+        is_approved: newStatus
+      });
+      if (error) throw error;
+      
+      alert(`Đã ${actionName.toLowerCase()} thành công tài khoản ${email}!`);
+      loadPendingUsers();
+      loadAllUsers();
+    } catch (err) {
+      alert(`❌ Lỗi cập nhật trạng thái: ${err.message}`);
+    }
+  }
+
+  async function handleToggleRole(userId, currentRole, email) {
+    const newRole = currentRole === 'manager' ? 'operator' : 'manager';
+    const roleName = newRole === 'manager' ? 'Quản lý (Hub Manager)' : 'Nhân viên (Operator/Staff)';
+    if (!confirm(`Thay đổi quyền của tài khoản ${email} thành ${roleName}?`)) return;
+    
+    try {
+      const { error } = await window.supabaseClient.rpc('update_user_role', {
+        target_user_id: userId,
+        target_role: newRole
+      });
+      if (error) throw error;
+      
+      alert(`Đã thay đổi quyền thành công tài khoản ${email}!`);
+      loadPendingUsers();
+      loadAllUsers();
+    } catch (err) {
+      alert(`❌ Lỗi thay đổi quyền: ${err.message}`);
+    }
+  }
+
+  async function handleDeleteUser(userId, email) {
+    if (!confirm(`⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XÓA vĩnh viễn tài khoản ${email}? Hành động này không thể hoàn tác!`)) return;
+    
+    try {
+      const { error } = await window.supabaseClient.rpc('delete_user_by_id', {
+        target_user_id: userId
+      });
+      if (error) throw error;
+      
+      alert(`Đã xóa vĩnh viễn tài khoản ${email}!`);
+      loadPendingUsers();
+      loadAllUsers();
+    } catch (err) {
+      alert(`❌ Lỗi xóa tài khoản: ${err.message}`);
+    }
+  }
+
   // Expose global methods
   window.checkAuth = checkAuth;
   window.logout = logout;
   window.initSupabase = initSupabase;
   window.loadPendingUsers = loadPendingUsers;
+  window.loadAllUsers = loadAllUsers;
 
 })();
