@@ -77,7 +77,16 @@ def sync_trips():
             return False
 
         trips = result["data"]
-        log(f"📦 Đã tải {len(trips)} chuyến xe. Tiến hành đẩy vào Supabase...")
+        log(f"📦 Đã tải {len(trips)} chuyến xe.")
+
+        # Lọc bỏ các bản ghi trùng lặp ID trước khi đẩy vào Supabase để tránh lỗi Postgres ON CONFLICT
+        unique_trips = {}
+        for t in trips:
+            tid = t.get("id")
+            if tid:
+                unique_trips[tid] = t
+        trips = list(unique_trips.values())
+        log(f"🧹 Đã lọc trùng lặp ID, còn {len(trips)} dòng. Tiến hành đẩy vào Supabase...")
 
         # Đẩy dữ liệu vào Supabase dùng REST API
         sub_url = f"{supabase_url}/rest/v1/trips_cache"
