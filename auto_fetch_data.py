@@ -306,9 +306,14 @@ def send_telegram_notification(message):
             print(f"⚠️ Không thể gửi cảnh báo Telegram: {e}")
 
 def open_terminal_for_session_update():
-    """Tự động mở file 🔄 Cập Nhật Session.command trên Terminal của macOS (ĐÃ TẮT TỰ ĐỘNG)"""
-    print("💡 Tự động mở Terminal để cập nhật session đã bị tắt theo yêu cầu.")
-    print("👉 Hãy chạy file '🔄 Cập Nhật Session.command' thủ công khi rảnh.")
+    """Tự động mở file 🔄 Cập Nhật Session.command trên Terminal của macOS"""
+    if sys.platform == 'darwin':
+        try:
+            cmd = f'open "{BASE_DIR}/🔄 Cập Nhật Session.command"'
+            os.system(cmd)
+            print("🚀 Đã tự động kích hoạt Terminal để cập nhật Session.")
+        except Exception as e:
+            print(f"⚠️ Không thể tự động mở Terminal: {e}")
 
 def is_already_marked_expired():
     """Kiểm tra xem file dữ liệu đã được đánh dấu là hết hạn trước đó chưa"""
