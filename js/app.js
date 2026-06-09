@@ -183,6 +183,175 @@
     });
   }
 
+  // 🤖 Telegram Alert Dispatcher
+  async function sendTelegramAlert(message) {
+    const token = localStorage.getItem('alert_telegram_token') || '8919718466:AAHoeb3TtrcaZJr98-pC_oeXNNGWnGP-01U';
+    const chatIdsStr = localStorage.getItem('alert_telegram_chat_ids') || '-1001681377844,-1001374377435';
+    const chatIds = chatIdsStr.split(',').map(id => id.trim()).filter(Boolean);
+    
+    for (const chatId of chatIds) {
+      const url = `https://api.telegram.org/bot${token}/sendMessage`;
+      try {
+        await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML'
+          })
+        });
+      } catch (e) {
+        console.error(`Error sending Telegram alert to ${chatId}:`, e);
+      }
+    }
+  }
+  window.sendTelegramAlert = sendTelegramAlert;
+
+  // ⏱️ Dynamic Data Sync Heartbeat Timers
+  function updateHeartbeatTimers() {
+    const fmtElapsed = (ms) => {
+      if (ms == null || isNaN(ms) || ms < 0) return 'Đang cập nhật...';
+      const sec = Math.floor(ms / 1000);
+      if (sec < 60) return `${sec} giây trước`;
+      const min = Math.floor(sec / 60);
+      const remSec = sec % 60;
+      return `${min} phút ${remSec} giây trước`;
+    };
+
+    // 1. Inventory Heartbeat
+    const invHeartbeat = document.getElementById('inventory-heartbeat');
+    if (invHeartbeat && window.TONKHO_DATA && window.TONKHO_DATA.updated) {
+      const invDate = parseDate(window.TONKHO_DATA.updated);
+      if (invDate) {
+        const diff = Date.now() - invDate.getTime();
+        const spanText = invHeartbeat.querySelector('span:last-child');
+        const dot = invHeartbeat.querySelector('.pulse-dot');
+        if (spanText) {
+          spanText.innerHTML = `Đồng bộ tồn kho: <strong>${fmtElapsed(diff)}</strong>`;
+        }
+        if (dot) {
+          dot.className = 'pulse-dot ' + (diff > 1800000 ? 'yellow' : 'green');
+        }
+      }
+    }
+
+    // 2. Inbound Heartbeat
+    const inHeartbeat = document.getElementById('inbound-heartbeat');
+    if (inHeartbeat) {
+      const spanText = inHeartbeat.querySelector('span:last-child');
+      const dot = inHeartbeat.querySelector('.pulse-dot');
+      if (spanText) {
+        if (window.inboundLastFetched) {
+          const diff = Date.now() - window.inboundLastFetched;
+          spanText.innerHTML = `Đồng bộ TripScan: <strong>${fmtElapsed(diff)}</strong>`;
+          if (dot) dot.className = 'pulse-dot ' + (diff > 120000 ? 'yellow' : 'green');
+        } else {
+          spanText.textContent = 'TripScan: Đang đồng bộ...';
+        }
+      }
+    }
+
+    // 3. Prediction Heartbeat
+    const predHeartbeat = document.getElementById('prediction-heartbeat');
+    if (predHeartbeat) {
+      const spanText = predHeartbeat.querySelector('span:last-child');
+      const dot = predHeartbeat.querySelector('.pulse-dot');
+      if (spanText) {
+        if (window.inboundLastFetched) {
+          const diff = Date.now() - window.inboundLastFetched;
+          spanText.innerHTML = `Bản tin dự báo: <strong>Đã đồng bộ (${fmtElapsed(diff)})</strong>`;
+          if (dot) dot.className = 'pulse-dot ' + (diff > 120000 ? 'yellow' : 'green');
+        } else {
+          spanText.textContent = 'Dự báo: Sẵn sàng';
+        }
+      }
+    }
+  }
+
+  // 📊 Excel Shift Report Export using SheetJS
+  function exportShiftExcelReport() {
+    if (!window.TONKHO_DATA) {
+      alert("Không có dữ liệu tồn kho để xuất báo cáo!");
+      return;
+    }
+    if (!window.xlsx) {
+      // Fallback check if SheetJS library is loaded
+      if (typeof XLSX === 'undefined') {
+        alert("Đang tải thư viện Excel. Vui lòng thử lại sau vài giây!");
+        return;
+      }
+    }
+    
+    const D = window.TONKHO_DATA;
+    const trips = window.tripScanData || [];
+    
+    // 1. Sheet 1: Tổng Quan Ca
+    const totalGT24 = D.routes ? D.routes.reduce((s, r) => {
+      const a = r.aging || {};
+      return s + (a['4. 24-36']||0) + (a['5. 36-48']||0) + (a['6. 48-72']||0) + (a['7. 72-96']||0) + (a['8. 96-120']||0) + (a['9. 120+']||0);
+    }, 0) : 0;
+
+    const overviewData = [
+      { "Chỉ Số Vận Hành": "Thời Gian Xuất Báo Cáo", "Giá Trị": new Date().toLocaleString('vi-VN') },
+      { "Chỉ Số Vận Hành": "Tổng Đơn Tồn Kho Hiện Tại", "Giá Trị": D.grand_total },
+      { "Chỉ Số Vận Hành": "Tồn Liên Vùng", "Giá Trị": D.destinations?.by_vung?.["Liên Vùng"] || 0 },
+      { "Chỉ Số Vận Hành": "Tồn Nội Vùng", "Giá Trị": D.destinations?.by_vung?.["Nội vùng"] || 0 },
+      { "Chỉ Số Vận Hành": "Tồn Nội Thành", "Giá Trị": D.destinations?.by_vung?.["Nội thành"] || 0 },
+      { "Chỉ Số Vận Hành": "Hàng Tồn Trễ SLA (>24h)", "Giá Trị": totalGT24 },
+      { "Chỉ Số Vận Hành": "Tổng Số Chuyến Xe Inbound Hôm Nay", "Giá Trị": trips.length },
+      { "Chỉ Số Vận Hành": "Số Xe Đã Nhận (Đã Dỡ)", "Giá Trị": trips.filter(t => t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed').length },
+      { "Chỉ Số Vận Hành": "Số Xe Đang Nhập", "Giá Trị": trips.filter(t => t.status === 'Đang nhập' || t.status === 'Đang xử lý' || t.status.toLowerCase() === 'unloading' || t.status.toLowerCase() === 'processing').length },
+      { "Chỉ Số Vận Hành": "Số Xe Đang Chờ (Seal)", "Giá Trị": trips.filter(t => t.status === 'Đang chờ' || t.status === 'Đang Chờ' || t.status.toLowerCase() === 'waiting').length }
+    ];
+    
+    const wb = XLSX.book_new();
+    const wsOverview = XLSX.json_to_sheet(overviewData);
+    XLSX.book_append_sheet(wb, wsOverview, "Tổng Quan Ca");
+    
+    // 2. Sheet 2: Danh Sách Xe Inbound
+    const inboundExcelData = trips.map(t => ({
+      "Mã Chuyến": t.code || "—",
+      "Biển Số": t.vehicle || "—",
+      "Tải Trọng": t.capacity || "—",
+      "Khung Đăng Ký (Slot)": t.slot || "—",
+      "Giờ Quét Nhập": t.time || "—",
+      "Trạng Thái": t.status || "—",
+      "Nhân Viên Ghi Nhận": t.username || "—"
+    }));
+    const wsInbound = XLSX.json_to_sheet(inboundExcelData);
+    XLSX.book_append_sheet(wb, wsInbound, "Chi Tiết Xe Inbound");
+    
+    // 3. Sheet 3: Chi Tiết Tuyến Kho
+    const routesExcelData = [];
+    if (D.routes) {
+      D.routes.forEach(r => {
+        r.children.forEach(c => {
+          const a = c.aging || {};
+          routesExcelData.push({
+            "Nhóm Kho": r.name,
+            "Tên Kho Con": c.name,
+            "0-6h": a["1. 0-6"] || 0,
+            "6-12h": a["2. 6-12"] || 0,
+            "12-24h": a["3. 12-24"] || 0,
+            "24-36h": a["4. 24-36"] || 0,
+            "36-48h": a["5. 36-48"] || 0,
+            "48-72h": a["6. 48-72"] || 0,
+            "72-96h": a["7. 72-96"] || 0,
+            "96-120h": a["8. 96-120"] || 0,
+            "120h+": a["9. 120+"] || 0,
+            "Tổng Tồn": c.total
+          });
+        });
+      });
+    }
+    const wsRoutes = XLSX.json_to_sheet(routesExcelData);
+    XLSX.book_append_sheet(wb, wsRoutes, "Tồn Chi Tiết Tuyến Kho");
+    
+    // Export Excel
+    XLSX.writeFile(wb, `BaoCao_Ca_KTC_HCM01_${new Date().toISOString().slice(0,10)}.xlsx`);
+  }
+
   // Setup Event Listeners and Initialise
   document.addEventListener('DOMContentLoaded', () => {
     // Initialise checkAuth
@@ -330,6 +499,11 @@
         renderParamsList();
         const pat = sessionStorage.getItem('github_pat') || '';
         document.getElementById('github-pat').value = pat;
+        
+        // Load Telegram settings
+        document.getElementById('telegram-token').value = localStorage.getItem('alert_telegram_token') || '8919718466:AAHoeb3TtrcaZJr98-pC_oeXNNGWnGP-01U';
+        document.getElementById('telegram-chatids').value = localStorage.getItem('alert_telegram_chat_ids') || '-1001681377844,-1001374377435';
+        
         if (window.loadPendingUsers) {
           window.loadPendingUsers();
         }
@@ -363,9 +537,16 @@
     const saveParamsBtn = document.getElementById('save-params-btn');
     if (saveParamsBtn) {
       saveParamsBtn.addEventListener('click', async () => {
+        // Save Telegram configurations first
+        const teleToken = document.getElementById('telegram-token').value.trim();
+        const teleChatIds = document.getElementById('telegram-chatids').value.trim();
+        localStorage.setItem('alert_telegram_token', teleToken);
+        localStorage.setItem('alert_telegram_chat_ids', teleChatIds);
+
         const pat = document.getElementById('github-pat').value.trim();
         if (!pat) {
-          alert('Vui lòng nhập Personal Access Token (PAT) để cập nhật tham số!');
+          alert('Đã lưu cấu hình Alert Telegram cục bộ! Để cập nhật tham số Mapping lên Cloud, vui lòng điền GitHub PAT.');
+          document.getElementById('settings-panel').classList.remove('open');
           return;
         }
 
@@ -457,6 +638,19 @@
     if (window.prediction && window.prediction.initPrediction) {
       window.prediction.initPrediction();
     }
+
+    // Bind Shift Report Excel Export Button
+    const exportShiftReportBtn = document.getElementById('export-shift-report-btn');
+    if (exportShiftReportBtn) {
+      exportShiftReportBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        exportShiftExcelReport();
+      });
+    }
+
+    // Start Heartbeat loop
+    setInterval(updateHeartbeatTimers, 1000);
+    updateHeartbeatTimers();
   });
 
   // Setup periodic refreshes

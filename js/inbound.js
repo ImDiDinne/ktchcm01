@@ -695,6 +695,41 @@
     renderOverdueTable(todayTrips);
     renderTodayTripsTable(todayTrips);
 
+    // Trigger Telegram Auto Alert for Inbound trucks waiting > 45 minutes
+    const alertedTrucksStr = localStorage.getItem('inbound_alerted_trucks') || '[]';
+    let alertedTrucks = [];
+    try { alertedTrucks = JSON.parse(alertedTrucksStr); } catch(e) {}
+    
+    let updatedAlerts = false;
+    todayTrips.forEach(t => {
+      const s = t.status ? t.status.toLowerCase() : '';
+      const isWaiting = s === 'đăng chờ' || s === 'đang chờ' || s === 'waiting';
+      const waitTime = getWaitTimeMinutes(t);
+      
+      if (isWaiting && waitTime > 45 && t.code) {
+        if (!alertedTrucks.includes(t.code)) {
+          alertedTrucks.push(t.code);
+          updatedAlerts = true;
+          
+          if (window.sendTelegramAlert) {
+            const vehicleNum = t.vehicle || 'N/A';
+            const slotStr = t.slot || 'N/A';
+            const msg = `🚚 <b>CẢNH BÁO XE CHỜ QUÁ HẠN DỠ HÀNG (KTC HCM 01)</b>\n` +
+                        `• Biển số xe: <b>${vehicleNum}</b>\n` +
+                        `• Khung giờ đăng ký (Slot): <b>${slotStr}</b>\n` +
+                        `• Thời gian nằm chờ: <b>${waitTime} phút</b> (> 45 phút chưa được dỡ hàng).\n` +
+                        `• Mã chuyến: <code>${t.code}</code>\n` +
+                        `• Khuyến nghị: Bố trí cửa dỡ hàng và cắt seal dỡ hàng khẩn cấp để giải phóng xe!`;
+            window.sendTelegramAlert(msg);
+          }
+        }
+      }
+    });
+    
+    if (updatedAlerts) {
+      localStorage.setItem('inbound_alerted_trucks', JSON.stringify(alertedTrucks));
+    }
+
     // Trigger prediction update
     if (window.prediction && window.prediction.renderPredictionDashboard) {
       window.prediction.renderPredictionDashboard();
@@ -718,6 +753,7 @@
       
       if (result && result.status === 'success' && Array.isArray(result.data)) {
         window.tripScanData = result.data;
+        window.inboundLastFetched = Date.now(); // Record sync timestamp
         console.log(`Fetched ${window.tripScanData.length} trips from TripScan.`);
         populateInboundDates();
         runDockSimulation();

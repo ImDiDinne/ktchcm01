@@ -173,6 +173,14 @@
     `;
   }
 
+  function getHeatmapStyle(key, val, maxVal) {
+    if (!val) return '';
+    const idx = AGING_KEYS.indexOf(key);
+    if (idx < 3) return ''; // Bỏ qua dải dưới 24h
+    const opacity = Math.min(0.75, 0.12 + (val / maxVal) * 0.6);
+    return `style="background-color: rgba(248, 113, 113, ${opacity}) !important; color: #fff !important; font-weight: 600;"`;
+  }
+
   // Main render entry point
   function renderDashboard(filterType) {
     const currentRaw = window.TONKHO_DATA;
@@ -194,6 +202,23 @@
       const a = r.aging || {};
       return s + (a['4. 24-36']||0) + (a['5. 36-48']||0) + (a['6. 48-72']||0) + (a['7. 72-96']||0) + (a['8. 96-120']||0) + (a['9. 120+']||0);
     }, 0) : 0;
+
+    // Trigger Telegram Auto Alert for Overdue Inventory (> 1000 orders)
+    if (totalGT24 > 1000) {
+      const now = Date.now();
+      const lastAlert = localStorage.getItem('last_alert_time_inventory') || 0;
+      const cooldown = 30 * 60 * 1000; // 30 mins cooldown
+      if (now - lastAlert > cooldown) {
+        localStorage.setItem('last_alert_time_inventory', now);
+        if (window.sendTelegramAlert) {
+          const msg = `🚨 <b>CẢNH BÁO TỒN KHO QUÁ HẠN (KTC HCM 01)</b>\n` +
+                      `• Lượng hàng tồn trễ SLA (> 24h) hiện tại: <b>${totalGT24.toLocaleString('vi-VN')} đơn</b> (vượt ngưỡng an toàn 1,000 đơn).\n` +
+                      `• Phân loại đang lọc: <b>${filterType.toUpperCase()}</b>\n` +
+                      `• Khuyến nghị: Đội ngũ vận hành ưu tiên bố trí nhân sự giải phóng hàng tồn đọng gấp!`;
+          window.sendTelegramAlert(msg);
+        }
+      }
+    }
 
     const kpis = [
       { label: 'Tổng Đơn Tồn', value: fmt(D.grand_total), sub: (D.routes ? D.routes.length : 0) + ' nhóm kho', colorClass: 'primary' },
@@ -217,6 +242,23 @@
       });
     }
 
+    // Calculate maximum overdue cell value for heatmap scaling
+    let maxOverdueVal = 1;
+    if (D.routes) {
+      D.routes.forEach(route => {
+        AGING_KEYS.slice(3).forEach(k => {
+          const v = (route.aging || {})[k] || 0;
+          if (v > maxOverdueVal) maxOverdueVal = v;
+        });
+        route.children.forEach(child => {
+          AGING_KEYS.slice(3).forEach(k => {
+            const v = (child.aging || {})[k] || 0;
+            if (v > maxOverdueVal) maxOverdueVal = v;
+          });
+        });
+      });
+    }
+
     // 3. Render Pivot Table
     const tbody = document.getElementById('pivot-body');
     if (tbody) {
@@ -230,7 +272,8 @@
           let cells = `<td><span class="group-toggle" id="toggle-${ri}">▼</span> ${escapeHTML(route.name)}</td>`;
           AGING_KEYS.forEach(k => {
             const v = (route.aging || {})[k] || 0;
-            cells += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}">${v ? fmt(v) : '—'}</td>`;
+            const heatStyle = getHeatmapStyle(k, v, maxOverdueVal);
+            cells += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}" ${heatStyle}>${v ? fmt(v) : '—'}</td>`;
           });
           cells += `<td>${fmt(route.total)}</td>`;
           pr.innerHTML = cells;
@@ -244,7 +287,8 @@
             let cc = `<td>${escapeHTML(child.short_name || child.name)}</td>`;
             AGING_KEYS.forEach(k => {
               const v = (child.aging || {})[k] || 0;
-              cc += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}">${v ? fmt(v) : '—'}</td>`;
+              const heatStyle = getHeatmapStyle(k, v, maxOverdueVal);
+              cc += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}" ${heatStyle}>${v ? fmt(v) : '—'}</td>`;
             });
             cc += `<td>${fmt(child.total)}</td>`;
             cr.innerHTML = cc;

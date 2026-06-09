@@ -1079,9 +1079,24 @@ body::before {
 }
 
 @media (max-width: 768px) {
-  .table-wrapper {
+  /* Only hide the main inventory pivot table wrapper, since it has cards */
+  #tab-content-inventory .content-grid .table-card .table-wrapper {
     display: none !important;
   }
+  
+  /* Ensure all other table wrappers are visible and scroll horizontally */
+  .table-wrapper {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Make sure the inner tables don't squash and can scroll */
+  .table-wrapper table {
+    width: 100%;
+    min-width: 800px; /* Force minimum width to enable horizontal scroll */
+  }
+  
   .mobile-cards-container {
     display: flex !important;
   }
@@ -1554,5 +1569,68 @@ input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.25);
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
 }
+
+/* ── Data Heartbeat Indicator ── */
+.data-heartbeat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+  width: fit-content;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  backdrop-filter: blur(10px);
+  transition: var(--transition);
+}
+
+.data-heartbeat:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-glass-hover);
+}
+
+.data-heartbeat .pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+}
+
+.data-heartbeat .pulse-dot.green {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse-dot-green 2s infinite;
+}
+
+.data-heartbeat .pulse-dot.yellow {
+  background: var(--yellow);
+  box-shadow: 0 0 6px var(--yellow);
+  animation: pulse-dot-yellow 2s infinite;
+}
+
+/* ── Pivot Heatmap styling helper classes ── */
+.pivot-table td.heatmap-cell {
+  transition: background-color 0.3s ease;
+}
+
+/* Responsive improvements for charts on mobile */
+@media (max-width: 768px) {
+  .flow-chart-container {
+    padding-bottom: 35px;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .flow-chart-bar-wrapper {
+    min-width: 38px;
+  }
+}
+
 
 

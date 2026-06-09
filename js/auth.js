@@ -44,13 +44,16 @@
   function applyRBAC(role) {
     const downloadBtn = document.getElementById('download-excel-btn');
     const settingsBtn = document.getElementById('open-settings-btn');
+    const shiftReportBtn = document.getElementById('export-shift-report-btn');
     
     if (role === 'manager') {
       if (downloadBtn) downloadBtn.style.display = 'flex';
       if (settingsBtn) settingsBtn.style.display = 'flex';
+      if (shiftReportBtn) shiftReportBtn.style.display = 'flex';
     } else {
       if (downloadBtn) downloadBtn.style.display = 'none';
       if (settingsBtn) settingsBtn.style.display = 'none';
+      if (shiftReportBtn) shiftReportBtn.style.display = 'none';
     }
   }
 
