@@ -694,6 +694,11 @@
     renderAdvisory(simulation, tAvg);
     renderOverdueTable(todayTrips);
     renderTodayTripsTable(todayTrips);
+
+    // Trigger prediction update
+    if (window.prediction && window.prediction.renderPredictionDashboard) {
+      window.prediction.renderPredictionDashboard();
+    }
   }
 
   async function fetchTripScanData() {

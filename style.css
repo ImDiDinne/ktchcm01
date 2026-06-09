@@ -1482,3 +1482,77 @@ body::before {
   to { transform: rotate(360deg); }
 }
 
+/* ── Custom Range Slider Styling ── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--accent);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  margin-top: -5px; /* (6px track height - 16px thumb height) / 2 */
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  background: var(--accent-light);
+}
+
+input[type="range"]::-moz-range-thumb {
+  background: var(--accent);
+  height: 16px;
+  width: 16px;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.25);
+  background: var(--accent-light);
+}
+
+/* ── Prediction Chart Extensions ── */
+#pred-chart-container .flow-chart-bar-wrapper {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#pred-chart-container .flow-chart-bar-wrapper:hover {
+  transform: translateY(-5px);
+}
+
+#pred-chart-container .flow-chart-bar-wrapper:hover .flow-bar-segment.processed {
+  filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.5));
+}
+
+#pred-chart-container .pred-rec-badge {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+#pred-chart-container .flow-chart-bar-wrapper:hover .pred-rec-badge {
+  transform: scale(1.25);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+}
+
+

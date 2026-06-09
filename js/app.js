@@ -193,21 +193,32 @@
     // 1. Tab switches
     const tabBtnInventory = document.getElementById('tab-btn-inventory');
     const tabBtnDock = document.getElementById('tab-btn-dock');
+    const tabBtnPrediction = document.getElementById('tab-btn-prediction');
+    
     const tabContentInventory = document.getElementById('tab-content-inventory');
     const tabContentDock = document.getElementById('tab-content-dock');
+    const tabContentPrediction = document.getElementById('tab-content-prediction');
     
-    if (tabBtnInventory && tabBtnDock && tabContentInventory && tabContentDock) {
+    function deactivateAllTabs() {
+      if (tabBtnInventory) tabBtnInventory.classList.remove('active');
+      if (tabBtnDock) tabBtnDock.classList.remove('active');
+      if (tabBtnPrediction) tabBtnPrediction.classList.remove('active');
+      
+      if (tabContentInventory) tabContentInventory.style.display = 'none';
+      if (tabContentDock) tabContentDock.style.display = 'none';
+      if (tabContentPrediction) tabContentPrediction.style.display = 'none';
+    }
+    
+    if (tabBtnInventory && tabBtnDock && tabBtnPrediction && tabContentInventory && tabContentDock && tabContentPrediction) {
       tabBtnInventory.addEventListener('click', () => {
+        deactivateAllTabs();
         tabBtnInventory.classList.add('active');
-        tabBtnDock.classList.remove('active');
         tabContentInventory.style.display = 'block';
-        tabContentDock.style.display = 'none';
       });
       
       tabBtnDock.addEventListener('click', () => {
+        deactivateAllTabs();
         tabBtnDock.classList.add('active');
-        tabBtnInventory.classList.remove('active');
-        tabContentInventory.style.display = 'none';
         tabContentDock.style.display = 'block';
         
         if (window.tripScanData.length === 0) {
@@ -215,6 +226,20 @@
         } else {
           window.inbound.populateInboundDates();
           window.inbound.runDockSimulation();
+        }
+      });
+
+      tabBtnPrediction.addEventListener('click', () => {
+        deactivateAllTabs();
+        tabBtnPrediction.classList.add('active');
+        tabContentPrediction.style.display = 'block';
+        
+        if (window.tripScanData.length === 0) {
+          window.inbound.fetchTripScanData();
+        } else {
+          if (window.prediction && window.prediction.renderPredictionDashboard) {
+            window.prediction.renderPredictionDashboard();
+          }
         }
       });
     }
@@ -427,6 +452,11 @@
 
     // Inbound configuration grid
     window.inbound.renderDockConfigGrid();
+
+    // Initialize prediction module
+    if (window.prediction && window.prediction.initPrediction) {
+      window.prediction.initPrediction();
+    }
   });
 
   // Setup periodic refreshes

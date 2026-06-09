@@ -64,6 +64,7 @@
     <div class="nav-main-tabs animate-in">
       <button class="nav-main-tab active" id="tab-btn-inventory">TỒN KHO REALTIME</button>
       <button class="nav-main-tab" id="tab-btn-dock">INBOUND REALTIME</button>
+      <button class="nav-main-tab" id="tab-btn-prediction">DỰ BÁO & KẾ HOẠCH</button>
     </div>
 
     <!-- Tab Content: Inventory -->
@@ -335,6 +336,109 @@
       </div>
     </div>
 
+    <!-- Tab Content: Predictive Capacity Planning -->
+    <div id="tab-content-prediction" class="tab-content-main" style="display: none;">
+      <!-- Prediction KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card animate-in delay-1">
+          <div class="kpi-label">Dự Báo Lượng Xe Ngày Mai</div>
+          <div class="kpi-value" id="pred-kpi-trips">—</div>
+          <div class="kpi-sub">Tổng số xe trung bình lịch sử</div>
+        </div>
+        <div class="kpi-card animate-in delay-2">
+          <div class="kpi-label">Tổng Giờ-Công Dự Kiến</div>
+          <div class="kpi-value" id="pred-kpi-workload" style="color: var(--blue-light);">—</div>
+          <div class="kpi-sub">Dựa trên T_avg đã cấu hình</div>
+        </div>
+        <div class="kpi-card animate-in delay-3">
+          <div class="kpi-label">Khung Giờ Cao Điểm Ngày Mai</div>
+          <div class="kpi-value" id="pred-kpi-peakhour" style="color: var(--yellow); font-size: 1.15rem;">—</div>
+          <div class="kpi-sub">Khung giờ xe về nhiều nhất</div>
+        </div>
+        <div class="kpi-card animate-in delay-4">
+          <div class="kpi-label">Cửa Tải Mở Max (AI Khuyên)</div>
+          <div class="kpi-value" id="pred-kpi-peakdocks" style="color: var(--green);">—</div>
+          <div class="kpi-sub">Khuyến nghị tại khung giờ cao điểm</div>
+        </div>
+      </div>
+
+      <!-- Controls & Parameters Grid -->
+      <div style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+        <!-- Average Unloading Time Slider -->
+        <div class="chart-card" style="flex: 1; min-width: 320px; display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;">
+          <div class="card-title">Thời Gian Dỡ Hàng Dự Kiến (T_avg)</div>
+          <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
+            <input type="range" id="pred-sim-t-avg" min="15" max="90" step="5" value="30" style="flex: 1; cursor: pointer;">
+            <span id="pred-sim-t-avg-val" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.1rem; color: var(--accent); width: 100px; text-align: right;">30 phút</span>
+          </div>
+        </div>
+
+        <!-- Target Utilization Slider -->
+        <div class="chart-card" style="flex: 1; min-width: 320px; display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;">
+          <div class="card-title">Hiệu Suất Cửa Tải Mục Tiêu (Utilization)</div>
+          <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
+            <input type="range" id="pred-sim-u-target" min="50" max="100" step="5" value="80" style="flex: 1; cursor: pointer;">
+            <span id="pred-sim-u-target-val" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.1rem; color: var(--accent); width: 80px; text-align: right;">80%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout Grid -->
+      <div class="content-grid">
+        <!-- Left Column: 24h Prediction Chart -->
+        <div class="table-card animate-in delay-2" style="flex: 2;">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <div class="card-title">Biểu Đồ Dự Báo Lượng Xe Về & Cửa Tải Khuyến Nghị Trong 24H</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 12px;">
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--blue); display: inline-block; border-radius: 2px;"></span> Dự báo xe về (TB)</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--green); display: inline-block; border-radius: 50%;"></span> Cửa khuyến nghị</span>
+            </div>
+          </div>
+          <div style="padding: 0 20px 20px;">
+            <div class="flow-chart-container" id="pred-chart-container" style="height: 240px; align-items: flex-end; padding-bottom: 35px;">
+              <!-- Bars are dynamically generated here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: AI Dispatch Advisory -->
+        <div class="side-panel">
+          <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="card-title">Khuyến Nghị Vận Hành Dự Báo (AI Staffing Plan)</div>
+            <div style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;" id="pred-advisory-list">
+              <!-- Recommendations go here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Layout: Shift Planning Detailed Table -->
+      <div class="table-card animate-in delay-4" style="margin-top: 16px;">
+        <div class="card-header">
+          <div class="card-title">Kế Hoạch Bố Trí Ca Kíp & Cửa Tải Chi Tiết Theo Giờ</div>
+        </div>
+        <div class="table-wrapper" style="max-height: 420px; overflow-y: auto;">
+          <table class="pivot-table" id="pred-trips-table" style="width: 100%; font-size: 0.76rem;">
+            <thead>
+              <tr>
+                <th style="text-align: left; padding-left: 10px;">Khung Giờ</th>
+                <th style="text-align: center;">Ca Vận Hành</th>
+                <th style="text-align: center; color: var(--blue-light);">Lượng Xe Dự Báo (TB)</th>
+                <th style="text-align: center;">Tải Trọng Dự Kiến</th>
+                <th style="text-align: center;">Thời Gian Dỡ Ước Tính</th>
+                <th style="text-align: center;">Mức Độ Vận Hành</th>
+                <th style="text-align: center; color: var(--accent-light);">Số Cửa Khuyến Nghị</th>
+                <th style="text-align: left; padding-left: 10px;">Khuyến Nghị Nhân Sự / Bố Trí</th>
+              </tr>
+            </thead>
+            <tbody id="pred-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Libraries -->
@@ -346,6 +450,7 @@
   <script src="js/charts.js"></script>
   <script src="js/inventory.js"></script>
   <script src="js/inbound.js"></script>
+  <script src="js/prediction.js"></script>
   <script src="js/app.js"></script>
 
   <!-- Login Overlay (Modal) -->
