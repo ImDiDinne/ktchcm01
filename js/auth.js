@@ -22,7 +22,7 @@
       console.warn("Supabase library not loaded yet.");
       return;
     }
-    const config = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)) || DEFAULT_SUPABASE;
+    const config = DEFAULT_SUPABASE;
     if (config.url && config.key) {
       window.supabaseClient = window.supabase.createClient(config.url, config.key);
       console.log("Supabase Client initialised.");
@@ -101,7 +101,7 @@
     initSupabase();
     
     // 1. Check Cloud Auth Session first
-    const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)) || DEFAULT_SUPABASE;
+    const supabaseConfig = DEFAULT_SUPABASE;
     if (supabaseConfig && window.supabaseClient) {
       try {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
@@ -284,7 +284,7 @@
         }
         
         // 2. Verify Cloud Auth
-        const supabaseConfig = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)) || DEFAULT_SUPABASE;
+        const supabaseConfig = DEFAULT_SUPABASE;
         if (supabaseConfig && window.supabaseClient) {
           try {
             const { data, error } = await window.supabaseClient.auth.signInWithPassword({
@@ -320,42 +320,6 @@
         if (errorEl) {
           errorEl.textContent = 'Tên đăng nhập không tồn tại hoặc chưa kết nối Cloud Auth.';
           errorEl.style.display = 'block';
-        }
-      });
-    }
-
-    // Toggle Cloud Auth settings panel in login form
-    const toggleCloudBtn = document.getElementById('toggle-cloud-auth-btn');
-    if (toggleCloudBtn) {
-      toggleCloudBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const panel = document.getElementById('cloud-auth-panel');
-        if (panel) {
-          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-          if (panel.style.display === 'block') {
-            const config = JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)) || { url: '', key: '' };
-            document.getElementById('supabase-url').value = config.url || '';
-            document.getElementById('supabase-key').value = config.key || '';
-          }
-        }
-      });
-    }
-
-    // Save Cloud Auth credentials
-    const saveCloudBtn = document.getElementById('save-cloud-auth-btn');
-    if (saveCloudBtn) {
-      saveCloudBtn.addEventListener('click', () => {
-        const url = document.getElementById('supabase-url').value.trim();
-        const key = document.getElementById('supabase-key').value.trim();
-        
-        if (url && key) {
-          localStorage.setItem(CLOUD_AUTH_KEY, JSON.stringify({ url, key }));
-          alert('Đã cấu hình Supabase Cloud Auth! Trình duyệt sẽ tải lại để áp dụng.');
-          location.reload();
-        } else {
-          localStorage.removeItem(CLOUD_AUTH_KEY);
-          alert('Đã xóa cấu hình Supabase. Hệ thống quay về dùng tài khoản cục bộ.');
-          location.reload();
         }
       });
     }
