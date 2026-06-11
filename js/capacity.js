@@ -6,13 +6,14 @@
   'use strict';
 
   // ─── Constants ────────────────────────────────────
-  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1RCdEDrhCwHKBQAsTNqZO-4vnxft9lcqa7Fe9IK8auZ8/export?format=csv&gid=1731657616';
+  // Using gviz/tq endpoint for proper CORS support from GitHub Pages
+  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1RCdEDrhCwHKBQAsTNqZO-4vnxft9lcqa7Fe9IK8auZ8/gviz/tq?tqx=out:csv&gid=1731657616';
   const LS_KEY_FC     = 'capacity_fc_data';
   const LS_KEY_CONF   = 'capacity_config';
   const LS_KEY_ACTUAL = 'capacity_actual_history';
 
   // Actual data sheet (dates as columns, transposed layout)
-  const ACTUAL_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1RCdEDrhCwHKBQAsTNqZO-4vnxft9lcqa7Fe9IK8auZ8/export?format=csv&gid=0';
+  const ACTUAL_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1RCdEDrhCwHKBQAsTNqZO-4vnxft9lcqa7Fe9IK8auZ8/gviz/tq?tqx=out:csv&gid=0';
 
   const DAY_NAMES_VI = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
