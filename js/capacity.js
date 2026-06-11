@@ -223,8 +223,8 @@
       const csvText = await resp.text();
 
       const lines = csvText.split('\n').map(l => l.replace(/\r/g, ''));
-      if (lines.length < 26) {
-        console.warn('[Capacity] Actual sheet too few rows');
+      if (lines.length < 15) {
+        console.warn('[Capacity] Actual sheet too few rows:', lines.length);
         return false;
       }
 
@@ -400,10 +400,12 @@
       if (d.staffTotal > maxStaffTotal) maxStaffTotal = d.staffTotal;
     });
 
-    const avgProd = countProd > 0 ? Math.round(sumProd / countProd) : null;
+    const avgProd = countProd > 0 ? (sumProd / countProd) : null;
+    // Convert package count/person/shift to tons/person/shift (assume 1 package = 1 kg = 0.001 tons)
+    const avgProdTons = avgProd ? avgProd / 1000 : null;
 
     derivedProductivity = {
-      avgProductivity: avgProd,   // tấn/người/ca (or đơn/người/ca depending on input)
+      avgProductivity: avgProdTons,   // tấn/người/ca (e.g. 1.05)
       maxCapacity: maxVol,
       peakDate: peakDate,
       sampleDays: useDays.length,
@@ -653,15 +655,16 @@
     const fl   = config.freelancer || 0;
     const currentTotal = nvct + fl;
 
-    // Get productivity from derived data (tấn/người/ca)
+    // Get productivity from derived data (tấn/người/ca, e.g. 1.05)
     const prod = derivedProductivity?.avgProductivity || 0;
+    const prodInPackages = prod * 1000; // e.g. 1050
 
-    // Required staff = FC_total / productivity
-    const requiredRaw = prod > 0 ? dayData.total / prod : 0;
-    const requiredTotal = prod > 0 ? Math.ceil(requiredRaw * (1 + config.bufferPercent / 100)) : 0;
+    // Required staff = FC_total / prodInPackages
+    const requiredRaw = prodInPackages > 0 ? dayData.total / prodInPackages : 0;
+    const requiredTotal = prodInPackages > 0 ? Math.ceil(requiredRaw * (1 + config.bufferPercent / 100)) : 0;
 
-    // Max capacity = current total staff * productivity
-    const maxCapacity = prod > 0 ? Math.round(currentTotal * prod) : 0;
+    // Max capacity = current total staff * prodInPackages
+    const maxCapacity = prodInPackages > 0 ? Math.round(currentTotal * prodInPackages) : 0;
 
     // Freelancer delta
     const flNeeded = Math.max(0, requiredTotal - nvct);
@@ -746,6 +749,7 @@
     }
 
     const dp = derivedProductivity;
+    const formattedProd = dp.avgProductivity ? dp.avgProductivity.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—';
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div style="font-size:0.72rem;color:var(--green);font-weight:700;">
@@ -754,12 +758,12 @@
 
         <div style="background:rgba(52,211,153,0.08);padding:14px;border-radius:8px;border:1px solid rgba(52,211,153,0.2);text-align:center;">
           <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:4px;">Năng Suất Trung Bình</div>
-          <div style="font-size:1.6rem;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--green);">${dp.avgProductivity ? formatNumber(dp.avgProductivity) : '—'}</div>
+          <div style="font-size:1.6rem;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--green);">${formattedProd}</div>
           <div style="font-size:0.65rem;color:var(--text-muted);">tấn/người/ca</div>
         </div>
 
         <div style="display:flex;gap:12px;font-size:0.68rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
-          <span>📈 Max xử lý: <strong style="color:var(--green);">${formatNumber(dp.maxCapacity)}</strong> tấn (${dp.peakDate})</span>
+          <span>📈 Max xử lý: <strong style="color:var(--green);">${formatNumber(dp.maxCapacity)}</strong> đơn (${dp.peakDate})</span>
         </div>
         <div style="display:flex;gap:12px;font-size:0.68rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
           <span>👥 Max NS: <strong>${dp.maxStaff || '—'}</strong> người</span>
@@ -823,7 +827,8 @@
     const elCapSub = document.getElementById('cap-kpi-sub-max');
     if (elCapSub) {
       const t = config.nvct + config.freelancer;
-      elCapSub.textContent = `${t} NS (NVCT:${config.nvct} + FL:${config.freelancer}) × ${todayCalc.productivity ? formatNumber(todayCalc.productivity) + ' t/ng' : 'chưa có NS'}`;
+      const formattedProd = todayCalc.productivity ? todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—';
+      elCapSub.textContent = `${t} NS (NVCT:${config.nvct} + FL:${config.freelancer}) × ${todayCalc.productivity ? formattedProd + ' tấn/người/ca' : 'chưa có NS'}`;
     }
 
     // Staff Needed
@@ -833,9 +838,11 @@
     const elStaffSub = document.getElementById('cap-kpi-sub-staff');
     if (elStaffSub) {
       if (todayCalc.productivity > 0) {
-        elStaffSub.textContent = `FC:${formatNumber(todayCalc.fc.total)} ÷ ${formatNumber(todayCalc.productivity)} t/ng +${config.bufferPercent}% buffer`;
+        const formattedProd = todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        elStaffSub.textContent = `FC:${formatNumber(todayCalc.fc.total)} ÷ ${formattedProd} t/ng +${config.bufferPercent}% buffer`;
+        elStaffSub.style.color = 'var(--text-muted)';
       } else {
-        elStaffSub.textContent = 'Cần dán Actual để tính năng suất';
+        elStaffSub.textContent = 'Chưa tải được Actual để tính năng suất';
         elStaffSub.style.color = 'var(--yellow)';
       }
     }
@@ -1010,7 +1017,15 @@
 
     const todayStr = getTodayString();
 
-    allCalc.forEach(calc => {
+    // Sort descending by date (latest/nearest first)
+    const sorted = [...allCalc].sort((a, b) => {
+      const dA = parseDate(a.date);
+      const dB = parseDate(b.date);
+      if (!dA || !dB) return 0;
+      return dB.getTime() - dA.getTime();
+    });
+
+    sorted.forEach(calc => {
       const dayName     = getDayOfWeek(calc.date);
       const weekendFlag = isWeekend(calc.date);
       const isToday     = calc.date === todayStr;
@@ -1079,6 +1094,42 @@
     if (allCalc.length === 0) return;
 
     const advises = [];
+
+    // ── 0. Phân tích so sánh Lịch Sử (Actual) vs Tương Lai (FC) ──
+    if (actualHistory && actualHistory.length > 0) {
+      const actualDays = actualHistory.filter(d => d.staffTotal > 0 && d.volTotal > 0);
+      if (actualDays.length > 0) {
+        const avgActualVol = actualDays.reduce((sum, d) => sum + d.volTotal, 0) / actualDays.length;
+        const avgActualStaff = actualDays.reduce((sum, d) => sum + d.staffTotal, 0) / actualDays.length;
+
+        const avgFCVol = allCalc.reduce((sum, c) => sum + c.fc.total, 0) / allCalc.length;
+        const avgFCStaffNeeded = allCalc.reduce((sum, c) => sum + c.requiredTotal, 0) / allCalc.length;
+
+        const volDiffPct = ((avgFCVol - avgActualVol) / avgActualVol) * 100;
+        const staffDiffPct = ((avgFCStaffNeeded - avgActualStaff) / avgActualStaff) * 100;
+
+        const prodVal = derivedProductivity?.avgProductivity || 0;
+
+        let comparisonMsg = `Năng suất lịch sử đạt trung bình <strong>${prodVal.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2})} tấn/người/ca</strong> (tính từ ${actualDays.length} ngày thực tế).<br><br>`;
+        
+        comparisonMsg += `• <strong>Khối lượng hàng:</strong> Thực tế quá khứ trung bình <strong>${formatNumber(avgActualVol)}</strong> đơn/ngày. Dự báo tương lai trung bình <strong>${formatNumber(avgFCVol)}</strong> đơn/ngày (biến động <strong>${volDiffPct > 0 ? '+' : ''}${volDiffPct.toFixed(1)}%</strong>).<br>`;
+        comparisonMsg += `• <strong>Nhân sự:</strong> Quá khứ vận hành trung bình <strong>${Math.round(avgActualStaff)}</strong> người/ngày. Dự báo tương lai cần trung bình <strong>${Math.round(avgFCStaffNeeded)}</strong> người/ngày (biến động <strong>${staffDiffPct > 0 ? '+' : ''}${staffDiffPct.toFixed(1)}%</strong>).<br><br>`;
+
+        if (volDiffPct < -15) {
+          comparisonMsg += `💡 <strong>Khuyến nghị:</strong> Lượng hàng tương lai dự kiến giảm trung bình <strong>${Math.abs(volDiffPct).toFixed(1)}%</strong> so với quá khứ. Cần chuẩn bị kế hoạch cắt giảm số ca Freelancer hoặc điều chuyển nhân sự để tối ưu hóa chi phí.`;
+        } else if (volDiffPct > 15) {
+          comparisonMsg += `⚠️ <strong>Khuyến nghị:</strong> Lượng hàng tương lai dự kiến tăng trung bình <strong>${volDiffPct.toFixed(1)}%</strong> so với quá khứ. Cần bổ sung thêm nhân sự hoặc Freelancer để đáp ứng năng lực xử lý.`;
+        } else {
+          comparisonMsg += `💡 <strong>Khuyến nghị:</strong> Quy mô lượng hàng tương lai ổn định tương đương quá khứ (biến động ${volDiffPct > 0 ? '+' : ''}${volDiffPct.toFixed(1)}%). Nên duy trì cấu hình nhân sự hiện có.`;
+        }
+
+        advises.push({
+          type: 'success',
+          title: '📊 So Sánh Lịch Sử vs Dự Báo (June 2026 Focus)',
+          message: comparisonMsg
+        });
+      }
+    }
 
     // ── 1. Weekly summaries ──
     const weekGroups = {};
