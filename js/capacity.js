@@ -1034,6 +1034,7 @@
     const chartArea = document.createElement('div');
     chartArea.className = 'flow-chart-container';
     chartArea.style.height    = '260px';
+    chartArea.style.paddingBottom = '45px'; // Increased padding-bottom to prevent x-axis date labels from being cut off
     chartArea.style.gap       = '4px';
     chartArea.style.position  = 'relative';
     chartArea.style.alignItems = 'flex-end';
@@ -1043,7 +1044,7 @@
     const capLine = document.createElement('div');
     capLine.style.cssText = `
       position: absolute;
-      bottom: calc(${capLinePos}% + 30px);
+      bottom: calc(${capLinePos}% + 45px); /* Adjusted for the new padding-bottom */
       left: 0; right: 0;
       height: 2px;
       border-top: 2px dashed ${COLORS.capLine};
@@ -1054,7 +1055,7 @@
     const capLabel = document.createElement('div');
     capLabel.style.cssText = `
       position: absolute;
-      bottom: calc(${capLinePos}% + 32px);
+      bottom: calc(${capLinePos}% + 47px); /* Adjusted for the new padding-bottom */
       right: 4px;
       font-size: 0.6rem;
       font-family: 'JetBrains Mono', monospace;
@@ -1107,9 +1108,9 @@
         </div>
         <span class="flow-chart-label" style="
           font-size: 0.58rem;
-          transform: rotate(-55deg);
+          transform: rotate(-45deg); /* Better rotation angle */
           transform-origin: left top;
-          margin-top: 6px;
+          margin-top: 8px;
           margin-left: 10px;
           white-space: nowrap;
           color: ${isWeekendDay ? 'var(--accent)' : 'var(--text-muted)'};
@@ -1133,16 +1134,7 @@
     if (btnPrevHeader) btnPrevHeader.disabled = startIdx === 0;
     if (btnNextHeader) btnNextHeader.disabled = startIdx + count >= allCalc.length;
 
-    // Centered Legend at the bottom
-    const legend = document.createElement('div');
-    legend.style.cssText = 'display:flex; justify-content:center; gap:14px; font-size:0.68rem; color:var(--text-muted); font-family:"JetBrains Mono",monospace; margin-top:12px;';
-    legend.innerHTML = `
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.normal};display:inline-block;border-radius:2px;"></span> &lt;5kg</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.bulky};display:inline-block;border-radius:2px;"></span> 5-15kg</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.freight};display:inline-block;border-radius:2px;"></span> &gt;15kg</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:2px;border-top:2px dashed ${COLORS.capLine};display:inline-block;"></span> Capacity</span>
-    `;
-    container.appendChild(legend);
+
   }
 
   // ─── Render: Staffing Table ───────────────────────
@@ -1181,6 +1173,7 @@
       const isSelected = calc.date === activeDate;
 
       const tr = document.createElement('tr');
+      tr.id = `cap-row-${calc.date.replace(/\//g, '-')}`;
       tr.style.cursor = 'pointer';
       tr.style.transition = 'background 0.2s, outline 0.2s';
       if (calc.closestActual) {
@@ -1193,7 +1186,6 @@
         tr.style.background = 'rgba(59, 130, 246, 0.15)';
         tr.style.outline = '1.5px solid var(--blue)';
       } else if (isToday) {
-        tr.id = 'cap-row-today';
         tr.style.background = 'rgba(52, 211, 153, 0.08)';
         tr.style.border = '1px dashed var(--green)';
       } else if (weekendFlag) {
@@ -1252,7 +1244,7 @@
     // Auto scroll to today's row in the table (only on initial load)
     if (!selectedDate) {
       setTimeout(() => {
-        const todayRow = document.getElementById('cap-row-today');
+        const todayRow = document.getElementById(`cap-row-${todayStr.replace(/\//g, '-')}`);
         if (todayRow) {
           todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -1278,14 +1270,68 @@
     }
     if (!todayCalc) return;
 
+    // Handle Date Dropdown Select in the Header
+    const selectEl = document.getElementById('cap-advisory-date-select');
+    if (selectEl) {
+      selectEl.innerHTML = '';
+      allCalc.forEach(calc => {
+        const opt = document.createElement('option');
+        opt.value = calc.date;
+        opt.textContent = calc.date;
+        if (calc.date === todayCalc.date) {
+          opt.selected = true;
+        }
+        selectEl.appendChild(opt);
+      });
+
+      // Clone select to detach previous change listeners
+      const newSelectEl = selectEl.cloneNode(true);
+      selectEl.parentNode.replaceChild(newSelectEl, selectEl);
+      newSelectEl.addEventListener('change', (e) => {
+        selectedDate = e.target.value;
+        renderCapacityDashboard();
+        
+        // Auto scroll to target table row
+        setTimeout(() => {
+          const targetRow = document.getElementById(`cap-row-${selectedDate.replace(/\//g, '-')}`);
+          if (targetRow) {
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      });
+    }
+
     const advises = [];
 
-    // ── 0. Phân tích cụ thể cho ngày Forecast gần nhất ──
+    // ── 0. Phân tích cụ thể cho ngày Forecast được chọn ──
     if (actualHistory && actualHistory.length > 0) {
       const dp = derivedProductivity;
-      const pN = dp?.peakNormal;
-      const pB = dp?.peakBulky;
-      const pF = dp?.peakFreight;
+      const pN = dp?.peakNormal?.productivity || 0;
+      const pB = dp?.peakBulky?.productivity || 0;
+      const pF = dp?.peakFreight?.productivity || 0;
+      
+      const fallbackPN = 1200;
+      const fallbackPB = 500;
+      const fallbackPF = 200;
+      
+      const pN_use = pN > 0 ? pN : fallbackPN;
+      const pB_use = pB > 0 ? pB : fallbackPB;
+      const pF_use = pF > 0 ? pF : fallbackPF;
+      
+      const staffN = todayCalc.fc.normal / pN_use;
+      const staffB = todayCalc.fc.bulky / pB_use;
+      const staffF = todayCalc.fc.freight / pF_use;
+      const staffSum = staffN + staffB + staffF;
+      
+      let requiredN = 0;
+      let requiredB = 0;
+      let requiredF = 0;
+      
+      if (staffSum > 0) {
+        requiredN = Math.round(todayCalc.requiredTotal * (staffN / staffSum));
+        requiredB = Math.round(todayCalc.requiredTotal * (staffB / staffSum));
+        requiredF = Math.max(0, todayCalc.requiredTotal - requiredN - requiredB);
+      }
 
       let customHtml = `
         <div class="kpi-card" style="padding: 16px; border-left: 4px solid var(--blue); display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.45); border-radius: var(--radius-lg); margin-bottom: 8px;">
@@ -1306,7 +1352,7 @@
                 <div style="font-size: 0.6rem; color: var(--text-muted);">Normal (&lt;5kg)</div>
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #60a5fa; margin-top: 2px;">${formatNumber(todayCalc.fc.normal)}</div>
               </div>
-              <div style="background: rgba(251, 191, 36, 0.04); border: 1px solid rgba(251, 191, 36, 0.12); padding: 4px 6px; border-radius: 6px; text-align: center;">
+              <div style="background: rgba(251, 146, 60, 0.04); border: 1px solid rgba(251, 146, 60, 0.12); padding: 4px 6px; border-radius: 6px; text-align: center;">
                 <div style="font-size: 0.6rem; color: var(--text-muted);">Bulky (5-15kg)</div>
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #fbbf24; margin-top: 2px;">${formatNumber(todayCalc.fc.bulky)}</div>
               </div>
@@ -1341,8 +1387,14 @@
           ` : ''}
           
           <!-- Nhận xét chi tiết bằng chữ -->
-          <div style="font-size: 0.7rem; color: var(--text-secondary); line-height: 1.45; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
-            💡 <strong>Nhận xét:</strong> Để đáp ứng sản lượng forecast ngày ${todayCalc.date}, kho cần bố trí tổng cộng <strong>${todayCalc.requiredTotal} nhân sự</strong>. Với lực lượng NVCT hoạt động ngày hôm trước (N-1) là <strong>${todayCalc.nvctTotal} người</strong>, kho cần bổ sung thêm <strong>${todayCalc.flNeeded} Freelancer</strong> để đảm bảo vận hành ổn định.
+          <div style="font-size: 0.7rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+            <div>💡 <strong>Nhận xét:</strong> Để đáp ứng sản lượng forecast ngày <strong>${todayCalc.date}</strong> với tổng <strong>${formatNumber(todayCalc.fc.total)} đơn</strong> (gồm <strong>${formatNumber(todayCalc.fc.normal)} Normal</strong>, <strong>${formatNumber(todayCalc.fc.bulky)} Bulky</strong>, <strong>${formatNumber(todayCalc.fc.freight)} Freight</strong>), kho cần bố trí hoạt động tổng cộng <strong>${todayCalc.requiredTotal} nhân sự</strong>.</div>
+            <div style="padding: 6px 12px; color: var(--text-muted); line-height: 1.4; font-size: 0.68rem; display: flex; flex-direction: column; gap: 2px; background: rgba(255, 255, 255, 0.02); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04); margin: 2px 0;">
+              <span style="display:flex; justify-content:space-between;">• Normal (&lt;5kg): <strong style="color: #60a5fa;">${requiredN} người</strong> <span style="font-size:0.62rem; color:var(--text-muted);">(NS: ~${formatNumber(Math.round(pN_use))} đơn/ng)</span></span>
+              <span style="display:flex; justify-content:space-between;">• Bulky (5-15kg): <strong style="color: #fbbf24;">${requiredB} người</strong> <span style="font-size:0.62rem; color:var(--text-muted);">(NS: ~${formatNumber(Math.round(pB_use))} đơn/ng)</span></span>
+              <span style="display:flex; justify-content:space-between;">• Freight (&gt;15kg): <strong style="color: #fb923c;">${requiredF} người</strong> <span style="font-size:0.62rem; color:var(--text-muted);">(NS: ~${formatNumber(Math.round(pF_use))} đơn/ng)</span></span>
+            </div>
+            <div style="margin-top: 2px;">Với lực lượng NVCT hoạt động từ ngày hôm trước (N-1) là <strong>${todayCalc.nvctTotal} người</strong>, kho cần bổ sung thêm <strong>${todayCalc.flNeeded} Freelancer</strong> để đảm bảo vận hành ổn định.</div>
           </div>
         </div>
       `;

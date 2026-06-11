@@ -63,22 +63,31 @@ class MetabaseClient:
         """Đăng nhập Metabase, lấy session token."""
         if self.session_token:
             print("🔑 Dùng session token có sẵn...")
-            resp = requests.get(
-                f"{self.base_url}/api/user/current",
-                headers=self._headers(),
-                timeout=15
-            )
-            if resp.status_code == 200:
-                user = resp.json()
-                print(f"✅ Đã xác thực: {user.get('common_name', user.get('email', 'OK'))}")
-                return True
-            else:
-                print("⚠️ Session token hết hạn hoặc không hợp lệ.")
-                if self.username and self.password:
-                    self.session_token = None
-                    return self._login_with_credentials()
-                print("❌ Hãy lấy lại session token mới (xem hướng dẫn bên dưới).")
-                self.auth_failed = True
+            try:
+                resp = requests.get(
+                    f"{self.base_url}/api/user/current",
+                    headers=self._headers(),
+                    timeout=15
+                )
+                if resp.status_code == 200:
+                    user = resp.json()
+                    print(f"✅ Đã xác thực: {user.get('common_name', user.get('email', 'OK'))}")
+                    return True
+                else:
+                    print("⚠️ Session token hết hạn hoặc không hợp lệ.")
+                    if self.username and self.password:
+                        self.session_token = None
+                        return self._login_with_credentials()
+                    print("❌ Hãy lấy lại session token mới (xem hướng dẫn bên dưới).")
+                    self.auth_failed = True
+                    return False
+            except requests.exceptions.RequestException as re_err:
+                print(f"❌ Không thể kết nối tới {self.base_url} để kiểm tra session: {re_err}")
+                self.auth_failed = False
+                return False
+            except Exception as e:
+                print(f"❌ Lỗi kiểm tra session: {e}")
+                self.auth_failed = False
                 return False
 
         return self._login_with_credentials()
@@ -123,9 +132,11 @@ class MetabaseClient:
             return False
         except requests.exceptions.ConnectionError:
             print(f"❌ Không thể kết nối tới {self.base_url}. Kiểm tra mạng.")
+            self.auth_failed = False
             return False
         except Exception as e:
             print(f"❌ Lỗi đăng nhập: {e}")
+            self.auth_failed = False
             return False
 
     def _save_new_token(self):
@@ -443,17 +454,25 @@ def main():
     client = MetabaseClient(METABASE_URL, username, password, session)
 
     if not client.login():
-        print("❌ Đăng nhập thất bại. Có thể Session Token đã hết hạn.")
-        already_expired = is_already_marked_expired()
-        set_session_expired_flag(True)
-        send_macos_notification(
-            title="KTC HCM 01 Dashboard",
-            subtitle="Phiên đăng nhập hết hạn",
-            message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
-        )
-        if not already_expired:
-            open_terminal_for_session_update()
+        if client.auth_failed:
+            print("❌ Đăng nhập thất bại. Có thể Session Token đã hết hạn.")
+            already_expired = is_already_marked_expired()
+            set_session_expired_flag(True)
+            send_macos_notification(
+                title="KTC HCM 01 Dashboard",
+                subtitle="Phiên đăng nhập hết hạn",
+                message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
+            )
+            if not already_expired:
+                open_terminal_for_session_update()
+        else:
+            print("⚠️ Lỗi kết nối mạng khi đăng nhập. Giữ nguyên trạng thái cũ.")
         sys.exit(1)
+
+    # Nếu đăng nhập thành công, xoá cờ session_expired nếu trước đó bị đánh dấu
+    if is_already_marked_expired():
+        print("🎉 Đăng nhập thành công! Đang xoá cờ session_expired...")
+        set_session_expired_flag(False)
 
     output_path = Path(args.output)
 
@@ -478,17 +497,24 @@ def main():
         while True:
             try:
                 if not client.login():
-                    print("❌ Phiên đăng nhập hết hạn.")
-                    already_expired = is_already_marked_expired()
-                    set_session_expired_flag(True)
-                    send_macos_notification(
-                        title="KTC HCM 01 Dashboard",
-                        subtitle="Phiên đăng nhập hết hạn",
-                        message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
-                    )
-                    if not already_expired:
-                        open_terminal_for_session_update()
+                    if client.auth_failed:
+                        print("❌ Phiên đăng nhập hết hạn.")
+                        already_expired = is_already_marked_expired()
+                        set_session_expired_flag(True)
+                        send_macos_notification(
+                            title="KTC HCM 01 Dashboard",
+                            subtitle="Phiên đăng nhập hết hạn",
+                            message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
+                        )
+                        if not already_expired:
+                            open_terminal_for_session_update()
+                    else:
+                        print("⚠️ Lỗi kết nối mạng khi đăng nhập. Giữ nguyên trạng thái cũ.")
                 else:
+                    # Nếu đăng nhập thành công, xoá cờ session_expired nếu trước đó bị đánh dấu
+                    if is_already_marked_expired():
+                        print("🎉 Đăng nhập thành công! Đang xoá cờ session_expired...")
+                        set_session_expired_flag(False)
                     success = fetch_once()
                     if not success:
                         print("❌ Tải dữ liệu thất bại.")

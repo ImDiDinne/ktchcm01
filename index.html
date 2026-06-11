@@ -559,7 +559,13 @@
           </div>
           <!-- AI Advisory -->
           <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
-            <div class="card-title">Khuyến Nghị Nhân Sự (AI Advisory)</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; margin-bottom: 4px;">
+              <div class="card-title" style="margin: 0; padding: 0; border: none;">Khuyến Nghị Nhân Sự (AI Advisory)</div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.65rem; color: var(--text-muted);">Xem ngày:</span>
+                <select id="cap-advisory-date-select" style="background: rgba(30, 41, 59, 0.8); color: var(--text-primary); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; outline: none; font-family: 'JetBrains Mono', monospace; font-weight: 600;"></select>
+              </div>
+            </div>
             <div style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;" id="cap-advisory-list"></div>
           </div>
         </div>

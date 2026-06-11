@@ -162,6 +162,9 @@ def verify_token(token):
         else:
             print(f"❌ Token không hợp lệ (HTTP {resp.status_code})")
             return False
+    except requests.exceptions.RequestException as e:
+        print(f"⚠️ Lỗi kết nối mạng khi kiểm tra token: {e}")
+        return "connection_error"
     except Exception as e:
         print(f"⚠️ Không thể kiểm tra token: {e}")
         return False
@@ -208,9 +211,12 @@ def renew_session_with_playwright(force_login=False, headless_mode=True):
                     ignore_default_args=['--enable-automation'],
                 )
                 page = context.new_page()
-                page.goto(METABASE_URL, wait_until='networkidle', timeout=30000)
+                try:
+                    page.goto(METABASE_URL, wait_until='load', timeout=30000)
+                except Exception as goto_err:
+                    print(f"⚠️ Page.goto load timeout/error: {goto_err}")
 
-                # Chờ trang tải xong
+                # Chờ trang tải thêm 3 giây
                 time.sleep(3)
 
                 # Kiểm tra xem đã đăng nhập chưa (redirect về homepage thay vì login)
@@ -225,7 +231,7 @@ def renew_session_with_playwright(force_login=False, headless_mode=True):
                         session_cookie = c['value']
                         break
 
-                if session_cookie and verify_token(session_cookie):
+                if session_cookie and verify_token(session_cookie) == True:
                     print("🎉 Lấy session thành công ở chế độ tự động!")
                     context.close()
                     return session_cookie
@@ -247,7 +253,10 @@ def renew_session_with_playwright(force_login=False, headless_mode=True):
             ignore_default_args=['--enable-automation'],
         )
         page = context.new_page()
-        page.goto(METABASE_URL, wait_until='networkidle', timeout=60000)
+        try:
+            page.goto(METABASE_URL, wait_until='load', timeout=60000)
+        except Exception as goto_err:
+            print(f"⚠️ Page.goto load error in GUI browser: {goto_err}")
 
         # Chờ cho đến khi có cookie metabase.SESSION (tối đa 5 phút)
         print("⏳ Chờ bạn đăng nhập... (tự động tắt sau khi hoàn tất, tối đa 5 phút)")
@@ -265,9 +274,13 @@ def renew_session_with_playwright(force_login=False, headless_mode=True):
 
             if session_cookie:
                 # Xác nhận token hợp lệ
-                if verify_token(session_cookie):
+                res = verify_token(session_cookie)
+                if res == True:
                     print("🎉 Đã lấy session token thành công!")
                     break
+                elif res == "connection_error":
+                    print("⚠️ Lỗi kết nối mạng khi kiểm tra token mới. Sẽ thử lại sau...")
+                    session_cookie = None
                 else:
                     session_cookie = None
 
@@ -309,8 +322,12 @@ def main():
     if args.check_only:
         if current_token:
             print(f"\n📋 Token hiện tại: {current_token[:8]}...")
-            if verify_token(current_token):
+            res = verify_token(current_token)
+            if res == True:
                 sys.exit(0)
+            elif res == "connection_error":
+                print("⚠️ Lỗi kết nối mạng, bỏ qua kiểm tra session.")
+                sys.exit(2)
             else:
                 sys.exit(1)
         else:
@@ -320,9 +337,13 @@ def main():
     # Kiểm tra token hiện tại còn dùng được không
     if current_token and not args.force_login:
         print(f"\n🔍 Kiểm tra token hiện tại: {current_token[:8]}...")
-        if verify_token(current_token):
+        res = verify_token(current_token)
+        if res == True:
             print("✅ Token hiện tại vẫn hợp lệ! Không cần renew.")
             return
+        elif res == "connection_error":
+            print("⚠️ Lỗi kết nối mạng. Không thể renew lúc này.")
+            sys.exit(2)
 
     print("\n🔄 Token đã hết hạn, đang tự động renew...")
 

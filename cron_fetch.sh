@@ -42,7 +42,9 @@ echo "🔑 Kiểm tra session token..." >> "$LOG"
 python3 auto_renew_session.py --check-only >> "$LOG" 2>&1
 CHECK_STATUS=$?
 
-if [ $CHECK_STATUS -ne 0 ]; then
+if [ $CHECK_STATUS -eq 2 ]; then
+    echo "⚠️ Lỗi kết nối mạng, bỏ qua việc gia hạn session lúc này." >> "$LOG"
+elif [ $CHECK_STATUS -ne 0 ]; then
     echo "🔄 Session hết hạn — đang tự động renew..." >> "$LOG"
     python3 auto_renew_session.py >> "$LOG" 2>&1
     RENEW_STATUS=$?
