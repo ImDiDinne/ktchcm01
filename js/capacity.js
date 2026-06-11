@@ -1030,21 +1030,12 @@
     const maxCapacity = slice[0].maxCapacity;
     const scaleMax    = Math.max(maxFC, maxCapacity) * 1.15;
 
-    // Chart area wrapper
-    const chartArea = document.createElement('div');
-    chartArea.className = 'flow-chart-container';
-    chartArea.style.height    = '260px';
-    chartArea.style.paddingBottom = '45px'; // Increased padding-bottom to prevent x-axis date labels from being cut off
-    chartArea.style.gap       = '4px';
-    chartArea.style.position  = 'relative';
-    chartArea.style.alignItems = 'flex-end';
-
     // Capacity line (horizontal dashed)
     const capLinePos = (maxCapacity / scaleMax) * 100;
     const capLine = document.createElement('div');
     capLine.style.cssText = `
       position: absolute;
-      bottom: calc(${capLinePos}% + 45px); /* Adjusted for the new padding-bottom */
+      bottom: calc(${capLinePos}% + 45px); /* Adjusted for the padding-bottom */
       left: 0; right: 0;
       height: 2px;
       border-top: 2px dashed ${COLORS.capLine};
@@ -1055,7 +1046,7 @@
     const capLabel = document.createElement('div');
     capLabel.style.cssText = `
       position: absolute;
-      bottom: calc(${capLinePos}% + 47px); /* Adjusted for the new padding-bottom */
+      bottom: calc(${capLinePos}% + 47px); /* Adjusted for the padding-bottom */
       right: 4px;
       font-size: 0.6rem;
       font-family: 'JetBrains Mono', monospace;
@@ -1067,8 +1058,8 @@
     `;
     capLabel.textContent = `Capacity: ${formatNumber(maxCapacity)}`;
 
-    chartArea.appendChild(capLine);
-    chartArea.appendChild(capLabel);
+    container.appendChild(capLine);
+    container.appendChild(capLabel);
 
     // Bars
     slice.forEach(calc => {
@@ -1118,10 +1109,8 @@
         ">${formatDateShort(calc.date)}</span>
       `;
 
-      chartArea.appendChild(wrapper);
+      container.appendChild(wrapper);
     });
-
-    container.appendChild(chartArea);
 
     // Update header navigation elements
     const displayEl = document.getElementById('cap-date-range-display');
@@ -1286,6 +1275,7 @@
 
       // Clone select to detach previous change listeners
       const newSelectEl = selectEl.cloneNode(true);
+      newSelectEl.value = todayCalc.date; // Preserve selected option value
       selectEl.parentNode.replaceChild(newSelectEl, selectEl);
       newSelectEl.addEventListener('change', (e) => {
         selectedDate = e.target.value;
