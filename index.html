@@ -510,20 +510,25 @@
           </div>
         </div>
 
-        <!-- Card B: Nhân Sự Hiện Có -->
-        <div class="chart-card" style="flex: 1; min-width: 220px;">
-          <div class="card-title">Nhân Sự Hiện Có</div>
-          <div class="cap-config-row">
-            <label>Normal</label>
-            <input type="number" id="cap-staff-normal" value="250">
-          </div>
-          <div class="cap-config-row">
-            <label>Bulky</label>
-            <input type="number" id="cap-staff-bulky" value="50">
-          </div>
-          <div class="cap-config-row">
-            <label>Freight</label>
-            <input type="number" id="cap-staff-freight" value="30">
+        <!-- Card B: Nhân Sự Hiện Có (NVCT + Freelancer) -->
+        <div class="chart-card" style="flex: 1.3; min-width: 320px;">
+          <div class="card-title">Nhân Sự Hiện Có (NVCT + Freelancer)</div>
+          <div style="display:grid; grid-template-columns: auto 1fr 1fr; gap:6px 10px; align-items:center;">
+            <div style="font-size:0.65rem;color:var(--text-muted);"></div>
+            <div style="font-size:0.62rem;color:var(--text-muted);text-align:center;font-weight:600;">NVCT</div>
+            <div style="font-size:0.62rem;color:var(--yellow);text-align:center;font-weight:600;">Freelancer</div>
+
+            <label style="font-size:0.72rem;color:var(--text-muted);">Normal</label>
+            <input type="number" id="cap-nvct-normal" value="180" style="width:100%;background:#1e293b;color:var(--text-primary);border:1px solid var(--border);padding:5px 8px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.82rem;text-align:center;">
+            <input type="number" id="cap-fl-normal" value="70" style="width:100%;background:#1e293b;color:var(--yellow);border:1px solid rgba(251,191,36,0.3);padding:5px 8px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.82rem;text-align:center;">
+
+            <label style="font-size:0.72rem;color:var(--text-muted);">Bulky</label>
+            <input type="number" id="cap-nvct-bulky" value="35" style="width:100%;background:#1e293b;color:var(--text-primary);border:1px solid var(--border);padding:5px 8px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.82rem;text-align:center;">
+            <input type="number" id="cap-fl-bulky" value="15" style="width:100%;background:#1e293b;color:var(--yellow);border:1px solid rgba(251,191,36,0.3);padding:5px 8px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.82rem;text-align:center;">
+
+            <label style="font-size:0.72rem;color:var(--text-muted);">Freight</label>
+            <input type="number" id="cap-nvct-freight" value="20" style="width:100%;background:#1e293b;color:var(--text-primary);border:1px solid var(--border);padding:5px 8px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.82rem;text-align:center;">
+            <input type="number" id="cap-fl-freight" value="10" style="width:100%;background:#1e293b;color:var(--yellow);border:1px solid rgba(251,191,36,0.3);padding:5px 8px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.82rem;text-align:center;">
           </div>
         </div>
 
@@ -598,10 +603,12 @@
                 <th style="text-align: center; color: var(--yellow);">FC Bulky</th>
                 <th style="text-align: center; color: var(--accent);">FC Freight</th>
                 <th style="text-align: center; font-weight: 700;">FC Tổng</th>
-                <th style="text-align: center;">Capacity Max</th>
+                <th style="text-align: center;">Cap Max</th>
                 <th style="text-align: center; color: var(--blue-light);">NS Cần</th>
-                <th style="text-align: center;">NS Hiện</th>
-                <th style="text-align: center; color: var(--accent-light);">Tăng/Giảm</th>
+                <th style="text-align: center; color: var(--text-muted);">NVCT</th>
+                <th style="text-align: center; color: var(--yellow);">FL Hiện</th>
+                <th style="text-align: center; color: var(--blue-light);">FL Cần</th>
+                <th style="text-align: center; color: var(--accent-light);">FL ±</th>
               </tr>
             </thead>
             <tbody id="cap-table-body">

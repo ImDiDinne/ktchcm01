@@ -107,30 +107,50 @@
       bulky:   800,   // đơn/người/ngày
       freight: 300    // đơn/người/ngày
     },
-    currentStaff: {
-      normal:  250,
-      bulky:   50,
-      freight: 30
+    nvct: {            // Nhân viên chính thức (fixed)
+      normal:  180,
+      bulky:   35,
+      freight: 20
+    },
+    freelancer: {      // Freelancer (flexible)
+      normal:  70,
+      bulky:   15,
+      freight: 10
     },
     bufferPercent: 10
   };
+
+  // Helper: compute total staff from nvct + freelancer
+  function totalStaff(config) {
+    return {
+      normal:  (config.nvct?.normal || 0)  + (config.freelancer?.normal || 0),
+      bulky:   (config.nvct?.bulky || 0)   + (config.freelancer?.bulky || 0),
+      freight: (config.nvct?.freight || 0) + (config.freelancer?.freight || 0)
+    };
+  }
 
   function loadConfig() {
     try {
       const stored = localStorage.getItem(LS_KEY_CONF);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Deep merge with defaults to ensure all keys exist
+        // Backward compat: old format had currentStaff, migrate to nvct+freelancer
+        const hasOldFormat = parsed.currentStaff && !parsed.nvct;
         return {
           productivity: {
             normal:  parsed.productivity?.normal  ?? DEFAULT_CONFIG.productivity.normal,
             bulky:   parsed.productivity?.bulky   ?? DEFAULT_CONFIG.productivity.bulky,
             freight: parsed.productivity?.freight ?? DEFAULT_CONFIG.productivity.freight
           },
-          currentStaff: {
-            normal:  parsed.currentStaff?.normal  ?? DEFAULT_CONFIG.currentStaff.normal,
-            bulky:   parsed.currentStaff?.bulky   ?? DEFAULT_CONFIG.currentStaff.bulky,
-            freight: parsed.currentStaff?.freight ?? DEFAULT_CONFIG.currentStaff.freight
+          nvct: {
+            normal:  parsed.nvct?.normal  ?? (hasOldFormat ? Math.round((parsed.currentStaff?.normal || 250) * 0.7) : DEFAULT_CONFIG.nvct.normal),
+            bulky:   parsed.nvct?.bulky   ?? (hasOldFormat ? Math.round((parsed.currentStaff?.bulky || 50) * 0.7) : DEFAULT_CONFIG.nvct.bulky),
+            freight: parsed.nvct?.freight ?? (hasOldFormat ? Math.round((parsed.currentStaff?.freight || 30) * 0.7) : DEFAULT_CONFIG.nvct.freight)
+          },
+          freelancer: {
+            normal:  parsed.freelancer?.normal  ?? (hasOldFormat ? Math.round((parsed.currentStaff?.normal || 250) * 0.3) : DEFAULT_CONFIG.freelancer.normal),
+            bulky:   parsed.freelancer?.bulky   ?? (hasOldFormat ? Math.round((parsed.currentStaff?.bulky || 50) * 0.3) : DEFAULT_CONFIG.freelancer.bulky),
+            freight: parsed.freelancer?.freight ?? (hasOldFormat ? Math.round((parsed.currentStaff?.freight || 30) * 0.3) : DEFAULT_CONFIG.freelancer.freight)
           },
           bufferPercent: parsed.bufferPercent ?? DEFAULT_CONFIG.bufferPercent
         };
@@ -327,11 +347,15 @@
     if (derivedProductivity.normal) cfg.productivity.normal = derivedProductivity.normal;
     if (derivedProductivity.bulky)  cfg.productivity.bulky  = derivedProductivity.bulky;
     if (derivedProductivity.freight) cfg.productivity.freight = derivedProductivity.freight;
-    // Also update staff with max seen from history
+    // Distribute max staff seen into NVCT (70%) + Freelancer (30%)
     if (derivedProductivity.maxStaff) {
-      cfg.currentStaff.normal  = derivedProductivity.maxStaff.normal;
-      cfg.currentStaff.bulky   = derivedProductivity.maxStaff.bulky;
-      cfg.currentStaff.freight = derivedProductivity.maxStaff.freight;
+      const ms = derivedProductivity.maxStaff;
+      cfg.nvct.normal      = Math.round(ms.normal * 0.7);
+      cfg.nvct.bulky       = Math.round(ms.bulky * 0.7);
+      cfg.nvct.freight     = Math.round(ms.freight * 0.7);
+      cfg.freelancer.normal  = ms.normal - cfg.nvct.normal;
+      cfg.freelancer.bulky   = ms.bulky  - cfg.nvct.bulky;
+      cfg.freelancer.freight = ms.freight - cfg.nvct.freight;
     }
     saveConfig(cfg);
   }
@@ -625,20 +649,28 @@
   function calculateCapacity(dayData, config) {
     if (!dayData || !config) return null;
 
+    const staff = totalStaff(config);
+
     const reqNormal  = Math.ceil(dayData.normal  / config.productivity.normal);
     const reqBulky   = Math.ceil(dayData.bulky   / config.productivity.bulky);
     const reqFreight = Math.ceil(dayData.freight  / config.productivity.freight);
 
     const reqSubtotal = reqNormal + reqBulky + reqFreight;
-    const requiredTotal = reqSubtotal * (1 + config.bufferPercent / 100);
+    const requiredTotal = Math.ceil(reqSubtotal * (1 + config.bufferPercent / 100));
 
-    const currentTotal = config.currentStaff.normal + config.currentStaff.bulky + config.currentStaff.freight;
+    const nvctTotal = (config.nvct?.normal || 0) + (config.nvct?.bulky || 0) + (config.nvct?.freight || 0);
+    const flTotal   = (config.freelancer?.normal || 0) + (config.freelancer?.bulky || 0) + (config.freelancer?.freight || 0);
+    const currentTotal = nvctTotal + flTotal;
 
-    const maxCapacity = (config.currentStaff.normal  * config.productivity.normal) +
-                        (config.currentStaff.bulky   * config.productivity.bulky) +
-                        (config.currentStaff.freight * config.productivity.freight);
+    const maxCapacity = (staff.normal  * config.productivity.normal) +
+                        (staff.bulky   * config.productivity.bulky) +
+                        (staff.freight * config.productivity.freight);
 
-    const delta = Math.ceil(requiredTotal) - currentTotal;
+    // Freelancer delta: how many FL needed vs current FL
+    const flNeeded = Math.max(0, requiredTotal - nvctTotal);
+    const flDelta  = flNeeded - flTotal;
+
+    const delta = requiredTotal - currentTotal;
     const gapPercent = maxCapacity > 0 ? ((dayData.total - maxCapacity) / maxCapacity) * 100 : 0;
 
     return {
@@ -648,8 +680,12 @@
       reqBulky,
       reqFreight,
       reqSubtotal,
-      requiredTotal: Math.ceil(requiredTotal),
+      requiredTotal,
       currentTotal,
+      nvctTotal,
+      flTotal,
+      flNeeded,
+      flDelta,
       maxCapacity,
       delta,
       gapPercent
@@ -771,9 +807,12 @@
       if (el) el.value = value;
     };
 
-    setInput('cap-staff-normal',  config.currentStaff.normal);
-    setInput('cap-staff-bulky',   config.currentStaff.bulky);
-    setInput('cap-staff-freight', config.currentStaff.freight);
+    setInput('cap-nvct-normal',  config.nvct.normal);
+    setInput('cap-nvct-bulky',   config.nvct.bulky);
+    setInput('cap-nvct-freight', config.nvct.freight);
+    setInput('cap-fl-normal',    config.freelancer.normal);
+    setInput('cap-fl-bulky',     config.freelancer.bulky);
+    setInput('cap-fl-freight',   config.freelancer.freight);
   }
 
   // ─── Render: KPIs ────────────────────────────────
@@ -794,7 +833,11 @@
     if (elCapMax) elCapMax.textContent = formatNumber(todayCalc.maxCapacity);
 
     const elCapSub = document.getElementById('cap-kpi-sub-max');
-    if (elCapSub) elCapSub.textContent = `${config.currentStaff.normal + config.currentStaff.bulky + config.currentStaff.freight} nhân sự hiện tại`;
+    if (elCapSub) {
+      const staff = totalStaff(config);
+      const t = staff.normal + staff.bulky + staff.freight;
+      elCapSub.textContent = `${t} NS (NVCT:${config.nvct.normal+config.nvct.bulky+config.nvct.freight} + FL:${config.freelancer.normal+config.freelancer.bulky+config.freelancer.freight})`;
+    }
 
     // Staff Needed
     const elStaff = document.getElementById('cap-kpi-staff-needed');
@@ -814,11 +857,11 @@
 
     const elGapSub = document.getElementById('cap-kpi-sub-gap');
     if (elGapSub) {
-      if (todayCalc.delta > 0) {
-        elGapSub.textContent = `Thiếu ${todayCalc.delta} người — cần tuyển thêm`;
+      if (todayCalc.flDelta > 0) {
+        elGapSub.textContent = `Cần thêm ${todayCalc.flDelta} Freelancer`;
         elGapSub.style.color = 'var(--red)';
-      } else if (todayCalc.delta < 0) {
-        elGapSub.textContent = `Dư ${Math.abs(todayCalc.delta)} người — có thể giảm tải`;
+      } else if (todayCalc.flDelta < 0) {
+        elGapSub.textContent = `Dư ${Math.abs(todayCalc.flDelta)} Freelancer — có thể giảm`;
         elGapSub.style.color = 'var(--green)';
       } else {
         elGapSub.textContent = 'Cân bằng — đủ nhân sự';
@@ -907,8 +950,8 @@
                            `  Freight: ${formatNumber(calc.fc.freight)}\n` +
                            `────────────────────\n` +
                            `Capacity Max: ${formatNumber(calc.maxCapacity)}\n` +
-                           `NS Cần: ${calc.requiredTotal} người\n` +
-                           `Tăng/Giảm: ${calc.delta > 0 ? '+' : ''}${calc.delta} người\n` +
+                           `NS Cần: ${calc.requiredTotal} (NVCT:${calc.nvctTotal} + FL cần:${calc.flNeeded})\n` +
+                           `FL hiện: ${calc.flTotal} | FL tăng/giảm: ${calc.flDelta > 0 ? '+' : ''}${calc.flDelta}\n` +
                            `Gap: ${calc.gapPercent > 0 ? '+' : ''}${calc.gapPercent.toFixed(1)}%`;
 
       wrapper.title = tooltipText;
@@ -1002,12 +1045,12 @@
       const dayName     = getDayOfWeek(calc.date);
       const weekendFlag = isWeekend(calc.date);
 
-      // Delta badge
+      // FL Delta badge
       let deltaBadge;
-      if (calc.delta > 0) {
-        deltaBadge = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-weight:700; font-family:'JetBrains Mono',monospace; background:rgba(248,113,113,0.15); color:var(--red); border:1px solid rgba(248,113,113,0.3);">+${calc.delta}</span>`;
-      } else if (calc.delta < 0) {
-        deltaBadge = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-weight:700; font-family:'JetBrains Mono',monospace; background:rgba(52,211,153,0.15); color:var(--green); border:1px solid rgba(52,211,153,0.3);">${calc.delta}</span>`;
+      if (calc.flDelta > 0) {
+        deltaBadge = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-weight:700; font-family:'JetBrains Mono',monospace; background:rgba(248,113,113,0.15); color:var(--red); border:1px solid rgba(248,113,113,0.3);">+${calc.flDelta}</span>`;
+      } else if (calc.flDelta < 0) {
+        deltaBadge = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-weight:700; font-family:'JetBrains Mono',monospace; background:rgba(52,211,153,0.15); color:var(--green); border:1px solid rgba(52,211,153,0.3);">${calc.flDelta}</span>`;
       } else {
         deltaBadge = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-weight:700; font-family:'JetBrains Mono',monospace; background:rgba(96,165,250,0.1); color:var(--blue); border:1px solid rgba(96,165,250,0.2);">0</span>`;
       }
@@ -1035,7 +1078,9 @@
         <td style="${rightCell} ${totalStyle}">${formatNumber(calc.fc.total)}</td>
         <td style="${rightCell} ${monoStyle} color:var(--green);">${formatNumber(calc.maxCapacity)}</td>
         <td style="${centerCell} ${monoStyle} font-weight:700; color:var(--text-primary);">${calc.requiredTotal}</td>
-        <td style="${centerCell} ${monoStyle} color:var(--text-secondary);">${calc.currentTotal}</td>
+        <td style="${centerCell} ${monoStyle} color:var(--text-muted);">${calc.nvctTotal}</td>
+        <td style="${centerCell} ${monoStyle} color:var(--yellow);">${calc.flTotal}</td>
+        <td style="${centerCell} ${monoStyle} font-weight:600; color:var(--blue-light);">${calc.flNeeded}</td>
         <td style="${centerCell}">${deltaBadge}</td>
       `;
 
@@ -1214,21 +1259,42 @@
       }
     });
 
-    // ── Staff number inputs ──
-    const staffInputs = [
-      { id: 'cap-staff-normal',  key: 'normal' },
-      { id: 'cap-staff-bulky',   key: 'bulky' },
-      { id: 'cap-staff-freight', key: 'freight' }
+    // ── NVCT number inputs ──
+    const nvctInputs = [
+      { id: 'cap-nvct-normal',  key: 'normal' },
+      { id: 'cap-nvct-bulky',   key: 'bulky' },
+      { id: 'cap-nvct-freight', key: 'freight' }
     ];
 
-    staffInputs.forEach(({ id, key }) => {
+    nvctInputs.forEach(({ id, key }) => {
       const input = document.getElementById(id);
       if (input) {
         input.addEventListener('change', (e) => {
           const val = parseInt(e.target.value, 10);
           if (isNaN(val) || val < 0) return;
           const cfg = loadConfig();
-          cfg.currentStaff[key] = val;
+          cfg.nvct[key] = val;
+          saveConfig(cfg);
+          renderCapacityDashboard();
+        });
+      }
+    });
+
+    // ── Freelancer number inputs ──
+    const flInputs = [
+      { id: 'cap-fl-normal',  key: 'normal' },
+      { id: 'cap-fl-bulky',   key: 'bulky' },
+      { id: 'cap-fl-freight', key: 'freight' }
+    ];
+
+    flInputs.forEach(({ id, key }) => {
+      const input = document.getElementById(id);
+      if (input) {
+        input.addEventListener('change', (e) => {
+          const val = parseInt(e.target.value, 10);
+          if (isNaN(val) || val < 0) return;
+          const cfg = loadConfig();
+          cfg.freelancer[key] = val;
           saveConfig(cfg);
           renderCapacityDashboard();
         });
