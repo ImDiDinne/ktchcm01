@@ -527,7 +527,9 @@
 
       <!-- Chart Section -->
       <div class="content-grid">
-        <!-- Left: FC vs Capacity Chart -->
+        <!-- Left Column: Chart & Staffing Detail Table -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Left: FC vs Capacity Chart -->
         <div class="table-card animate-in delay-2" style="flex: 2;">
           <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
             <div class="card-title">Biểu Đồ FC vs Khả Năng Xử Lý Theo Ngày</div>
@@ -549,30 +551,9 @@
             <div class="flow-chart-container" id="cap-chart-container" style="height: 280px; align-items: flex-end; padding-bottom: 45px; position: relative;"></div>
           </div>
         </div>
-
-        <!-- Right: AI Advisory + Derived Productivity -->
-        <div class="side-panel">
-          <!-- Derived Productivity Panel -->
-          <div class="chart-card animate-in delay-2" style="display: flex; flex-direction: column; gap: 8px;">
-            <div class="card-title">🧮 Năng Suất Tự Tính (Từ Actual)</div>
-            <div id="cap-derived-panel"></div>
-          </div>
-          <!-- AI Advisory -->
-          <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; margin-bottom: 4px;">
-              <div class="card-title" style="margin: 0; padding: 0; border: none;">Khuyến Nghị Nhân Sự (AI Advisory)</div>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 0.65rem; color: var(--text-muted);">Xem ngày:</span>
-                <select id="cap-advisory-date-select" style="background: rgba(30, 41, 59, 0.8); color: var(--text-primary); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; outline: none; font-family: 'JetBrains Mono', monospace; font-weight: 600;"></select>
-              </div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 8px;" id="cap-advisory-list"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Staffing Detail Table -->
-      <div class="table-card animate-in delay-4" style="margin-top: 16px;">
+          
+          <!-- Staffing Detail Table -->
+      <div class="table-card animate-in delay-4" style="margin-top: 0;">
         <div class="card-header">
           <div class="card-title">Bảng Chi Tiết Nhân Sự Cần Thiết Theo Ngày</div>
         </div>
@@ -600,6 +581,29 @@
           </table>
         </div>
       </div>
+        </div>
+        <!-- Right: AI Advisory + Derived Productivity -->
+        <div class="side-panel">
+          <!-- Derived Productivity Panel -->
+          <div class="chart-card animate-in delay-2" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="card-title">🧮 Năng Suất Tự Tính (Từ Actual)</div>
+            <div id="cap-derived-panel"></div>
+          </div>
+          <!-- AI Advisory -->
+          <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; margin-bottom: 4px;">
+              <div class="card-title" style="margin: 0; padding: 0; border: none;">Khuyến Nghị Nhân Sự (AI Advisory)</div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.65rem; color: var(--text-muted);">Xem ngày:</span>
+                <select id="cap-advisory-date-select" style="background: rgba(30, 41, 59, 0.8); color: var(--text-primary); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; outline: none; font-family: 'JetBrains Mono', monospace; font-weight: 600;"></select>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;" id="cap-advisory-list"></div>
+          </div>
+        </div>
+      </div>
+
+      
     </div>
 
     <!-- Paste FC Data Modal -->
