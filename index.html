@@ -15,7 +15,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://script.google.com https://script.googleusercontent.com https://api.github.com https://imdidinne.github.io https://raw.githubusercontent.com https://docs.google.com; img-src 'self' data: blob:;">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css?v=1.0.4">
+  <link rel="stylesheet" href="style.css?v=1.0.5">
 </head>
 <body>
   <div class="dashboard" id="dashboard">
@@ -488,72 +488,92 @@
         </div>
       </div>
 
-      <!-- Configuration Panel -->
-      <div style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px; flex-wrap: wrap;">
-        <!-- Card A: Nhân Sự Hiện Có -->
-        <div class="chart-card" style="flex: 1; min-width: 280px;">
-          <div class="card-title">Nhân Sự Hiện Có</div>
-          <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
-            <div style="flex:1;">
-              <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:4px;text-align:center;font-weight:600;">NVCT (Chính thức)</div>
-              <input type="number" id="cap-nvct-total" value="235" style="width:100%;background:#1e293b;color:var(--text-primary);border:1px solid var(--border);padding:10px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;">
+      <!-- Chart Section & Side Controls -->
+      <div class="content-grid">
+        <!-- Left Column: Chart & AI Advisory -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Left: FC vs Capacity Chart -->
+          <div class="table-card animate-in delay-2">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+              <div class="card-title">Biểu Đồ FC vs Khả Năng Xử Lý Theo Ngày</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 12px;">
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--blue); display: inline-block; border-radius: 2px;"></span> &lt;5kg</span>
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--yellow); display: inline-block; border-radius: 2px;"></span> 5-15kg</span>
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent); display: inline-block; border-radius: 2px;"></span> &gt;15kg</span>
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 2px; background: var(--green); display: inline-block;"></span> Capacity Max</span>
+              </div>
             </div>
-            <div style="font-size:1.2rem;color:var(--text-muted);font-weight:700;padding-top:16px;">+</div>
-            <div style="flex:1;">
-              <div style="font-size:0.62rem;color:var(--yellow);margin-bottom:4px;text-align:center;font-weight:600;">Freelancer</div>
-              <input type="number" id="cap-fl-total" value="95" style="width:100%;background:#1e293b;color:var(--yellow);border:1px solid rgba(251,191,36,0.3);padding:10px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;">
+            <div style="padding: 8px 20px;">
+              <div class="cap-chart-nav">
+                <button id="cap-chart-prev">◀</button>
+                <span class="cap-date-range-text" id="cap-date-range-display">—</span>
+                <button id="cap-chart-next">▶</button>
+              </div>
+            </div>
+            <div style="padding: 0 20px 20px;">
+              <div class="flow-chart-container" id="cap-chart-container" style="height: 280px; align-items: flex-end; padding-bottom: 45px; position: relative;"></div>
             </div>
           </div>
-          <div style="font-size:0.68rem;color:var(--text-muted);text-align:center;font-family:'JetBrains Mono',monospace;">
-            Kho vận hành chung — không chia theo nhóm hàng
+          
+          <!-- AI Advisory -->
+          <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; margin-bottom: 4px;">
+              <div class="card-title" style="margin: 0; padding: 0; border: none;">Khuyến Nghị Nhân Sự & Phân Tích Định Mức (AI Advisory)</div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.65rem; color: var(--text-muted);">Xem ngày:</span>
+                <select id="cap-advisory-date-select" style="background: rgba(30, 41, 59, 0.8); color: var(--text-primary); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; outline: none; font-family: 'JetBrains Mono', monospace; font-weight: 600;"></select>
+              </div>
+            </div>
+            <div class="advisory-grid-container" id="cap-advisory-list"></div>
           </div>
         </div>
 
-        <!-- Card B: Buffer & Data Controls -->
-        <div class="chart-card" style="flex: 1; min-width: 260px;">
-          <div class="card-title">Buffer &amp; Data Controls</div>
-          <div class="cap-config-row">
-            <label>Buffer (%)</label>
-            <input type="range" id="cap-buffer" min="0" max="30" step="1" value="10">
-            <span class="cap-config-val" id="cap-buffer-val">10%</span>
+        <!-- Right: Configurations & Derived Productivity -->
+        <div class="side-panel">
+          <!-- Card A: Nhân Sự Hiện Có -->
+          <div class="chart-card">
+            <div class="card-title">Nhân Sự Hiện Có</div>
+            <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
+              <div style="flex:1;">
+                <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:4px;text-align:center;font-weight:600;">NVCT (Chính thức)</div>
+                <input type="number" id="cap-nvct-total" value="235" style="width:100%;background:#1e293b;color:var(--text-primary);border:1px solid var(--border);padding:10px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;">
+              </div>
+              <div style="font-size:1.2rem;color:var(--text-muted);font-weight:700;padding-top:16px;">+</div>
+              <div style="flex:1;">
+                <div style="font-size:0.62rem;color:var(--yellow);margin-bottom:4px;text-align:center;font-weight:600;">Freelancer</div>
+                <input type="number" id="cap-fl-total" value="95" style="width:100%;background:#1e293b;color:var(--yellow);border:1px solid rgba(251,191,36,0.3);padding:10px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;">
+              </div>
+            </div>
+            <div style="font-size:0.68rem;color:var(--text-muted);text-align:center;font-family:'JetBrains Mono',monospace;">
+              Kho vận hành chung — không chia theo nhóm hàng
+            </div>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
-            <button class="filter-btn" id="cap-btn-paste-actual" style="border-color: var(--yellow); color: var(--yellow); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📊 Dán Actual Data</button>
-            <button class="filter-btn" id="cap-btn-paste" style="border-color: var(--green); color: var(--green); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📋 Dán Dữ Liệu FC</button>
-            <button class="filter-btn" id="cap-btn-refresh" style="border-color: var(--accent); color: var(--accent-light); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">🔄 Tải FC Từ Sheet</button>
+
+          <!-- Card B: Buffer & Data Controls -->
+          <div class="chart-card">
+            <div class="card-title">Buffer &amp; Data Controls</div>
+            <div class="cap-config-row">
+              <label>Buffer (%)</label>
+              <input type="range" id="cap-buffer" min="0" max="30" step="1" value="10">
+              <span class="cap-config-val" id="cap-buffer-val">10%</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+              <button class="filter-btn" id="cap-btn-paste-actual" style="border-color: var(--yellow); color: var(--yellow); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📊 Dán Actual Data</button>
+              <button class="filter-btn" id="cap-btn-paste" style="border-color: var(--green); color: var(--green); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📋 Dán Dữ Liệu FC</button>
+              <button class="filter-btn" id="cap-btn-refresh" style="border-color: var(--accent); color: var(--accent-light); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">🔄 Tải FC Từ Sheet</button>
+            </div>
+          </div>
+
+          <!-- Derived Productivity Panel -->
+          <div class="chart-card animate-in delay-2" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="card-title">🧮 Năng Suất Tự Tính (Từ Actual)</div>
+            <div id="cap-derived-panel"></div>
           </div>
         </div>
       </div>
 
-      <!-- Chart Section -->
-      <div class="content-grid">
-        <!-- Left Column: Chart & Staffing Detail Table -->
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <!-- Left: FC vs Capacity Chart -->
-        <div class="table-card animate-in delay-2" style="flex: 2;">
-          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
-            <div class="card-title">Biểu Đồ FC vs Khả Năng Xử Lý Theo Ngày</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 12px;">
-              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--blue); display: inline-block; border-radius: 2px;"></span> &lt;5kg</span>
-              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--yellow); display: inline-block; border-radius: 2px;"></span> 5-15kg</span>
-              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent); display: inline-block; border-radius: 2px;"></span> &gt;15kg</span>
-              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 2px; background: var(--green); display: inline-block;"></span> Capacity Max</span>
-            </div>
-          </div>
-          <div style="padding: 8px 20px;">
-            <div class="cap-chart-nav">
-              <button id="cap-chart-prev">◀</button>
-              <span class="cap-date-range-text" id="cap-date-range-display">—</span>
-              <button id="cap-chart-next">▶</button>
-            </div>
-          </div>
-          <div style="padding: 0 20px 20px;">
-            <div class="flow-chart-container" id="cap-chart-container" style="height: 280px; align-items: flex-end; padding-bottom: 45px; position: relative;"></div>
-          </div>
-        </div>
-          
-          <!-- Staffing Detail Table -->
-      <div class="table-card animate-in delay-4" style="margin-top: 0;">
+      <!-- Staffing Detail Table -->
+      <div class="table-card animate-in delay-4" style="margin-top: 16px;">
         <div class="card-header">
           <div class="card-title">Bảng Chi Tiết Nhân Sự Cần Thiết Theo Ngày</div>
         </div>
@@ -579,27 +599,6 @@
               <!-- Rendered dynamically -->
             </tbody>
           </table>
-        </div>
-      </div>
-        </div>
-        <!-- Right: AI Advisory + Derived Productivity -->
-        <div class="side-panel">
-          <!-- Derived Productivity Panel -->
-          <div class="chart-card animate-in delay-2" style="display: flex; flex-direction: column; gap: 8px;">
-            <div class="card-title">🧮 Năng Suất Tự Tính (Từ Actual)</div>
-            <div id="cap-derived-panel"></div>
-          </div>
-          <!-- AI Advisory -->
-          <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; margin-bottom: 4px;">
-              <div class="card-title" style="margin: 0; padding: 0; border: none;">Khuyến Nghị Nhân Sự (AI Advisory)</div>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 0.65rem; color: var(--text-muted);">Xem ngày:</span>
-                <select id="cap-advisory-date-select" style="background: rgba(30, 41, 59, 0.8); color: var(--text-primary); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; outline: none; font-family: 'JetBrains Mono', monospace; font-weight: 600;"></select>
-              </div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 8px;" id="cap-advisory-list"></div>
-          </div>
         </div>
       </div>
 
@@ -653,7 +652,7 @@
   <script src="js/inventory.js"></script>
   <script src="js/inbound.js"></script>
   <script src="js/prediction.js"></script>
-  <script src="js/capacity.js?v=1.0.4"></script>
+  <script src="js/capacity.js?v=1.0.5"></script>
   <script src="js/app.js"></script>
 
   <!-- Login Overlay (Modal) -->

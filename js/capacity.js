@@ -1340,67 +1340,72 @@
       }
 
       let customHtml = `
-        <div class="kpi-card dock-advisory-card" style="padding: 16px; border-left: 4px solid var(--blue) !important; display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.45); border-radius: var(--radius-lg); margin-bottom: 8px;">
+        <div class="kpi-card dock-advisory-card daily-analysis-card" style="padding: 16px; border-left: 4px solid var(--blue) !important; display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.45); border-radius: var(--radius-lg); margin-bottom: 8px;">
           <!-- Header -->
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px; margin-bottom: 4px;">
             <span style="font-weight: 700; font-size: 0.78rem; color: var(--blue-light);">📊 PHÂN TÍCH ĐỊNH MỨC NGÀY ${todayCalc.date}</span>
             <span style="font-size: 0.65rem; font-weight: 600; padding: 2px 6px; border-radius: 12px; background: rgba(96, 165, 250, 0.12); color: var(--blue-light);">Forecast N</span>
           </div>
           
-          <!-- Vol FC chia theo nhóm hàng -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <div style="font-weight: 600; font-size: 0.74rem; color: var(--text-primary); display: flex; justify-content: space-between;">
-              <span>📦 Sản lượng Forecast (FC Tổng):</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-primary);">${formatNumber(todayCalc.fc.total)} đơn</span>
+          <!-- Body Grid -->
+          <div class="advisory-body-grid">
+            <!-- Column 1: Forecast Volume -->
+            <div class="advisory-col">
+              <div style="font-weight: 600; font-size: 0.74rem; color: var(--text-primary); display: flex; justify-content: space-between;">
+                <span>📦 Forecast (FC Tổng):</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-primary);">${formatNumber(todayCalc.fc.total)} đơn</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+                <div style="background: rgba(96, 165, 250, 0.04); border: 1px solid rgba(96, 165, 250, 0.12); padding: 5px 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">Normal (&lt;5kg)</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: #60a5fa;">${formatNumber(todayCalc.fc.normal)}</span>
+                </div>
+                <div style="background: rgba(251, 146, 60, 0.04); border: 1px solid rgba(251, 146, 60, 0.12); padding: 5px 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">Bulky (5-15kg)</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: #fbbf24;">${formatNumber(todayCalc.fc.bulky)}</span>
+                </div>
+                <div style="background: rgba(251, 146, 60, 0.04); border: 1px solid rgba(251, 146, 60, 0.12); padding: 5px 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">Freight (&gt;15kg)</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: #fb923c;">${formatNumber(todayCalc.fc.freight)}</span>
+                </div>
+              </div>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 4px;">
-              <div style="background: rgba(96, 165, 250, 0.04); border: 1px solid rgba(96, 165, 250, 0.12); padding: 4px 6px; border-radius: 6px; text-align: center;">
-                <div style="font-size: 0.6rem; color: var(--text-muted);">Normal (&lt;5kg)</div>
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #60a5fa; margin-top: 2px;">${formatNumber(todayCalc.fc.normal)}</div>
-              </div>
-              <div style="background: rgba(251, 146, 60, 0.04); border: 1px solid rgba(251, 146, 60, 0.12); padding: 4px 6px; border-radius: 6px; text-align: center;">
-                <div style="font-size: 0.6rem; color: var(--text-muted);">Bulky (5-15kg)</div>
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #fbbf24; margin-top: 2px;">${formatNumber(todayCalc.fc.bulky)}</div>
-              </div>
-              <div style="background: rgba(251, 146, 60, 0.04); border: 1px solid rgba(251, 146, 60, 0.12); padding: 4px 6px; border-radius: 6px; text-align: center;">
-                <div style="font-size: 0.6rem; color: var(--text-muted);">Freight (&gt;15kg)</div>
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #fb923c; margin-top: 2px;">${formatNumber(todayCalc.fc.freight)}</div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Nhu cầu nhân sự -->
-          <div style="display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary);">
-              <span>👥 Tổng nhân sự cần (gồm ${config.bufferPercent}% buffer):</span>
-              <strong style="font-family: 'JetBrains Mono', monospace; color: var(--text-primary);">${todayCalc.requiredTotal} người</strong>
+            <!-- Column 2: Staffing Needs -->
+            <div class="advisory-col">
+              <div style="font-weight: 600; font-size: 0.74rem; color: var(--text-primary); display: flex; justify-content: space-between;">
+                <span>👥 Phân Bố Nhân Sự:</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-primary);">${todayCalc.requiredTotal} người</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary);">
+                  <span>👔 NVCT (Ngày N-1):</span>
+                  <strong style="font-family: 'JetBrains Mono', monospace; color: var(--green);">${todayCalc.nvctTotal} người</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary); align-items: center;">
+                  <span>🧡 Freelancer cần:</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(52, 211, 153, 0.12)'}; color: ${todayCalc.flNeeded > 0 ? 'var(--red)' : 'var(--green)'}; border: 1px solid ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(52, 211, 153, 0.2)'};">${todayCalc.flNeeded} người</span>
+                </div>
+                <div style="padding: 4px 8px; color: var(--text-muted); line-height: 1.4; font-size: 0.65rem; display: flex; flex-direction: column; gap: 2px; background: rgba(255, 255, 255, 0.02); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
+                  <span style="display:flex; justify-content:space-between;">• Normal (&lt;5kg): <strong style="color: #60a5fa;">${requiredN} ng</strong> <span style="font-size:0.58rem; color:var(--text-muted);">(~${formatNumber(Math.round(pN_use))}/ng)</span></span>
+                  <span style="display:flex; justify-content:space-between;">• Bulky (5-15kg): <strong style="color: #fbbf24;">${requiredB} ng</strong> <span style="font-size:0.58rem; color:var(--text-muted);">(~${formatNumber(Math.round(pB_use))}/ng)</span></span>
+                  <span style="display:flex; justify-content:space-between;">• Freight (&gt;15kg): <strong style="color: #fb923c;">${requiredF} ng</strong> <span style="font-size:0.58rem; color:var(--text-muted);">(~${formatNumber(Math.round(pF_use))}/ng)</span></span>
+                </div>
+              </div>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary);">
-              <span>👔 Số NVCT (lấy từ ngày N-1):</span>
-              <strong style="font-family: 'JetBrains Mono', monospace; color: var(--green);">${todayCalc.nvctTotal} người</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); align-items: center;">
-              <span>🧡 Số Freelancer cần bổ sung:</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(52, 211, 153, 0.12)'}; color: ${todayCalc.flNeeded > 0 ? 'var(--red)' : 'var(--green)'}; border: 1px solid ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(52, 211, 153, 0.2)'};">${todayCalc.flNeeded} người</span>
-            </div>
-          </div>
 
-          <!-- Note/Closest actual day info -->
-          ${todayCalc.closestActual ? `
-          <div style="font-size: 0.65rem; color: var(--text-muted); background: rgba(255, 255, 255, 0.02); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-            📌 <strong>Đối chiếu Actual:</strong> So sánh với ngày lịch sử <strong>${todayCalc.closestActual.date}</strong> có sản lượng <strong>${formatNumber(todayCalc.closestActual.volTotal)} đơn</strong> Nhận Kiện (sử dụng <strong>${todayCalc.closestActual.staffTotal} nhân sự</strong>).
-          </div>
-          ` : ''}
-          
-          <!-- Nhận xét chi tiết bằng chữ -->
-          <div style="font-size: 0.7rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; display: flex; flex-direction: column; gap: 4px;">
-            <div>💡 <strong>Nhận xét:</strong> Để đáp ứng sản lượng forecast ngày <strong>${todayCalc.date}</strong> với tổng <strong>${formatNumber(todayCalc.fc.total)} đơn</strong> (gồm <strong>${formatNumber(todayCalc.fc.normal)} Normal</strong>, <strong>${formatNumber(todayCalc.fc.bulky)} Bulky</strong>, <strong>${formatNumber(todayCalc.fc.freight)} Freight</strong>), kho cần bố trí hoạt động tổng cộng <strong>${todayCalc.requiredTotal} nhân sự</strong>.</div>
-            <div style="padding: 6px 12px; color: var(--text-muted); line-height: 1.4; font-size: 0.68rem; display: flex; flex-direction: column; gap: 2px; background: rgba(255, 255, 255, 0.02); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04); margin: 2px 0;">
-              <span style="display:flex; justify-content:space-between;">• Normal (&lt;5kg): <strong style="color: #60a5fa;">${requiredN} người</strong> <span style="font-size:0.62rem; color:var(--text-muted);">(NS: ~${formatNumber(Math.round(pN_use))} đơn/ng)</span></span>
-              <span style="display:flex; justify-content:space-between;">• Bulky (5-15kg): <strong style="color: #fbbf24;">${requiredB} người</strong> <span style="font-size:0.62rem; color:var(--text-muted);">(NS: ~${formatNumber(Math.round(pB_use))} đơn/ng)</span></span>
-              <span style="display:flex; justify-content:space-between;">• Freight (&gt;15kg): <strong style="color: #fb923c;">${requiredF} người</strong> <span style="font-size:0.62rem; color:var(--text-muted);">(NS: ~${formatNumber(Math.round(pF_use))} đơn/ng)</span></span>
+            <!-- Column 3: AI Commentary & Actual Match -->
+            <div class="advisory-col">
+              <div style="font-weight: 600; font-size: 0.74rem; color: var(--text-primary);">💡 Nhận Xét & Đối Chiếu AI</div>
+              <div style="font-size: 0.68rem; color: var(--text-secondary); line-height: 1.45; display: flex; flex-direction: column; gap: 6px;">
+                <div>Để đáp ứng forecast ngày <strong>${todayCalc.date}</strong> với <strong>${formatNumber(todayCalc.fc.total)} đơn</strong>, kho cần <strong>${todayCalc.requiredTotal} nhân sự</strong> (gồm <strong>${config.bufferPercent}% buffer</strong>). Cần thêm <strong>${todayCalc.flNeeded} Freelancer</strong> so với NVCT N-1.</div>
+                ${todayCalc.closestActual ? `
+                <div style="font-size: 0.62rem; color: var(--text-muted); background: rgba(255, 255, 255, 0.02); padding: 5px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04); line-height: 1.3;">
+                  📌 <strong>So khớp Actual:</strong> Ngày <strong>${todayCalc.closestActual.date}</strong> (Vol: <strong>${formatNumber(todayCalc.closestActual.volTotal)} đơn</strong>, NS: <strong>${todayCalc.closestActual.staffTotal} người</strong>).
+                </div>
+                ` : ''}
+              </div>
             </div>
-            <div style="margin-top: 2px;">Với lực lượng NVCT hoạt động từ ngày hôm trước (N-1) là <strong>${todayCalc.nvctTotal} người</strong>, kho cần bổ sung thêm <strong>${todayCalc.flNeeded} Freelancer</strong> để đảm bảo vận hành ổn định.</div>
           </div>
         </div>
       `;
