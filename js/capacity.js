@@ -713,35 +713,77 @@
   }
 
   // ─── Core Calculations ────────────────────────────
-  // Uses unified staff (nvct + freelancer as single numbers)
-  // Productivity comes from derivedProductivity (auto-calculated from actual data)
+  function getNVCTForDate(dateStr, defaultNVCT) {
+    const d = parseDate(dateStr);
+    if (!d) return defaultNVCT;
+    
+    // Get N-1 date string (DD/MM/YYYY)
+    const prevDate = new Date(d.getTime() - 24 * 60 * 60 * 1000);
+    const prevDateStr = `${String(prevDate.getDate()).padStart(2, '0')}/${String(prevDate.getMonth() + 1).padStart(2, '0')}/${prevDate.getFullYear()}`;
+    
+    const prevActual = actualHistory.find(x => x.date === prevDateStr);
+    if (prevActual && prevActual.nvct > 0) {
+      return prevActual.nvct;
+    }
+    
+    // Fallback to the latest actual day with NVCT > 0 in actualHistory
+    const validActuals = actualHistory.filter(x => x.nvct > 0);
+    if (validActuals.length > 0) {
+      const sorted = [...validActuals].sort((a, b) => parseDate(b.date) - parseDate(a.date));
+      return sorted[0].nvct;
+    }
+    
+    return defaultNVCT;
+  }
+
+  function findClosestActualDay(fcTotal) {
+    if (actualHistory.length === 0) return null;
+    let closestDay = null;
+    let minDiff = Infinity;
+    actualHistory.forEach(d => {
+      if (d.volTotal > 0 && d.staffTotal > 0) {
+        const diff = Math.abs(d.volTotal - fcTotal);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestDay = d;
+        }
+      }
+    });
+    return closestDay;
+  }
+
   function calculateCapacity(dayData, config) {
     if (!dayData || !config) return null;
 
-    const nvct = config.nvct || 0;
+    const nvct = getNVCTForDate(dayData.date, config.nvct || 0);
     const fl   = config.freelancer || 0;
     const currentTotal = nvct + fl;
 
-    // Get peak productivities from derived data
-    const pN = derivedProductivity?.peakNormal?.productivity || 0;
-    const pB = derivedProductivity?.peakBulky?.productivity || 0;
-    const pF = derivedProductivity?.peakFreight?.productivity || 0;
-
-    // Required staff per group based on their respective peak day productivities
-    const staffN = pN > 0 ? dayData.normal / pN : 0;
-    const staffB = pB > 0 ? dayData.bulky / pB : 0;
-    const staffF = pF > 0 ? dayData.freight / pF : 0;
-
-    const requiredRaw = staffN + staffB + staffF;
-    const requiredTotal = Math.ceil(requiredRaw * (1 + config.bufferPercent / 100));
-
-    // The mixed productivity for this day's FC volume distribution (packages/person/shift)
-    const pMix = requiredRaw > 0 ? dayData.total / requiredRaw : 0;
+    // Find the closest volume day in actual history to today's FC total
+    const closestDay = findClosestActualDay(dayData.total);
     
-    // Max capacity (in packages) based on current staffing
+    let requiredRaw = 0;
+    let pMix = 0;
+
+    if (closestDay) {
+      // Scale closest day's staff by forecast ratio
+      requiredRaw = closestDay.staffTotal * (dayData.total / closestDay.volTotal);
+      pMix = dayData.total / requiredRaw;
+    } else {
+      // Fallback if no actual data is loaded yet
+      const pN = derivedProductivity?.peakNormal?.productivity || 0;
+      const pB = derivedProductivity?.peakBulky?.productivity || 0;
+      const pF = derivedProductivity?.peakFreight?.productivity || 0;
+      const staffN = pN > 0 ? dayData.normal / pN : 0;
+      const staffB = pB > 0 ? dayData.bulky / pB : 0;
+      const staffF = pF > 0 ? dayData.freight / pF : 0;
+      requiredRaw = staffN + staffB + staffF;
+      pMix = requiredRaw > 0 ? dayData.total / requiredRaw : 0;
+    }
+
+    const requiredTotal = Math.ceil(requiredRaw * (1 + config.bufferPercent / 100));
     const maxCapacity = Math.round(currentTotal * pMix);
 
-    // Freelancer delta
     const flNeeded = Math.max(0, requiredTotal - nvct);
     const flDelta  = flNeeded - fl;
 
@@ -760,7 +802,12 @@
       maxCapacity,
       delta,
       gapPercent,
-      productivity:  pMix // Display productivity in packages/person/shift
+      productivity:  pMix,
+      closestActual: closestDay ? {
+        date: closestDay.date,
+        volTotal: closestDay.volTotal,
+        staffTotal: closestDay.staffTotal
+      } : null
     };
   }
 
@@ -912,9 +959,11 @@
 
     const elCapSub = document.getElementById('cap-kpi-sub-max');
     if (elCapSub) {
-      const t = config.nvct + config.freelancer;
+      const nvctVal = todayCalc.nvctTotal;
+      const flVal   = todayCalc.flTotal;
+      const t = nvctVal + flVal;
       const formattedProd = todayCalc.productivity ? todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 1}) : '—';
-      elCapSub.textContent = `${t} NS (NVCT:${config.nvct} + FL:${config.freelancer}) × ${todayCalc.productivity ? formattedProd + ' đơn/người/ca' : 'chưa có NS'}`;
+      elCapSub.textContent = `${t} NS (NVCT:${nvctVal} + FL:${flVal}) × ${todayCalc.productivity ? formattedProd + ' đơn/người/ca' : 'chưa có NS'}`;
     }
 
     // Staff Needed
@@ -1127,6 +1176,11 @@
       }
 
       const tr = document.createElement('tr');
+      if (calc.closestActual) {
+        tr.title = `Tính dựa trên ngày thực tế ${calc.closestActual.date}\n` +
+                   `Sản lượng: ${formatNumber(calc.closestActual.volTotal)} đơn\n` +
+                   `Nhân sự thực tế ngày đó: ${calc.closestActual.staffTotal} người`;
+      }
       if (isToday) {
         tr.id = 'cap-row-today';
         tr.style.background = 'rgba(52, 211, 153, 0.15)';
@@ -1193,25 +1247,29 @@
         const avgFCVol = allCalc.reduce((sum, c) => sum + c.fc.total, 0) / allCalc.length;
         const avgFCStaffNeeded = allCalc.reduce((sum, c) => sum + c.requiredTotal, 0) / allCalc.length;
 
-        let comparisonMsg = `Hệ thống phân tích nhu cầu nhân sự dựa trên <strong>năng suất tại ngày xử lý đỉnh điểm (Peak Day)</strong> của từng nhóm hàng trong quá khứ:<br><br>`;
+        let comparisonMsg = `Hệ thống phân tích nhu cầu nhân sự dựa trên <strong>số lượng thực tế (Actual) của ngày có sản lượng gần khớp nhất</strong> trong lịch sử:<br><br>`;
         
+        comparisonMsg += `• <strong>Số NVCT ngày N:</strong> Được xác định dựa trên số NVCT thực tế hoạt động ngày <strong>N-1</strong> (hôm trước).<br>`;
+        comparisonMsg += `• <strong>Freelancer cần thiết:</strong> Tính toán bằng cách lấy tổng nhân sự từ ngày Actual có sản lượng gần khớp nhất với forecast ngày N, trừ đi số NVCT của ngày N-1.<br><br>`;
+        
+        comparisonMsg += `💡 <strong>Đối chiếu Peak lịch sử (Nhận Kiện):</strong><br>`;
         if (pN) {
-          comparisonMsg += `• <strong>Hàng <5kg:</strong> Peak xử lý <strong>${formatNumber(pN.vol)} đơn</strong> ngày ${pN.date} (Nhân sự ngày đó: ${pN.staff} người | NS quy đổi: <strong>${pN.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br>`;
+          comparisonMsg += `• Hàng <5kg: Peak <strong>${formatNumber(pN.vol)} đơn</strong> ngày ${pN.date} (NS quy đổi: <strong>${pN.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br>`;
         }
         if (pB) {
-          comparisonMsg += `• <strong>Hàng vừa (5-15kg):</strong> Peak xử lý <strong>${formatNumber(pB.vol)} đơn</strong> ngày ${pB.date} (Nhân sự ngày đó: ${pB.staff} người | NS quy đổi: <strong>${pB.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br>`;
+          comparisonMsg += `• Hàng vừa (5-15kg): Peak <strong>${formatNumber(pB.vol)} đơn</strong> ngày ${pB.date} (NS quy đổi: <strong>${pB.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br>`;
         }
         if (pF) {
-          comparisonMsg += `• <strong>Hàng to (>15kg):</strong> Peak xử lý <strong>${formatNumber(pF.vol)} đơn</strong> ngày ${pF.date} (Nhân sự ngày đó: ${pF.staff} người | NS quy đổi: <strong>${pF.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br><br>`;
+          comparisonMsg += `• Hàng to (>15kg): Peak <strong>${formatNumber(pF.vol)} đơn</strong> ngày ${pF.date} (NS quy đổi: <strong>${pF.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br><br>`;
         }
 
         comparisonMsg += `• <strong>Dự báo tương lai:</strong> FC trung bình đạt <strong>${formatNumber(avgFCVol)} đơn/ngày</strong>. Nhân sự cần thiết tương lai trung bình là <strong>${Math.round(avgFCStaffNeeded)} người/ngày</strong> (đã tính ${config.bufferPercent}% buffer).<br><br>`;
 
-        comparisonMsg += `💡 <strong>Nhận xét:</strong> Phân tích nhân sự cần thiết đã căn cứ trực tiếp vào năng lực thực tế lịch sử cao nhất mà kho KTC HCM01 từng chứng minh có thể xử lý được và số nhân sự thực huy động vào các ngày đó.`;
+        comparisonMsg += `💡 <strong>Nhận xét:</strong> Phương án này phản ánh chính xác thực tế vận hành hàng ngày của kho KTC HCM01 bằng cách tham chiếu trực tiếp đến các ngày có khối lượng tương đồng trong quá khứ.`;
 
         advises.push({
           type: 'success',
-          title: '📊 Phân tích định mức nhân sự (Theo Peak Lịch Sử)',
+          title: '📊 Phân tích định mức nhân sự (Theo Actual Gần Khớp & NVCT N-1)',
           message: comparisonMsg
         });
       }
