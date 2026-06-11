@@ -536,8 +536,9 @@
             <span class="cap-config-val" id="cap-buffer-val">10%</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
-            <button class="filter-btn" id="cap-btn-refresh" style="border-color: var(--accent); color: var(--accent-light); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">🔄 Tải FC Từ Sheet</button>
+            <button class="filter-btn" id="cap-btn-paste-actual" style="border-color: var(--yellow); color: var(--yellow); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📊 Dán Actual Data</button>
             <button class="filter-btn" id="cap-btn-paste" style="border-color: var(--green); color: var(--green); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📋 Dán Dữ Liệu FC</button>
+            <button class="filter-btn" id="cap-btn-refresh" style="border-color: var(--accent); color: var(--accent-light); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">🔄 Tải FC Từ Sheet</button>
           </div>
         </div>
       </div>
@@ -567,8 +568,14 @@
           </div>
         </div>
 
-        <!-- Right: AI Advisory -->
+        <!-- Right: AI Advisory + Derived Productivity -->
         <div class="side-panel">
+          <!-- Derived Productivity Panel -->
+          <div class="chart-card animate-in delay-2" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="card-title">🧮 Năng Suất Tự Tính (Từ Actual)</div>
+            <div id="cap-derived-panel"></div>
+          </div>
+          <!-- AI Advisory -->
           <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="card-title">Khuyến Nghị Nhân Sự (AI Advisory)</div>
             <div style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;" id="cap-advisory-list"></div>
@@ -615,6 +622,20 @@
         <div class="cap-btn-row">
           <button class="login-btn" id="cap-btn-apply-paste">Áp Dụng</button>
           <button class="login-btn" id="cap-btn-cancel-paste" style="background: #475569;">Đóng</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paste Actual Data Modal -->
+    <div id="cap-actual-modal" class="login-overlay" style="display: none;">
+      <div class="login-card" style="max-width: 700px;">
+        <div class="login-logo">📊</div>
+        <h2>Dán Dữ Liệu Actual (Lịch Sử Xử Lý)</h2>
+        <p class="login-subtitle">Copy từ Google Sheets với <strong>7 cột</strong> (Ngày, Vol Normal, Vol Bulky, Vol Freight, NS Normal, NS Bulky, NS Freight) rồi dán vào đây. Hệ thống sẽ tự tính năng suất trung bình.</p>
+        <textarea id="cap-actual-textarea" rows="12" placeholder="Ngày&#9;Vol_Normal&#9;Vol_Bulky&#9;Vol_Freight&#9;NS_Normal&#9;NS_Bulky&#9;NS_Freight&#10;01/05/2026&#9;280715&#9;48033&#9;56861&#9;200&#9;45&#9;28&#10;02/05/2026&#9;249567&#9;41226&#9;42573&#9;195&#9;42&#9;25&#10;..." style="width:100%;min-height:200px;background:#0f172a;color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.5;resize:vertical;"></textarea>
+        <div class="cap-btn-row">
+          <button class="login-btn" id="cap-btn-apply-actual">⚡ Phân Tích & Áp Dụng</button>
+          <button class="login-btn" id="cap-btn-cancel-actual" style="background: #475569;">Đóng</button>
         </div>
       </div>
     </div>

@@ -7,8 +7,9 @@
 
   // ─── Constants ────────────────────────────────────
   const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Yw7fOwP4f0b4idAmiXF4m4rmeuggr8C_N7m1IG6YOXs/export?format=csv&gid=1918098715';
-  const LS_KEY_FC   = 'capacity_fc_data';
-  const LS_KEY_CONF = 'capacity_config';
+  const LS_KEY_FC     = 'capacity_fc_data';
+  const LS_KEY_CONF   = 'capacity_config';
+  const LS_KEY_ACTUAL = 'capacity_actual_history';
 
   const DAY_NAMES_VI = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
@@ -152,6 +153,12 @@
   let fcData = [];     // Array of { date, normal, bulky, freight, total }
   let actualData = []; // Array of { date, normal, bulky, freight, total }
 
+  // ─── Actual History (with staff) ──────────────────
+  // Array of { date, volNormal, volBulky, volFreight, volTotal, staffNormal, staffBulky, staffFreight, staffTotal }
+  let actualHistory = [];
+  // Derived productivity from actual data
+  let derivedProductivity = null; // { normal, bulky, freight, maxCapacity, peakDate, sampleDays }
+
   function saveFCData() {
     try {
       localStorage.setItem(LS_KEY_FC, JSON.stringify({ fc: fcData, actual: actualData, ts: Date.now() }));
@@ -175,6 +182,158 @@
       console.warn('[Capacity] Error loading FC data:', e);
     }
     return false;
+  }
+
+  function saveActualHistory() {
+    try {
+      localStorage.setItem(LS_KEY_ACTUAL, JSON.stringify({ data: actualHistory, ts: Date.now() }));
+    } catch (e) {
+      console.warn('[Capacity] Error saving actual history:', e);
+    }
+  }
+
+  function loadActualHistory() {
+    try {
+      const stored = localStorage.getItem(LS_KEY_ACTUAL);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.data && Array.isArray(parsed.data) && parsed.data.length > 0) {
+          actualHistory = parsed.data;
+          calculateDerivedProductivity();
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('[Capacity] Error loading actual history:', e);
+    }
+    return false;
+  }
+
+  // ─── Parse Actual History paste ────────────────────
+  // Format: Date\tVol_Normal\tVol_Bulky\tVol_Freight\tStaff_Normal\tStaff_Bulky\tStaff_Freight
+  function parseActualPaste(text) {
+    if (!text || typeof text !== 'string') return [];
+    const lines = text.trim().split('\n').map(l => l.replace(/\r/g, ''));
+    if (lines.length < 2) return [];
+
+    const result = [];
+    for (let i = 0; i < lines.length; i++) {
+      const cols = lines[i].split('\t');
+      if (cols.length < 7) continue;
+
+      const dateStr = cols[0].trim();
+      // Skip header rows
+      if (dateStr.toLowerCase().includes('ngày') || dateStr.toLowerCase().includes('date') || dateStr === '') continue;
+      if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) continue;
+
+      const volN = parseVNNumber(cols[1]);
+      const volB = parseVNNumber(cols[2]);
+      const volF = parseVNNumber(cols[3]);
+      const stfN = parseVNNumber(cols[4]);
+      const stfB = parseVNNumber(cols[5]);
+      const stfF = parseVNNumber(cols[6]);
+
+      // Skip rows with zero volume AND zero staff
+      if ((volN + volB + volF) === 0 && (stfN + stfB + stfF) === 0) continue;
+
+      result.push({
+        date: dateStr,
+        volNormal: volN, volBulky: volB, volFreight: volF,
+        volTotal: volN + volB + volF,
+        staffNormal: stfN, staffBulky: stfB, staffFreight: stfF,
+        staffTotal: stfN + stfB + stfF
+      });
+    }
+    return result;
+  }
+
+  // ─── Calculate productivity from actual history ────
+  function calculateDerivedProductivity() {
+    if (actualHistory.length === 0) {
+      derivedProductivity = null;
+      return;
+    }
+
+    // Filter days with meaningful data (staff > 0 and volume > 0)
+    const validDays = actualHistory.filter(d =>
+      d.staffNormal > 0 && d.staffBulky > 0 && d.staffFreight > 0 &&
+      d.volNormal > 0 && d.volBulky > 0 && d.volFreight > 0
+    );
+
+    // If strict filter removes too many, allow partial
+    const useDays = validDays.length >= 5 ? validDays : actualHistory.filter(d =>
+      (d.staffNormal > 0 && d.volNormal > 0) ||
+      (d.staffBulky > 0 && d.volBulky > 0) ||
+      (d.staffFreight > 0 && d.volFreight > 0)
+    );
+
+    if (useDays.length === 0) {
+      derivedProductivity = null;
+      return;
+    }
+
+    // Calculate productivity per person per day for each valid day
+    let sumProdN = 0, countN = 0;
+    let sumProdB = 0, countB = 0;
+    let sumProdF = 0, countF = 0;
+    let maxVol = 0, peakDate = '';
+
+    // For max staff seen
+    let maxStaffN = 0, maxStaffB = 0, maxStaffF = 0;
+
+    useDays.forEach(d => {
+      if (d.staffNormal > 0 && d.volNormal > 0) {
+        sumProdN += d.volNormal / d.staffNormal;
+        countN++;
+      }
+      if (d.staffBulky > 0 && d.volBulky > 0) {
+        sumProdB += d.volBulky / d.staffBulky;
+        countB++;
+      }
+      if (d.staffFreight > 0 && d.volFreight > 0) {
+        sumProdF += d.volFreight / d.staffFreight;
+        countF++;
+      }
+      if (d.volTotal > maxVol) {
+        maxVol = d.volTotal;
+        peakDate = d.date;
+      }
+      if (d.staffNormal > maxStaffN) maxStaffN = d.staffNormal;
+      if (d.staffBulky > maxStaffB)  maxStaffB = d.staffBulky;
+      if (d.staffFreight > maxStaffF) maxStaffF = d.staffFreight;
+    });
+
+    const avgProdN = countN > 0 ? Math.round(sumProdN / countN) : null;
+    const avgProdB = countB > 0 ? Math.round(sumProdB / countB) : null;
+    const avgProdF = countF > 0 ? Math.round(sumProdF / countF) : null;
+
+    derivedProductivity = {
+      normal: avgProdN,
+      bulky: avgProdB,
+      freight: avgProdF,
+      maxCapacity: maxVol,
+      peakDate: peakDate,
+      sampleDays: useDays.length,
+      maxStaff: { normal: maxStaffN, bulky: maxStaffB, freight: maxStaffF }
+    };
+
+    console.log('[Capacity] Derived productivity from actual:', derivedProductivity);
+  }
+
+  // ─── Apply derived productivity to config ──────────
+  function applyDerivedProductivity() {
+    if (!derivedProductivity) return;
+    const cfg = loadConfig();
+    if (derivedProductivity.normal) cfg.productivity.normal = derivedProductivity.normal;
+    if (derivedProductivity.bulky)  cfg.productivity.bulky  = derivedProductivity.bulky;
+    if (derivedProductivity.freight) cfg.productivity.freight = derivedProductivity.freight;
+    // Also update staff with max seen from history
+    if (derivedProductivity.maxStaff) {
+      cfg.currentStaff.normal  = derivedProductivity.maxStaff.normal;
+      cfg.currentStaff.bulky   = derivedProductivity.maxStaff.bulky;
+      cfg.currentStaff.freight = derivedProductivity.maxStaff.freight;
+    }
+    saveConfig(cfg);
   }
 
   // ─── CSV Parsing ──────────────────────────────────
@@ -506,6 +665,9 @@
     const config  = loadConfig();
     const allCalc = calculateAllDays(config);
 
+    // Always render derived productivity panel
+    renderDerivedPanel();
+
     if (allCalc.length === 0) {
       const container = document.getElementById('cap-chart-container');
       if (container) {
@@ -519,6 +681,75 @@
     renderCapacityChart(allCalc, 0, 30);
     renderStaffingTable(allCalc);
     renderAdvisoryPanel(allCalc, config);
+  }
+
+  // ─── Render: Derived Productivity Panel ────────────
+  function renderDerivedPanel() {
+    const panel = document.getElementById('cap-derived-panel');
+    if (!panel) return;
+
+    if (!derivedProductivity || actualHistory.length === 0) {
+      panel.innerHTML = `
+        <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.78rem;">
+          <div style="font-size:1.5rem;margin-bottom:8px;">📊</div>
+          Chưa có dữ liệu Actual.<br>
+          Bấm <strong>"📊 Dán Actual Data"</strong> để hệ thống tự tính năng suất từ lịch sử.
+        </div>`;
+      return;
+    }
+
+    const dp = derivedProductivity;
+    panel.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:0.72rem;color:var(--green);font-weight:700;">
+          ✅ Tự động tính từ ${dp.sampleDays} ngày Actual
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div style="background:rgba(96,165,250,0.1);padding:8px 10px;border-radius:6px;border:1px solid rgba(96,165,250,0.2);">
+            <div style="font-size:0.62rem;color:var(--text-muted);">Normal (< 5kg)</div>
+            <div style="font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${COLORS.normal};">${dp.normal ? formatNumber(dp.normal) : '—'}</div>
+            <div style="font-size:0.58rem;color:var(--text-muted);">đơn/người/ngày</div>
+          </div>
+          <div style="background:rgba(251,191,36,0.1);padding:8px 10px;border-radius:6px;border:1px solid rgba(251,191,36,0.2);">
+            <div style="font-size:0.62rem;color:var(--text-muted);">Bulky (5-15kg)</div>
+            <div style="font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${COLORS.bulky};">${dp.bulky ? formatNumber(dp.bulky) : '—'}</div>
+            <div style="font-size:0.58rem;color:var(--text-muted);">đơn/người/ngày</div>
+          </div>
+          <div style="background:rgba(251,146,60,0.1);padding:8px 10px;border-radius:6px;border:1px solid rgba(251,146,60,0.2);">
+            <div style="font-size:0.62rem;color:var(--text-muted);">Freight (> 15kg)</div>
+            <div style="font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${COLORS.freight};">${dp.freight ? formatNumber(dp.freight) : '—'}</div>
+            <div style="font-size:0.58rem;color:var(--text-muted);">đơn/người/ngày</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;font-size:0.68rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
+          <span>📈 Max xử lý: <strong style="color:var(--green);">${formatNumber(dp.maxCapacity)}</strong> đơn (${dp.peakDate})</span>
+        </div>
+
+        <div style="display:flex;gap:12px;font-size:0.68rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
+          <span>👥 Max NS: N:${dp.maxStaff?.normal || '—'} B:${dp.maxStaff?.bulky || '—'} F:${dp.maxStaff?.freight || '—'}</span>
+        </div>
+
+        <button id="cap-btn-apply-derived" class="filter-btn" style="border-color:var(--green);color:var(--green);font-weight:600;cursor:pointer;font-size:0.72rem;width:100%;text-align:center;">
+          ⚡ Áp Dụng Năng Suất Actual → Config
+        </button>
+      </div>`;
+
+    // Bind apply button
+    const applyBtn = document.getElementById('cap-btn-apply-derived');
+    if (applyBtn) {
+      applyBtn.onclick = () => {
+        applyDerivedProductivity();
+        renderCapacityDashboard();
+        applyBtn.textContent = '✅ Đã áp dụng!';
+        applyBtn.style.color = 'var(--text-primary)';
+        setTimeout(() => {
+          applyBtn.textContent = '⚡ Áp Dụng Năng Suất Actual → Config';
+          applyBtn.style.color = 'var(--green)';
+        }, 2000);
+      };
+    }
   }
 
   // ─── Update control values in UI ──────────────────
@@ -943,6 +1174,7 @@
 
     // Load cached data first
     const hadCache = loadFCData();
+    const hadActual = loadActualHistory();
     if (hadCache) {
       updateHeartbeat('connected');
     }
@@ -955,7 +1187,7 @@
     });
 
     // If we had cache, render immediately while fetch happens
-    if (hadCache) {
+    if (hadCache || hadActual) {
       renderCapacityDashboard();
     }
 
@@ -1057,6 +1289,65 @@
     if (btnCloseModal) {
       btnCloseModal.addEventListener('click', () => {
         const modal = document.getElementById('cap-paste-modal');
+        if (modal) modal.style.display = 'none';
+      });
+    }
+
+    // Also close with cancel button
+    const btnCancelPaste = document.getElementById('cap-btn-cancel-paste');
+    if (btnCancelPaste) {
+      btnCancelPaste.addEventListener('click', () => {
+        const modal = document.getElementById('cap-paste-modal');
+        if (modal) modal.style.display = 'none';
+      });
+    }
+
+    // ── Actual Data paste button → shows actual modal ──
+    const btnPasteActual = document.getElementById('cap-btn-paste-actual');
+    if (btnPasteActual) {
+      btnPasteActual.addEventListener('click', () => {
+        const modal = document.getElementById('cap-actual-modal');
+        if (modal) modal.style.display = 'flex';
+      });
+    }
+
+    // ── Apply actual paste ──
+    const btnApplyActual = document.getElementById('cap-btn-apply-actual');
+    if (btnApplyActual) {
+      btnApplyActual.addEventListener('click', () => {
+        const textarea = document.getElementById('cap-actual-textarea');
+        if (!textarea) return;
+
+        const parsed = parseActualPaste(textarea.value);
+        if (parsed.length > 0) {
+          actualHistory = parsed;
+          calculateDerivedProductivity();
+          saveActualHistory();
+          updateHeartbeat('connected');
+          renderCapacityDashboard();
+
+          // Close modal
+          const modal = document.getElementById('cap-actual-modal');
+          if (modal) modal.style.display = 'none';
+          textarea.value = '';
+
+          // Show feedback
+          alert(`✅ Đã nhập ${parsed.length} ngày Actual!\n\nNăng suất tự động:\n` +
+            `• Normal: ${derivedProductivity?.normal ? formatNumber(derivedProductivity.normal) : '—'} đơn/người/ngày\n` +
+            `• Bulky: ${derivedProductivity?.bulky ? formatNumber(derivedProductivity.bulky) : '—'} đơn/người/ngày\n` +
+            `• Freight: ${derivedProductivity?.freight ? formatNumber(derivedProductivity.freight) : '—'} đơn/người/ngày\n\n` +
+            `Bấm "⚡ Áp Dụng" trên panel để cập nhật vào cấu hình.`);
+        } else {
+          alert('Không thể phân tích dữ liệu Actual.\n\nĐịnh dạng cần:\nNgày\tVol_Normal\tVol_Bulky\tVol_Freight\tNS_Normal\tNS_Bulky\tNS_Freight\n01/06/2026\t280715\t48033\t56861\t200\t45\t28');
+        }
+      });
+    }
+
+    // ── Close actual modal ──
+    const btnCancelActual = document.getElementById('cap-btn-cancel-actual');
+    if (btnCancelActual) {
+      btnCancelActual.addEventListener('click', () => {
+        const modal = document.getElementById('cap-actual-modal');
         if (modal) modal.style.display = 'none';
       });
     }
