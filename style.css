@@ -1877,6 +1877,7 @@ input[type="range"]::-moz-range-thumb:hover {
   min-height: 0 !important;
   max-height: none !important;
   overflow: visible !important;
+  flex-shrink: 0 !important;
   transition: var(--transition) !important;
 }
 
