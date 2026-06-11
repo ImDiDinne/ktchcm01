@@ -101,57 +101,38 @@
   }
 
   // ─── Configuration management ─────────────────────
+  // Productivity is NOT stored here — it is always derived from Actual data.
   const DEFAULT_CONFIG = {
-    productivity: {
-      normal:  3000,  // đơn/người/ngày
-      bulky:   800,   // đơn/người/ngày
-      freight: 300    // đơn/người/ngày
-    },
-    nvct: {            // Nhân viên chính thức (fixed)
-      normal:  180,
-      bulky:   35,
-      freight: 20
-    },
-    freelancer: {      // Freelancer (flexible)
-      normal:  70,
-      bulky:   15,
-      freight: 10
-    },
+    nvct: 235,            // NVCT tổng (cố định)
+    freelancer: 95,       // Freelancer tổng (linh hoạt)
     bufferPercent: 10
   };
-
-  // Helper: compute total staff from nvct + freelancer
-  function totalStaff(config) {
-    return {
-      normal:  (config.nvct?.normal || 0)  + (config.freelancer?.normal || 0),
-      bulky:   (config.nvct?.bulky || 0)   + (config.freelancer?.bulky || 0),
-      freight: (config.nvct?.freight || 0) + (config.freelancer?.freight || 0)
-    };
-  }
 
   function loadConfig() {
     try {
       const stored = localStorage.getItem(LS_KEY_CONF);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Backward compat: old format had currentStaff, migrate to nvct+freelancer
-        const hasOldFormat = parsed.currentStaff && !parsed.nvct;
+        // Backward compat: old format had objects, flatten to numbers
+        let nvctVal = parsed.nvct;
+        let flVal   = parsed.freelancer;
+        // If old object format, sum them
+        if (typeof nvctVal === 'object' && nvctVal !== null) {
+          nvctVal = (nvctVal.normal || 0) + (nvctVal.bulky || 0) + (nvctVal.freight || 0);
+        }
+        if (typeof flVal === 'object' && flVal !== null) {
+          flVal = (flVal.normal || 0) + (flVal.bulky || 0) + (flVal.freight || 0);
+        }
+        // Also handle old currentStaff format
+        if (parsed.currentStaff && nvctVal == null) {
+          const cs = parsed.currentStaff;
+          const total = (cs.normal || 0) + (cs.bulky || 0) + (cs.freight || 0);
+          nvctVal = Math.round(total * 0.7);
+          flVal   = total - nvctVal;
+        }
         return {
-          productivity: {
-            normal:  parsed.productivity?.normal  ?? DEFAULT_CONFIG.productivity.normal,
-            bulky:   parsed.productivity?.bulky   ?? DEFAULT_CONFIG.productivity.bulky,
-            freight: parsed.productivity?.freight ?? DEFAULT_CONFIG.productivity.freight
-          },
-          nvct: {
-            normal:  parsed.nvct?.normal  ?? (hasOldFormat ? Math.round((parsed.currentStaff?.normal || 250) * 0.7) : DEFAULT_CONFIG.nvct.normal),
-            bulky:   parsed.nvct?.bulky   ?? (hasOldFormat ? Math.round((parsed.currentStaff?.bulky || 50) * 0.7) : DEFAULT_CONFIG.nvct.bulky),
-            freight: parsed.nvct?.freight ?? (hasOldFormat ? Math.round((parsed.currentStaff?.freight || 30) * 0.7) : DEFAULT_CONFIG.nvct.freight)
-          },
-          freelancer: {
-            normal:  parsed.freelancer?.normal  ?? (hasOldFormat ? Math.round((parsed.currentStaff?.normal || 250) * 0.3) : DEFAULT_CONFIG.freelancer.normal),
-            bulky:   parsed.freelancer?.bulky   ?? (hasOldFormat ? Math.round((parsed.currentStaff?.bulky || 50) * 0.3) : DEFAULT_CONFIG.freelancer.bulky),
-            freight: parsed.freelancer?.freight ?? (hasOldFormat ? Math.round((parsed.currentStaff?.freight || 30) * 0.3) : DEFAULT_CONFIG.freelancer.freight)
-          },
+          nvct:          nvctVal ?? DEFAULT_CONFIG.nvct,
+          freelancer:    flVal   ?? DEFAULT_CONFIG.freelancer,
           bufferPercent: parsed.bufferPercent ?? DEFAULT_CONFIG.bufferPercent
         };
       }
@@ -292,70 +273,45 @@
       return;
     }
 
-    // Calculate productivity per person per day for each valid day
-    let sumProdN = 0, countN = 0;
-    let sumProdB = 0, countB = 0;
-    let sumProdF = 0, countF = 0;
+    // Calculate single unified productivity = volTotal / staffTotal per day
+    let sumProd = 0, countProd = 0;
     let maxVol = 0, peakDate = '';
-
-    // For max staff seen
-    let maxStaffN = 0, maxStaffB = 0, maxStaffF = 0;
+    let maxStaffTotal = 0;
 
     useDays.forEach(d => {
-      if (d.staffNormal > 0 && d.volNormal > 0) {
-        sumProdN += d.volNormal / d.staffNormal;
-        countN++;
-      }
-      if (d.staffBulky > 0 && d.volBulky > 0) {
-        sumProdB += d.volBulky / d.staffBulky;
-        countB++;
-      }
-      if (d.staffFreight > 0 && d.volFreight > 0) {
-        sumProdF += d.volFreight / d.staffFreight;
-        countF++;
+      if (d.staffTotal > 0 && d.volTotal > 0) {
+        sumProd += d.volTotal / d.staffTotal;
+        countProd++;
       }
       if (d.volTotal > maxVol) {
         maxVol = d.volTotal;
         peakDate = d.date;
       }
-      if (d.staffNormal > maxStaffN) maxStaffN = d.staffNormal;
-      if (d.staffBulky > maxStaffB)  maxStaffB = d.staffBulky;
-      if (d.staffFreight > maxStaffF) maxStaffF = d.staffFreight;
+      if (d.staffTotal > maxStaffTotal) maxStaffTotal = d.staffTotal;
     });
 
-    const avgProdN = countN > 0 ? Math.round(sumProdN / countN) : null;
-    const avgProdB = countB > 0 ? Math.round(sumProdB / countB) : null;
-    const avgProdF = countF > 0 ? Math.round(sumProdF / countF) : null;
+    const avgProd = countProd > 0 ? Math.round(sumProd / countProd) : null;
 
     derivedProductivity = {
-      normal: avgProdN,
-      bulky: avgProdB,
-      freight: avgProdF,
+      avgProductivity: avgProd,   // tấn/người/ca (or đơn/người/ca depending on input)
       maxCapacity: maxVol,
       peakDate: peakDate,
       sampleDays: useDays.length,
-      maxStaff: { normal: maxStaffN, bulky: maxStaffB, freight: maxStaffF }
+      maxStaff: maxStaffTotal
     };
 
     console.log('[Capacity] Derived productivity from actual:', derivedProductivity);
   }
 
-  // ─── Apply derived productivity to config ──────────
+  // ─── Apply derived staff to config ─────────────────
   function applyDerivedProductivity() {
     if (!derivedProductivity) return;
     const cfg = loadConfig();
-    if (derivedProductivity.normal) cfg.productivity.normal = derivedProductivity.normal;
-    if (derivedProductivity.bulky)  cfg.productivity.bulky  = derivedProductivity.bulky;
-    if (derivedProductivity.freight) cfg.productivity.freight = derivedProductivity.freight;
     // Distribute max staff seen into NVCT (70%) + Freelancer (30%)
     if (derivedProductivity.maxStaff) {
       const ms = derivedProductivity.maxStaff;
-      cfg.nvct.normal      = Math.round(ms.normal * 0.7);
-      cfg.nvct.bulky       = Math.round(ms.bulky * 0.7);
-      cfg.nvct.freight     = Math.round(ms.freight * 0.7);
-      cfg.freelancer.normal  = ms.normal - cfg.nvct.normal;
-      cfg.freelancer.bulky   = ms.bulky  - cfg.nvct.bulky;
-      cfg.freelancer.freight = ms.freight - cfg.nvct.freight;
+      cfg.nvct       = Math.round(ms * 0.7);
+      cfg.freelancer = ms - cfg.nvct;
     }
     saveConfig(cfg);
   }
@@ -646,29 +602,28 @@
   }
 
   // ─── Core Calculations ────────────────────────────
+  // Uses unified staff (nvct + freelancer as single numbers)
+  // Productivity comes from derivedProductivity (auto-calculated from actual data)
   function calculateCapacity(dayData, config) {
     if (!dayData || !config) return null;
 
-    const staff = totalStaff(config);
+    const nvct = config.nvct || 0;
+    const fl   = config.freelancer || 0;
+    const currentTotal = nvct + fl;
 
-    const reqNormal  = Math.ceil(dayData.normal  / config.productivity.normal);
-    const reqBulky   = Math.ceil(dayData.bulky   / config.productivity.bulky);
-    const reqFreight = Math.ceil(dayData.freight  / config.productivity.freight);
+    // Get productivity from derived data (tấn/người/ca)
+    const prod = derivedProductivity?.avgProductivity || 0;
 
-    const reqSubtotal = reqNormal + reqBulky + reqFreight;
-    const requiredTotal = Math.ceil(reqSubtotal * (1 + config.bufferPercent / 100));
+    // Required staff = FC_total / productivity
+    const requiredRaw = prod > 0 ? dayData.total / prod : 0;
+    const requiredTotal = prod > 0 ? Math.ceil(requiredRaw * (1 + config.bufferPercent / 100)) : 0;
 
-    const nvctTotal = (config.nvct?.normal || 0) + (config.nvct?.bulky || 0) + (config.nvct?.freight || 0);
-    const flTotal   = (config.freelancer?.normal || 0) + (config.freelancer?.bulky || 0) + (config.freelancer?.freight || 0);
-    const currentTotal = nvctTotal + flTotal;
+    // Max capacity = current total staff * productivity
+    const maxCapacity = prod > 0 ? Math.round(currentTotal * prod) : 0;
 
-    const maxCapacity = (staff.normal  * config.productivity.normal) +
-                        (staff.bulky   * config.productivity.bulky) +
-                        (staff.freight * config.productivity.freight);
-
-    // Freelancer delta: how many FL needed vs current FL
-    const flNeeded = Math.max(0, requiredTotal - nvctTotal);
-    const flDelta  = flNeeded - flTotal;
+    // Freelancer delta
+    const flNeeded = Math.max(0, requiredTotal - nvct);
+    const flDelta  = flNeeded - fl;
 
     const delta = requiredTotal - currentTotal;
     const gapPercent = maxCapacity > 0 ? ((dayData.total - maxCapacity) / maxCapacity) * 100 : 0;
@@ -676,19 +631,16 @@
     return {
       date:          dayData.date,
       fc:            dayData,
-      reqNormal,
-      reqBulky,
-      reqFreight,
-      reqSubtotal,
       requiredTotal,
       currentTotal,
-      nvctTotal,
-      flTotal,
+      nvctTotal:     nvct,
+      flTotal:       fl,
       flNeeded,
       flDelta,
       maxCapacity,
       delta,
-      gapPercent
+      gapPercent,
+      productivity:  prod
     };
   }
 
@@ -741,34 +693,21 @@
           ✅ Tự động tính từ ${dp.sampleDays} ngày Actual
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-          <div style="background:rgba(96,165,250,0.1);padding:8px 10px;border-radius:6px;border:1px solid rgba(96,165,250,0.2);">
-            <div style="font-size:0.62rem;color:var(--text-muted);">Normal (< 5kg)</div>
-            <div style="font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${COLORS.normal};">${dp.normal ? formatNumber(dp.normal) : '—'}</div>
-            <div style="font-size:0.58rem;color:var(--text-muted);">đơn/người/ngày</div>
-          </div>
-          <div style="background:rgba(251,191,36,0.1);padding:8px 10px;border-radius:6px;border:1px solid rgba(251,191,36,0.2);">
-            <div style="font-size:0.62rem;color:var(--text-muted);">Bulky (5-15kg)</div>
-            <div style="font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${COLORS.bulky};">${dp.bulky ? formatNumber(dp.bulky) : '—'}</div>
-            <div style="font-size:0.58rem;color:var(--text-muted);">đơn/người/ngày</div>
-          </div>
-          <div style="background:rgba(251,146,60,0.1);padding:8px 10px;border-radius:6px;border:1px solid rgba(251,146,60,0.2);">
-            <div style="font-size:0.62rem;color:var(--text-muted);">Freight (> 15kg)</div>
-            <div style="font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${COLORS.freight};">${dp.freight ? formatNumber(dp.freight) : '—'}</div>
-            <div style="font-size:0.58rem;color:var(--text-muted);">đơn/người/ngày</div>
-          </div>
+        <div style="background:rgba(52,211,153,0.08);padding:14px;border-radius:8px;border:1px solid rgba(52,211,153,0.2);text-align:center;">
+          <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:4px;">Năng Suất Trung Bình</div>
+          <div style="font-size:1.6rem;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--green);">${dp.avgProductivity ? formatNumber(dp.avgProductivity) : '—'}</div>
+          <div style="font-size:0.65rem;color:var(--text-muted);">tấn/người/ca</div>
         </div>
 
         <div style="display:flex;gap:12px;font-size:0.68rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
-          <span>📈 Max xử lý: <strong style="color:var(--green);">${formatNumber(dp.maxCapacity)}</strong> đơn (${dp.peakDate})</span>
+          <span>📈 Max xử lý: <strong style="color:var(--green);">${formatNumber(dp.maxCapacity)}</strong> tấn (${dp.peakDate})</span>
         </div>
-
         <div style="display:flex;gap:12px;font-size:0.68rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
-          <span>👥 Max NS: N:${dp.maxStaff?.normal || '—'} B:${dp.maxStaff?.bulky || '—'} F:${dp.maxStaff?.freight || '—'}</span>
+          <span>👥 Max NS: <strong>${dp.maxStaff || '—'}</strong> người</span>
         </div>
 
         <button id="cap-btn-apply-derived" class="filter-btn" style="border-color:var(--green);color:var(--green);font-weight:600;cursor:pointer;font-size:0.72rem;width:100%;text-align:center;">
-          ⚡ Áp Dụng Năng Suất Actual → Config
+          ⚡ Áp Dụng NS Actual → Config
         </button>
       </div>`;
 
@@ -781,7 +720,7 @@
         applyBtn.textContent = '✅ Đã áp dụng!';
         applyBtn.style.color = 'var(--text-primary)';
         setTimeout(() => {
-          applyBtn.textContent = '⚡ Áp Dụng Năng Suất Actual → Config';
+          applyBtn.textContent = '⚡ Áp Dụng NS Actual → Config';
           applyBtn.style.color = 'var(--green)';
         }, 2000);
       };
@@ -790,32 +729,22 @@
 
   // ─── Update control values in UI ──────────────────
   function updateControlValues(config) {
-    const setSlider = (id, valId, value, suffix) => {
-      const slider = document.getElementById(id);
-      const label  = document.getElementById(valId);
-      if (slider) slider.value = value;
-      if (label)  label.textContent = `${formatNumber(value)}${suffix}`;
-    };
+    // Buffer slider
+    const bufSlider = document.getElementById('cap-buffer');
+    const bufLabel  = document.getElementById('cap-buffer-val');
+    if (bufSlider) bufSlider.value = config.bufferPercent;
+    if (bufLabel)  bufLabel.textContent = `${config.bufferPercent}%`;
 
-    setSlider('cap-prod-normal',  'cap-prod-normal-val',  config.productivity.normal,  ' đơn/người');
-    setSlider('cap-prod-bulky',   'cap-prod-bulky-val',   config.productivity.bulky,   ' đơn/người');
-    setSlider('cap-prod-freight', 'cap-prod-freight-val', config.productivity.freight,  ' đơn/người');
-    setSlider('cap-buffer',       'cap-buffer-val',       config.bufferPercent,         '%');
-
+    // Staff inputs (flat numbers)
     const setInput = (id, value) => {
       const el = document.getElementById(id);
       if (el) el.value = value;
     };
-
-    setInput('cap-nvct-normal',  config.nvct.normal);
-    setInput('cap-nvct-bulky',   config.nvct.bulky);
-    setInput('cap-nvct-freight', config.nvct.freight);
-    setInput('cap-fl-normal',    config.freelancer.normal);
-    setInput('cap-fl-bulky',     config.freelancer.bulky);
-    setInput('cap-fl-freight',   config.freelancer.freight);
+    setInput('cap-nvct-total',  config.nvct);
+    setInput('cap-fl-total',    config.freelancer);
   }
 
-  // ─── Render: KPIs ────────────────────────────────
+  // ─── Render: KPIs ────────────────────────────
   function renderKPIs(allCalc, config) {
     const todayIdx = findTodayIndex();
     const todayCalc = todayIdx >= 0 && todayIdx < allCalc.length ? allCalc[todayIdx] : allCalc[0];
@@ -834,17 +763,23 @@
 
     const elCapSub = document.getElementById('cap-kpi-sub-max');
     if (elCapSub) {
-      const staff = totalStaff(config);
-      const t = staff.normal + staff.bulky + staff.freight;
-      elCapSub.textContent = `${t} NS (NVCT:${config.nvct.normal+config.nvct.bulky+config.nvct.freight} + FL:${config.freelancer.normal+config.freelancer.bulky+config.freelancer.freight})`;
+      const t = config.nvct + config.freelancer;
+      elCapSub.textContent = `${t} NS (NVCT:${config.nvct} + FL:${config.freelancer}) × ${todayCalc.productivity ? formatNumber(todayCalc.productivity) + ' t/ng' : 'chưa có NS'}`;
     }
 
     // Staff Needed
     const elStaff = document.getElementById('cap-kpi-staff-needed');
-    if (elStaff) elStaff.textContent = formatNumber(todayCalc.requiredTotal);
+    if (elStaff) elStaff.textContent = todayCalc.requiredTotal > 0 ? formatNumber(todayCalc.requiredTotal) : '—';
 
     const elStaffSub = document.getElementById('cap-kpi-sub-staff');
-    if (elStaffSub) elStaffSub.textContent = `N:${todayCalc.reqNormal} B:${todayCalc.reqBulky} F:${todayCalc.reqFreight} +${config.bufferPercent}% buffer`;
+    if (elStaffSub) {
+      if (todayCalc.productivity > 0) {
+        elStaffSub.textContent = `FC:${formatNumber(todayCalc.fc.total)} ÷ ${formatNumber(todayCalc.productivity)} t/ng +${config.bufferPercent}% buffer`;
+      } else {
+        elStaffSub.textContent = 'Cần dán Actual để tính năng suất';
+        elStaffSub.style.color = 'var(--yellow)';
+      }
+    }
 
     // Gap %
     const elGap = document.getElementById('cap-kpi-gap-pct');
@@ -1236,70 +1171,31 @@
       renderCapacityDashboard();
     }
 
-    // ── Productivity sliders ──
-    const prodSliders = [
-      { id: 'cap-prod-normal',  valId: 'cap-prod-normal-val',  key: 'normal',  suffix: ' đơn/người' },
-      { id: 'cap-prod-bulky',   valId: 'cap-prod-bulky-val',   key: 'bulky',   suffix: ' đơn/người' },
-      { id: 'cap-prod-freight', valId: 'cap-prod-freight-val', key: 'freight', suffix: ' đơn/người' }
-    ];
+    // ── NVCT total input ──
+    const nvctInput = document.getElementById('cap-nvct-total');
+    if (nvctInput) {
+      nvctInput.addEventListener('change', (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (isNaN(val) || val < 0) return;
+        const cfg = loadConfig();
+        cfg.nvct = val;
+        saveConfig(cfg);
+        renderCapacityDashboard();
+      });
+    }
 
-    prodSliders.forEach(({ id, valId, key, suffix }) => {
-      const slider = document.getElementById(id);
-      if (slider) {
-        slider.addEventListener('input', (e) => {
-          const val = parseInt(e.target.value, 10);
-          const label = document.getElementById(valId);
-          if (label) label.textContent = `${formatNumber(val)}${suffix}`;
-
-          const cfg = loadConfig();
-          cfg.productivity[key] = val;
-          saveConfig(cfg);
-          renderCapacityDashboard();
-        });
-      }
-    });
-
-    // ── NVCT number inputs ──
-    const nvctInputs = [
-      { id: 'cap-nvct-normal',  key: 'normal' },
-      { id: 'cap-nvct-bulky',   key: 'bulky' },
-      { id: 'cap-nvct-freight', key: 'freight' }
-    ];
-
-    nvctInputs.forEach(({ id, key }) => {
-      const input = document.getElementById(id);
-      if (input) {
-        input.addEventListener('change', (e) => {
-          const val = parseInt(e.target.value, 10);
-          if (isNaN(val) || val < 0) return;
-          const cfg = loadConfig();
-          cfg.nvct[key] = val;
-          saveConfig(cfg);
-          renderCapacityDashboard();
-        });
-      }
-    });
-
-    // ── Freelancer number inputs ──
-    const flInputs = [
-      { id: 'cap-fl-normal',  key: 'normal' },
-      { id: 'cap-fl-bulky',   key: 'bulky' },
-      { id: 'cap-fl-freight', key: 'freight' }
-    ];
-
-    flInputs.forEach(({ id, key }) => {
-      const input = document.getElementById(id);
-      if (input) {
-        input.addEventListener('change', (e) => {
-          const val = parseInt(e.target.value, 10);
-          if (isNaN(val) || val < 0) return;
-          const cfg = loadConfig();
-          cfg.freelancer[key] = val;
-          saveConfig(cfg);
-          renderCapacityDashboard();
-        });
-      }
-    });
+    // ── Freelancer total input ──
+    const flInput = document.getElementById('cap-fl-total');
+    if (flInput) {
+      flInput.addEventListener('change', (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (isNaN(val) || val < 0) return;
+        const cfg = loadConfig();
+        cfg.freelancer = val;
+        saveConfig(cfg);
+        renderCapacityDashboard();
+      });
+    }
 
     // ── Buffer slider ──
     const bufferSlider = document.getElementById('cap-buffer');
