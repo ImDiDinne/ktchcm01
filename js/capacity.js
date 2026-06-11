@@ -390,10 +390,10 @@
       return;
     }
 
-    // Find peak actual volume ever handled for each group
-    let peakNormal  = { date: '', vol: 0, staff: 0, productivity: 0 };
-    let peakBulky   = { date: '', vol: 0, staff: 0, productivity: 0 };
-    let peakFreight = { date: '', vol: 0, staff: 0, productivity: 0 };
+    // Find peak actual volume ever handled for each group (Nhận Kiện only)
+    let peakNormal  = { date: '', vol: 0, staff: 0, volNormal: 0, volBulky: 0, volFreight: 0, productivity: 0 };
+    let peakBulky   = { date: '', vol: 0, staff: 0, volNormal: 0, volBulky: 0, volFreight: 0, productivity: 0 };
+    let peakFreight = { date: '', vol: 0, staff: 0, volNormal: 0, volBulky: 0, volFreight: 0, productivity: 0 };
 
     useDays.forEach(d => {
       if (d.volNormal > peakNormal.vol) {
@@ -401,6 +401,9 @@
           date: d.date,
           vol: d.volNormal,
           staff: d.staffTotal,
+          volNormal: d.volNormal,
+          volBulky: d.volBulky,
+          volFreight: d.volFreight,
           productivity: d.volNormal / d.staffTotal
         };
       }
@@ -409,6 +412,9 @@
           date: d.date,
           vol: d.volBulky,
           staff: d.staffTotal,
+          volNormal: d.volNormal,
+          volBulky: d.volBulky,
+          volFreight: d.volFreight,
           productivity: d.volBulky / d.staffTotal
         };
       }
@@ -417,10 +423,27 @@
           date: d.date,
           vol: d.volFreight,
           staff: d.staffTotal,
+          volNormal: d.volNormal,
+          volBulky: d.volBulky,
+          volFreight: d.volFreight,
           productivity: d.volFreight / d.staffTotal
         };
       }
     });
+
+    // We calculate relative weights to adjust productivities for shared staff model
+    const pN_raw = peakNormal.productivity;
+    const pB_raw = peakBulky.productivity;
+    const pF_raw = peakFreight.productivity;
+
+    const w_Bulky = pN_raw / (pB_raw || 1);
+    const w_Freight = pN_raw / (pF_raw || 1);
+
+    // True normal peak productivity (in Normal-Equivalent Units)
+    const NEV_NormalPeak = peakNormal.volNormal + w_Bulky * peakNormal.volBulky + w_Freight * peakNormal.volFreight;
+    const pN_true = NEV_NormalPeak / (peakNormal.staff || 1);
+    const pB_true = pN_true / w_Bulky;
+    const pF_true = pN_true / w_Freight;
 
     // We also calculate overall average metrics for summary cards
     let sumTotalVol = 0, sumTotalStaff = 0, countProd = 0;
@@ -434,12 +457,21 @@
     const avgOverallProd = sumTotalStaff > 0 ? sumTotalVol / sumTotalStaff : 0;
 
     derivedProductivity = {
-      normal: peakNormal.productivity,
-      bulky: peakBulky.productivity,
-      freight: peakFreight.productivity,
-      peakNormal,
-      peakBulky,
-      peakFreight,
+      normal: pN_true,
+      bulky: pB_true,
+      freight: pF_true,
+      peakNormal: {
+        ...peakNormal,
+        productivity: pN_true
+      },
+      peakBulky: {
+        ...peakBulky,
+        productivity: pB_true
+      },
+      peakFreight: {
+        ...peakFreight,
+        productivity: pF_true
+      },
       avgProductivity: avgOverallProd / 1000, // Overall average productivity in tons
       sampleDays: useDays.length,
       maxCapacity: peakNormal.vol + peakBulky.vol + peakFreight.vol, // Estimate capacity peak
@@ -447,7 +479,7 @@
       maxStaff: Math.max(peakNormal.staff, peakBulky.staff, peakFreight.staff)
     };
 
-    console.log('[Capacity] Derived productivity from actual peaks:', derivedProductivity);
+    console.log('[Capacity] Derived productivity from actual peaks (NEV model):', derivedProductivity);
   }
 
   // ─── Apply derived staff to config ─────────────────
@@ -1165,13 +1197,13 @@
         let comparisonMsg = `Hệ thống phân tích nhu cầu nhân sự dựa trên <strong>năng suất tại ngày xử lý đỉnh điểm (Peak Day)</strong> của từng nhóm hàng trong quá khứ:<br><br>`;
         
         if (pN) {
-          comparisonMsg += `• <strong>Hàng <5kg:</strong> Peak xử lý <strong>${formatNumber(pN.vol)} đơn</strong> ngày ${pN.date} (Nhân sự ngày đó: ${pN.staff} người $\\rightarrow$ <strong>${(pN.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br>`;
+          comparisonMsg += `• <strong>Hàng <5kg:</strong> Peak xử lý <strong>${formatNumber(pN.vol)} đơn</strong> ngày ${pN.date} (Nhân sự ngày đó: ${pN.staff} người | NS quy đổi: <strong>${(pN.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br>`;
         }
         if (pB) {
-          comparisonMsg += `• <strong>Hàng vừa (5-15kg):</strong> Peak xử lý <strong>${formatNumber(pB.vol)} đơn</strong> ngày ${pB.date} (Nhân sự ngày đó: ${pB.staff} người $\\rightarrow$ <strong>${(pB.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br>`;
+          comparisonMsg += `• <strong>Hàng vừa (5-15kg):</strong> Peak xử lý <strong>${formatNumber(pB.vol)} đơn</strong> ngày ${pB.date} (Nhân sự ngày đó: ${pB.staff} người | NS quy đổi: <strong>${(pB.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br>`;
         }
         if (pF) {
-          comparisonMsg += `• <strong>Hàng to (>15kg):</strong> Peak xử lý <strong>${formatNumber(pF.vol)} đơn</strong> ngày ${pF.date} (Nhân sự ngày đó: ${pF.staff} người $\\rightarrow$ <strong>${(pF.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br><br>`;
+          comparisonMsg += `• <strong>Hàng to (>15kg):</strong> Peak xử lý <strong>${formatNumber(pF.vol)} đơn</strong> ngày ${pF.date} (Nhân sự ngày đó: ${pF.staff} người | NS quy đổi: <strong>${(pF.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br><br>`;
         }
 
         comparisonMsg += `• <strong>Dự báo tương lai:</strong> FC trung bình đạt <strong>${formatNumber(avgFCVol)} đơn/ngày</strong>. Nhân sự cần thiết tương lai trung bình là <strong>${Math.round(avgFCStaffNeeded)} người/ngày</strong> (đã tính ${config.bufferPercent}% buffer).<br><br>`;
