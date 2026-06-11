@@ -472,7 +472,7 @@
         ...peakFreight,
         productivity: pF_true
       },
-      avgProductivity: avgOverallProd / 1000, // Overall average productivity in tons
+      avgProductivity: avgOverallProd, // Overall average productivity in packages
       sampleDays: useDays.length,
       maxCapacity: peakNormal.vol + peakBulky.vol + peakFreight.vol, // Estimate capacity peak
       peakDate: peakNormal.date,
@@ -760,7 +760,7 @@
       maxCapacity,
       delta,
       gapPercent,
-      productivity:  pMix / 1000 // Display productivity in tons/person/shift
+      productivity:  pMix // Display productivity in packages/person/shift
     };
   }
 
@@ -826,11 +826,10 @@
     const dp = derivedProductivity;
     const formatPeak = (peak) => {
       if (!peak || !peak.vol) return '—';
-      const prodTons = peak.productivity / 1000;
       return `<div style="background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid var(--border); font-size:0.7rem; display:flex; flex-direction:column; gap:2px;">
         <div style="display:flex; justify-content:space-between; font-weight:700;">
           <span>Peak: ${formatNumber(peak.vol)} đơn</span>
-          <span style="color:var(--green); font-family:'JetBrains Mono',monospace;">${prodTons.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2})} t/ng</span>
+          <span style="color:var(--green); font-family:'JetBrains Mono',monospace;">${peak.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 1})} đơn/ng</span>
         </div>
         <div style="display:flex; justify-content:space-between; font-size:0.62rem; color:var(--text-muted);">
           <span>Ngày: ${peak.date}</span>
@@ -914,8 +913,8 @@
     const elCapSub = document.getElementById('cap-kpi-sub-max');
     if (elCapSub) {
       const t = config.nvct + config.freelancer;
-      const formattedProd = todayCalc.productivity ? todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—';
-      elCapSub.textContent = `${t} NS (NVCT:${config.nvct} + FL:${config.freelancer}) × ${todayCalc.productivity ? formattedProd + ' tấn/người/ca' : 'chưa có NS'}`;
+      const formattedProd = todayCalc.productivity ? todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 1}) : '—';
+      elCapSub.textContent = `${t} NS (NVCT:${config.nvct} + FL:${config.freelancer}) × ${todayCalc.productivity ? formattedProd + ' đơn/người/ca' : 'chưa có NS'}`;
     }
 
     // Staff Needed
@@ -925,8 +924,8 @@
     const elStaffSub = document.getElementById('cap-kpi-sub-staff');
     if (elStaffSub) {
       if (todayCalc.productivity > 0) {
-        const formattedProd = todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        elStaffSub.textContent = `FC:${formatNumber(todayCalc.fc.total)} ÷ ${formattedProd} t/ng +${config.bufferPercent}% buffer`;
+        const formattedProd = todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 1});
+        elStaffSub.textContent = `FC:${formatNumber(todayCalc.fc.total)} ÷ ${formattedProd} đơn/ng +${config.bufferPercent}% buffer`;
         elStaffSub.style.color = 'var(--text-muted)';
       } else {
         elStaffSub.textContent = 'Chưa tải được Actual để tính năng suất';
@@ -1197,13 +1196,13 @@
         let comparisonMsg = `Hệ thống phân tích nhu cầu nhân sự dựa trên <strong>năng suất tại ngày xử lý đỉnh điểm (Peak Day)</strong> của từng nhóm hàng trong quá khứ:<br><br>`;
         
         if (pN) {
-          comparisonMsg += `• <strong>Hàng <5kg:</strong> Peak xử lý <strong>${formatNumber(pN.vol)} đơn</strong> ngày ${pN.date} (Nhân sự ngày đó: ${pN.staff} người | NS quy đổi: <strong>${(pN.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br>`;
+          comparisonMsg += `• <strong>Hàng <5kg:</strong> Peak xử lý <strong>${formatNumber(pN.vol)} đơn</strong> ngày ${pN.date} (Nhân sự ngày đó: ${pN.staff} người | NS quy đổi: <strong>${pN.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br>`;
         }
         if (pB) {
-          comparisonMsg += `• <strong>Hàng vừa (5-15kg):</strong> Peak xử lý <strong>${formatNumber(pB.vol)} đơn</strong> ngày ${pB.date} (Nhân sự ngày đó: ${pB.staff} người | NS quy đổi: <strong>${(pB.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br>`;
+          comparisonMsg += `• <strong>Hàng vừa (5-15kg):</strong> Peak xử lý <strong>${formatNumber(pB.vol)} đơn</strong> ngày ${pB.date} (Nhân sự ngày đó: ${pB.staff} người | NS quy đổi: <strong>${pB.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br>`;
         }
         if (pF) {
-          comparisonMsg += `• <strong>Hàng to (>15kg):</strong> Peak xử lý <strong>${formatNumber(pF.vol)} đơn</strong> ngày ${pF.date} (Nhân sự ngày đó: ${pF.staff} người | NS quy đổi: <strong>${(pF.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br><br>`;
+          comparisonMsg += `• <strong>Hàng to (>15kg):</strong> Peak xử lý <strong>${formatNumber(pF.vol)} đơn</strong> ngày ${pF.date} (Nhân sự ngày đó: ${pF.staff} người | NS quy đổi: <strong>${pF.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br><br>`;
         }
 
         comparisonMsg += `• <strong>Dự báo tương lai:</strong> FC trung bình đạt <strong>${formatNumber(avgFCVol)} đơn/ngày</strong>. Nhân sự cần thiết tương lai trung bình là <strong>${Math.round(avgFCStaffNeeded)} người/ngày</strong> (đã tính ${config.bufferPercent}% buffer).<br><br>`;
