@@ -1233,57 +1233,60 @@
 
     if (allCalc.length === 0) return;
 
+    const todayIdx = findTodayIndex();
+    const todayCalc = todayIdx >= 0 && todayIdx < allCalc.length ? allCalc[todayIdx] : allCalc[0];
+    if (!todayCalc) return;
+
     const advises = [];
 
-    // ── 0. Phân tích so sánh Lịch Sử (Actual) vs Tương Lai (FC) ──
+    // ── 0. Phân tích cụ thể cho ngày Forecast gần nhất ──
     if (actualHistory && actualHistory.length > 0) {
-      const actualDays = actualHistory.filter(d => d.staffTotal > 0);
-      if (actualDays.length > 0) {
-        const dp = derivedProductivity;
-        const pN = dp?.peakNormal;
-        const pB = dp?.peakBulky;
-        const pF = dp?.peakFreight;
+      const dp = derivedProductivity;
+      const pN = dp?.peakNormal;
+      const pB = dp?.peakBulky;
+      const pF = dp?.peakFreight;
 
-        const avgFCVol = allCalc.reduce((sum, c) => sum + c.fc.total, 0) / allCalc.length;
-        const avgFCStaffNeeded = allCalc.reduce((sum, c) => sum + c.requiredTotal, 0) / allCalc.length;
-
-        let comparisonMsg = `Hệ thống phân tích nhu cầu nhân sự dựa trên <strong>số lượng thực tế (Actual) của ngày có sản lượng gần khớp nhất</strong> trong lịch sử:<br><br>`;
-        
-        comparisonMsg += `• <strong>Số NVCT ngày N:</strong> Được xác định dựa trên số NVCT thực tế hoạt động ngày <strong>N-1</strong> (hôm trước).<br>`;
-        comparisonMsg += `• <strong>Freelancer cần thiết:</strong> Tính toán bằng cách lấy tổng nhân sự từ ngày Actual có sản lượng gần khớp nhất với forecast ngày N, trừ đi số NVCT của ngày N-1.<br><br>`;
-        
-        comparisonMsg += `💡 <strong>Đối chiếu Peak lịch sử (Nhận Kiện):</strong><br>`;
-        if (pN) {
-          comparisonMsg += `• Hàng <5kg: Peak <strong>${formatNumber(pN.vol)} đơn</strong> ngày ${pN.date} (NS quy đổi: <strong>${pN.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br>`;
-        }
-        if (pB) {
-          comparisonMsg += `• Hàng vừa (5-15kg): Peak <strong>${formatNumber(pB.vol)} đơn</strong> ngày ${pB.date} (NS quy đổi: <strong>${pB.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br>`;
-        }
-        if (pF) {
-          comparisonMsg += `• Hàng to (>15kg): Peak <strong>${formatNumber(pF.vol)} đơn</strong> ngày ${pF.date} (NS quy đổi: <strong>${pF.productivity.toLocaleString('vi-VN', {maximumFractionDigits: 1})} đơn/ng</strong>).<br><br>`;
-        }
-
-        comparisonMsg += `• <strong>Dự báo tương lai:</strong> FC trung bình đạt <strong>${formatNumber(avgFCVol)} đơn/ngày</strong>. Nhân sự cần thiết tương lai trung bình là <strong>${Math.round(avgFCStaffNeeded)} người/ngày</strong> (đã tính ${config.bufferPercent}% buffer).<br><br>`;
-
-        comparisonMsg += `💡 <strong>Nhận xét:</strong> Phương án này phản ánh chính xác thực tế vận hành hàng ngày của kho KTC HCM01 bằng cách tham chiếu trực tiếp đến các ngày có khối lượng tương đồng trong quá khứ.`;
-
-        advises.push({
-          type: 'success',
-          title: '📊 Phân tích định mức nhân sự (Theo Actual Gần Khớp & NVCT N-1)',
-          message: comparisonMsg
-        });
+      let comparisonMsg = `Phân tích định mức nhân sự cho ngày forecast gần nhất (<strong>${todayCalc.date}</strong>) với sản lượng <strong>FC Tổng: ${formatNumber(todayCalc.fc.total)} đơn</strong>:<br><br>`;
+      
+      comparisonMsg += `• <strong>Chia theo từng nhóm hàng:</strong><br>`;
+      comparisonMsg += `  - Hàng &lt;5kg (Normal): <strong>${formatNumber(todayCalc.fc.normal)} đơn</strong><br>`;
+      comparisonMsg += `  - Hàng vừa (5-15kg - Bulky): <strong>${formatNumber(todayCalc.fc.bulky)} đơn</strong><br>`;
+      comparisonMsg += `  - Hàng to (&gt;15kg - Freight): <strong>${formatNumber(todayCalc.fc.freight)} đơn</strong><br><br>`;
+      
+      comparisonMsg += `• <strong>Nhân sự cần thiết để hoạt động:</strong><br>`;
+      comparisonMsg += `  - Tổng nhân sự cần (đã tính ${config.bufferPercent}% buffer): <strong>${todayCalc.requiredTotal} người</strong><br>`;
+      comparisonMsg += `  - Số NVCT (lấy thực tế ngày N-1): <strong>${todayCalc.nvctTotal} người</strong><br>`;
+      comparisonMsg += `  - Số Freelancer cần bổ sung: <strong>${todayCalc.flNeeded} người</strong><br><br>`;
+      
+      if (todayCalc.closestActual) {
+        comparisonMsg += `• <strong>Cơ sở đối chiếu Actual lịch sử gần nhất:</strong> Ngày <strong>${todayCalc.closestActual.date}</strong> có sản lượng <strong>${formatNumber(todayCalc.closestActual.volTotal)} đơn</strong> Nhận Kiện (huy động <strong>${todayCalc.closestActual.staffTotal} nhân sự</strong>).<br><br>`;
       }
+      
+      comparisonMsg += `💡 <strong>Nhận xét:</strong> Để chạy sản lượng forecast ngày ${todayCalc.date}, kho cần bố trí tổng cộng <strong>${todayCalc.requiredTotal} người</strong>. Với lực lượng NVCT ngày hôm trước (N-1) hoạt động thực tế là <strong>${todayCalc.nvctTotal} người</strong>, kho cần tuyển/bổ sung thêm <strong>${todayCalc.flNeeded} Freelancer</strong> để bảo đảm vận hành trôi chảy.`;
+
+      advises.push({
+        type: 'success',
+        title: `📊 Phân Tích Định Mức Ngày ${todayCalc.date}`,
+        message: comparisonMsg
+      });
     }
 
-    // ── 1. Weekly summaries ──
+    // ── 1. Weekly summaries (Chỉ hiển thị tuần hiện tại và tương lai) ──
     const weekGroups = {};
+    const today = getVNNow();
+    today.setHours(0, 0, 0, 0);
+    // Limit to weeks containing dates from (today - 7 days) onwards
+    const limitDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
     allCalc.forEach(calc => {
       const d = parseDate(calc.date);
       if (!d) return;
+      if (d < limitDate) return; // Skip past weeks
+
       // ISO week number approximation
       const oneJan = new Date(d.getFullYear(), 0, 1);
       const weekNum = Math.ceil(((d - oneJan) / 86400000 + oneJan.getDay() + 1) / 7);
-      const key = `W${weekNum}`;
+      const key = `Tuần ${weekNum} (${d.getFullYear()})`;
       if (!weekGroups[key]) weekGroups[key] = { days: [], totalFC: 0, maxDelta: -Infinity, sumDelta: 0 };
       weekGroups[key].days.push(calc);
       weekGroups[key].totalFC += calc.fc.total;
@@ -1311,20 +1314,27 @@
       });
     });
 
-    // ── 2. Peak day warning ──
-    let peakDay = allCalc[0];
-    allCalc.forEach(c => { if (c.fc.total > peakDay.fc.total) peakDay = c; });
-
-    advises.push({
-      type: 'warning',
-      title: `⚡ Ngày cao điểm: ${peakDay.date} (${getDayOfWeek(peakDay.date)})`,
-      message: `FC đạt đỉnh <strong>${formatNumber(peakDay.fc.total)} đơn</strong>. ` +
-               `Cần tổng cộng <strong>${peakDay.requiredTotal} nhân sự</strong> ` +
-               `(hiện có ${peakDay.currentTotal}). ` +
-               (peakDay.delta > 0
-                 ? `<strong style="color:var(--red);">Thiếu ${peakDay.delta} người!</strong> Cần tuyển hoặc huy động thêm.`
-                 : `<strong style="color:var(--green);">Đủ nhân sự.</strong>`)
+    // ── 2. Peak day warning (Chỉ hiển thị cảnh báo cho các ngày tương lai) ──
+    const futureCalcs = allCalc.filter(c => {
+      const d = parseDate(c.date);
+      return d && d >= today;
     });
+
+    if (futureCalcs.length > 0) {
+      let peakDay = futureCalcs[0];
+      futureCalcs.forEach(c => { if (c.fc.total > peakDay.fc.total) peakDay = c; });
+
+      advises.push({
+        type: 'warning',
+        title: `⚡ Ngày cao điểm sắp tới: ${peakDay.date} (${getDayOfWeek(peakDay.date)})`,
+        message: `FC đạt đỉnh <strong>${formatNumber(peakDay.fc.total)} đơn</strong>. ` +
+                 `Cần tổng cộng <strong>${peakDay.requiredTotal} nhân sự</strong> ` +
+                 `(gồm <strong>${peakDay.nvctTotal} NVCT</strong> và <strong>${peakDay.flNeeded} Freelancer</strong>). ` +
+                 (peakDay.delta > 0
+                   ? `<strong style="color:var(--red);">Thiếu ${peakDay.delta} người!</strong> Cần tuyển thêm.`
+                   : `<strong style="color:var(--green);">Đủ nhân sự.</strong>`)
+      });
+    }
 
     // ── 3. Trend analysis ──
     if (allCalc.length >= 7) {
