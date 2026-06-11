@@ -1026,12 +1026,19 @@
       return;
     }
 
-    const maxFC       = Math.max(...slice.map(c => c.fc.total), 1);
-    const maxCapacity = slice[0].maxCapacity;
-    const scaleMax    = Math.max(maxFC, maxCapacity) * 1.15;
+    const maxFC = Math.max(...slice.map(c => c.fc.total), 1);
+    
+    // Dynamically get the capacity for the selected date, fallback to today or first slice day
+    const todayStr = getTodayString();
+    const activeDate = selectedDate || (allCalc[findTodayIndex()] || allCalc[0])?.date || todayStr;
+    const activeCalc = allCalc.find(c => c.date === activeDate) || slice[0];
+    const activeCapacity = activeCalc ? activeCalc.maxCapacity : slice[0].maxCapacity;
+    
+    const sliceMaxCap = Math.max(...slice.map(c => c.maxCapacity), 1);
+    const scaleMax = Math.max(maxFC, sliceMaxCap, activeCapacity) * 1.15;
 
-    // Capacity line (horizontal dashed)
-    const capLinePos = (maxCapacity / scaleMax) * 100;
+    // Capacity line (horizontal dashed) matching the active (selected) date's capacity
+    const capLinePos = (activeCapacity / scaleMax) * 100;
     const capLine = document.createElement('div');
     capLine.style.cssText = `
       position: absolute;
@@ -1056,7 +1063,7 @@
       background: var(--bg-secondary);
       padding: 0 4px;
     `;
-    capLabel.textContent = `Capacity: ${formatNumber(maxCapacity)}`;
+    capLabel.textContent = `Capacity: ${formatNumber(activeCapacity)}`;
 
     container.appendChild(capLine);
     container.appendChild(capLabel);
@@ -1072,19 +1079,29 @@
       const normalPct     = calc.fc.total > 0 ? (calc.fc.normal  / calc.fc.total) * totalHeight : 0;
       const bulkyPct      = calc.fc.total > 0 ? (calc.fc.bulky   / calc.fc.total) * totalHeight : 0;
       const freightPct    = calc.fc.total > 0 ? (calc.fc.freight / calc.fc.total) * totalHeight : 0;
-      const isOver        = calc.fc.total > maxCapacity;
+      const isOver        = calc.fc.total > calc.maxCapacity; // Compare dynamically to its own day's capacity!
       const isWeekendDay  = isWeekend(calc.date);
 
-      const tooltipText = `📅 ${calc.date} (${getDayOfWeek(calc.date)})\n` +
-                           `────────────────────\n` +
-                           `FC Tổng: ${formatNumber(calc.fc.total)}\n` +
-                           `  Normal: ${formatNumber(calc.fc.normal)}\n` +
-                           `  Bulky: ${formatNumber(calc.fc.bulky)}\n` +
-                           `  Freight: ${formatNumber(calc.fc.freight)}\n` +
-                           `────────────────────\n` +
-                           `Capacity Max: ${formatNumber(calc.maxCapacity)}\n` +
-                           `NS Cần: ${calc.requiredTotal} (NVCT:${calc.nvctTotal} + FL cần:${calc.flNeeded})\n` +
-                           `FL hiện: ${calc.flTotal} | FL tăng/giảm: ${calc.flDelta > 0 ? '+' : ''}${calc.flDelta}\n` +
+      const tooltipText = `📅 ${calc.date} (${getDayOfWeek(calc.date)})
+` +
+                           `────────────────────
+` +
+                           `FC Tổng: ${formatNumber(calc.fc.total)}
+` +
+                           `  Normal: ${formatNumber(calc.fc.normal)}
+` +
+                           `  Bulky: ${formatNumber(calc.fc.bulky)}
+` +
+                           `  Freight: ${formatNumber(calc.fc.freight)}
+` +
+                           `────────────────────
+` +
+                           `Capacity Max: ${formatNumber(calc.maxCapacity)}
+` +
+                           `NS Cần: ${calc.requiredTotal} (NVCT:${calc.nvctTotal} + FL cần:${calc.flNeeded})
+` +
+                           `FL hiện: ${calc.flTotal} | FL tăng/giảm: ${calc.flDelta > 0 ? '+' : ''}${calc.flDelta}
+` +
                            `Gap: ${calc.gapPercent > 0 ? '+' : ''}${calc.gapPercent.toFixed(1)}%`;
 
       wrapper.title = tooltipText;
@@ -1122,9 +1139,8 @@
     const btnNextHeader = document.getElementById('cap-chart-next');
     if (btnPrevHeader) btnPrevHeader.disabled = startIdx === 0;
     if (btnNextHeader) btnNextHeader.disabled = startIdx + count >= allCalc.length;
-
-
   }
+
 
   // ─── Render: Staffing Table ───────────────────────
   function renderStaffingTable(allCalc) {
@@ -1324,7 +1340,7 @@
       }
 
       let customHtml = `
-        <div class="kpi-card" style="padding: 16px; border-left: 4px solid var(--blue); display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.45); border-radius: var(--radius-lg); margin-bottom: 8px;">
+        <div class="kpi-card dock-advisory-card" style="padding: 16px; border-left: 4px solid var(--blue) !important; display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.45); border-radius: var(--radius-lg); margin-bottom: 8px;">
           <!-- Header -->
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px;">
             <span style="font-weight: 700; font-size: 0.78rem; color: var(--blue-light);">📊 PHÂN TÍCH ĐỊNH MỨC NGÀY ${todayCalc.date}</span>

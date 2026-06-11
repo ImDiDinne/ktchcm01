@@ -1862,3 +1862,38 @@ input[type="range"]::-moz-range-thumb:hover {
 .cap-btn-row .login-btn {
   flex: 1;
 }
+
+/* ── AI Advisory Cards Layout Overrides ── */
+.dock-advisory-card {
+  border-left: 4px solid var(--accent) !important;
+  background: rgba(30, 41, 59, 0.45) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 12px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  transition: var(--transition) !important;
+}
+
+.dock-advisory-card:hover {
+  border-color: var(--border-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.dock-advisory-card.warning {
+  border-left-color: var(--red) !important;
+}
+
+.dock-advisory-card.info {
+  border-left-color: var(--yellow) !important;
+}
+
+.dock-advisory-card.success {
+  border-left-color: var(--green) !important;
+}
