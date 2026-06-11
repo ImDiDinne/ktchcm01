@@ -1633,4 +1633,232 @@ input[type="range"]::-moz-range-thumb:hover {
 }
 
 
+/* ═══════════════════════════════════════
+   Capacity Planning Tab Styles
+   ═══════════════════════════════════════ */
 
+.cap-config-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cap-config-row label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  min-width: 110px;
+  white-space: nowrap;
+}
+
+.cap-config-row input[type="range"] {
+  flex: 1;
+  cursor: pointer;
+}
+
+.cap-config-row input[type="number"] {
+  width: 80px;
+  background: #1e293b;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+  outline: none;
+}
+
+.cap-config-row input[type="number"]:focus {
+  border-color: var(--accent);
+}
+
+.cap-config-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--accent);
+  min-width: 70px;
+  text-align: right;
+}
+
+.cap-chart-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cap-chart-nav button {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.cap-chart-nav button:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.cap-chart-nav .cap-date-range-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Capacity bar styling */
+.cap-bar-wrapper {
+  flex: 1;
+  min-width: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.cap-bar-stack {
+  width: 100%;
+  max-width: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+  border-radius: 3px 3px 0 0;
+  overflow: hidden;
+}
+
+.cap-bar-segment {
+  width: 100%;
+  transition: height 0.4s ease;
+}
+
+.cap-bar-normal { background: linear-gradient(180deg, rgba(96, 165, 250, 0.9), rgba(96, 165, 250, 0.4)); }
+.cap-bar-bulky { background: linear-gradient(180deg, rgba(251, 191, 36, 0.9), rgba(251, 191, 36, 0.4)); }
+.cap-bar-freight { background: linear-gradient(180deg, rgba(251, 146, 60, 0.9), rgba(251, 146, 60, 0.4)); }
+
+.cap-bar-over .cap-bar-normal { background: linear-gradient(180deg, rgba(248, 113, 113, 0.9), rgba(248, 113, 113, 0.4)); }
+.cap-bar-over .cap-bar-bulky { background: linear-gradient(180deg, rgba(248, 113, 113, 0.7), rgba(248, 113, 113, 0.3)); }
+.cap-bar-over .cap-bar-freight { background: linear-gradient(180deg, rgba(248, 113, 113, 0.5), rgba(248, 113, 113, 0.2)); }
+
+.cap-bar-label {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cap-bar-value-label {
+  font-size: 0.55rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.cap-capacity-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--green);
+  border-top: 2px dashed var(--green);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.cap-capacity-line::after {
+  content: 'Max';
+  position: absolute;
+  right: -4px;
+  top: -14px;
+  font-size: 0.55rem;
+  color: var(--green);
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Delta badges */
+.cap-delta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cap-delta-badge.increase {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--red);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.cap-delta-badge.decrease {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--green);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.cap-delta-badge.neutral {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Weekend row highlight */
+.cap-row-weekend {
+  background: rgba(30, 41, 59, 0.4) !important;
+}
+
+.cap-row-weekend td {
+  color: var(--text-muted) !important;
+}
+
+/* Paste modal */
+#cap-paste-modal .login-card {
+  max-width: 620px;
+}
+
+#cap-paste-textarea {
+  width: 100%;
+  min-height: 200px;
+  background: #0f172a;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+#cap-paste-textarea:focus {
+  border-color: var(--accent);
+}
+
+#cap-paste-textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.cap-btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cap-btn-row .login-btn {
+  flex: 1;
+}

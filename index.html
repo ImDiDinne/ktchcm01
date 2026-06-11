@@ -12,7 +12,7 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- CSP Policy -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://script.google.com https://script.googleusercontent.com https://api.github.com https://imdidinne.github.io https://raw.githubusercontent.com; img-src 'self' data: blob:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://script.google.com https://script.googleusercontent.com https://api.github.com https://imdidinne.github.io https://raw.githubusercontent.com https://docs.google.com; img-src 'self' data: blob:;">
 
   <!-- CSS -->
   <link rel="stylesheet" href="style.css">
@@ -64,6 +64,7 @@
       <button class="nav-main-tab active" id="tab-btn-inventory">TỒN KHO REALTIME</button>
       <button class="nav-main-tab" id="tab-btn-dock">INBOUND REALTIME</button>
       <button class="nav-main-tab" id="tab-btn-prediction">DỰ BÁO & KẾ HOẠCH</button>
+      <button class="nav-main-tab" id="tab-btn-capacity">NĂNG LỰC & NHÂN SỰ</button>
     </div>
 
     <!-- Tab Content: Inventory -->
@@ -455,6 +456,169 @@
       </div>
     </div>
 
+    <!-- Tab Content: Capacity & Workforce Planning -->
+    <div id="tab-content-capacity" class="tab-content-main" style="display: none;">
+      <!-- Data Heartbeat -->
+      <div class="data-heartbeat animate-in" id="capacity-heartbeat">
+        <span class="pulse-dot green"></span>
+        <span>Năng lực: Sẵn sàng</span>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="kpi-card animate-in delay-1">
+          <div class="kpi-label">FC Hôm Nay / Ngày Gần Nhất</div>
+          <div class="kpi-value" id="cap-kpi-fc-today">—</div>
+          <div class="kpi-sub" id="cap-kpi-sub-fc">Tổng forecast đơn hàng</div>
+        </div>
+        <div class="kpi-card animate-in delay-2">
+          <div class="kpi-label">Khả Năng Xử Lý Tối Đa</div>
+          <div class="kpi-value" id="cap-kpi-capacity-max" style="color: var(--blue-light);">—</div>
+          <div class="kpi-sub" id="cap-kpi-sub-max">Dựa trên nhân sự & năng suất</div>
+        </div>
+        <div class="kpi-card animate-in delay-3">
+          <div class="kpi-label">Nhân Sự Cần Thiết</div>
+          <div class="kpi-value" id="cap-kpi-staff-needed" style="color: var(--yellow);">—</div>
+          <div class="kpi-sub" id="cap-kpi-sub-staff">Bao gồm buffer</div>
+        </div>
+        <div class="kpi-card animate-in delay-4">
+          <div class="kpi-label">Gap Năng Lực (%)</div>
+          <div class="kpi-value" id="cap-kpi-gap-pct" style="color: var(--green);">—</div>
+          <div class="kpi-sub" id="cap-kpi-sub-gap">FC vs Capacity Max</div>
+        </div>
+      </div>
+
+      <!-- Configuration Panel -->
+      <div style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+        <!-- Card A: Năng Suất Xử Lý -->
+        <div class="chart-card" style="flex: 1; min-width: 280px;">
+          <div class="card-title">Năng Suất Xử Lý (đơn/người/ngày)</div>
+          <div class="cap-config-row">
+            <label>Normal (&lt;5kg)</label>
+            <input type="range" id="cap-prod-normal" min="500" max="10000" step="100" value="3000">
+            <span class="cap-config-val" id="cap-prod-normal-val">3,000</span>
+          </div>
+          <div class="cap-config-row">
+            <label>Bulky (5-15kg)</label>
+            <input type="range" id="cap-prod-bulky" min="100" max="5000" step="50" value="800">
+            <span class="cap-config-val" id="cap-prod-bulky-val">800</span>
+          </div>
+          <div class="cap-config-row">
+            <label>Freight (&gt;15kg)</label>
+            <input type="range" id="cap-prod-freight" min="50" max="2000" step="25" value="300">
+            <span class="cap-config-val" id="cap-prod-freight-val">300</span>
+          </div>
+        </div>
+
+        <!-- Card B: Nhân Sự Hiện Có -->
+        <div class="chart-card" style="flex: 1; min-width: 220px;">
+          <div class="card-title">Nhân Sự Hiện Có</div>
+          <div class="cap-config-row">
+            <label>Normal</label>
+            <input type="number" id="cap-staff-normal" value="250">
+          </div>
+          <div class="cap-config-row">
+            <label>Bulky</label>
+            <input type="number" id="cap-staff-bulky" value="50">
+          </div>
+          <div class="cap-config-row">
+            <label>Freight</label>
+            <input type="number" id="cap-staff-freight" value="30">
+          </div>
+        </div>
+
+        <!-- Card C: Buffer & Data Controls -->
+        <div class="chart-card" style="flex: 1; min-width: 260px;">
+          <div class="card-title">Buffer & Data Controls</div>
+          <div class="cap-config-row">
+            <label>Buffer (%)</label>
+            <input type="range" id="cap-buffer" min="0" max="30" step="1" value="10">
+            <span class="cap-config-val" id="cap-buffer-val">10%</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+            <button class="filter-btn" id="cap-btn-refresh" style="border-color: var(--accent); color: var(--accent-light); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">🔄 Tải FC Từ Sheet</button>
+            <button class="filter-btn" id="cap-btn-paste" style="border-color: var(--green); color: var(--green); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📋 Dán Dữ Liệu FC</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Section -->
+      <div class="content-grid">
+        <!-- Left: FC vs Capacity Chart -->
+        <div class="table-card animate-in delay-2" style="flex: 2;">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <div class="card-title">Biểu Đồ FC vs Khả Năng Xử Lý Theo Ngày</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 12px;">
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--blue); display: inline-block; border-radius: 2px;"></span> Normal</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--yellow); display: inline-block; border-radius: 2px;"></span> Bulky</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent); display: inline-block; border-radius: 2px;"></span> Freight</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 2px; background: var(--green); display: inline-block;"></span> Capacity Max</span>
+            </div>
+          </div>
+          <div style="padding: 8px 20px;">
+            <div class="cap-chart-nav">
+              <button id="cap-chart-prev">◀</button>
+              <span class="cap-date-range-text" id="cap-date-range-display">—</span>
+              <button id="cap-chart-next">▶</button>
+            </div>
+          </div>
+          <div style="padding: 0 20px 20px;">
+            <div class="flow-chart-container" id="cap-chart-container" style="height: 280px; align-items: flex-end; padding-bottom: 35px;"></div>
+          </div>
+        </div>
+
+        <!-- Right: AI Advisory -->
+        <div class="side-panel">
+          <div class="chart-card animate-in delay-3" style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="card-title">Khuyến Nghị Nhân Sự (AI Advisory)</div>
+            <div style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;" id="cap-advisory-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staffing Detail Table -->
+      <div class="table-card animate-in delay-4" style="margin-top: 16px;">
+        <div class="card-header">
+          <div class="card-title">Bảng Chi Tiết Nhân Sự Cần Thiết Theo Ngày</div>
+        </div>
+        <div class="table-wrapper" style="max-height: 420px; overflow-y: auto;">
+          <table class="pivot-table" id="cap-staffing-table" style="width: 100%; font-size: 0.76rem;">
+            <thead>
+              <tr>
+                <th style="text-align: left; padding-left: 10px;">Ngày</th>
+                <th style="text-align: center;">Thứ</th>
+                <th style="text-align: center; color: var(--blue);">FC Normal</th>
+                <th style="text-align: center; color: var(--yellow);">FC Bulky</th>
+                <th style="text-align: center; color: var(--accent);">FC Freight</th>
+                <th style="text-align: center; font-weight: 700;">FC Tổng</th>
+                <th style="text-align: center;">Capacity Max</th>
+                <th style="text-align: center; color: var(--blue-light);">NS Cần</th>
+                <th style="text-align: center;">NS Hiện</th>
+                <th style="text-align: center; color: var(--accent-light);">Tăng/Giảm</th>
+              </tr>
+            </thead>
+            <tbody id="cap-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paste FC Data Modal -->
+    <div id="cap-paste-modal" class="login-overlay" style="display: none;">
+      <div class="login-card" style="max-width: 600px;">
+        <div class="login-logo">📋</div>
+        <h2>Dán Dữ Liệu Forecast</h2>
+        <p class="login-subtitle">Copy từ Google Sheets (chọn cột Ngày, Normal, Bulky, Freight) rồi dán vào đây:</p>
+        <textarea id="cap-paste-textarea" rows="10" placeholder="VD: Dán từ Google Sheets&#10;2024-01-15&#9;12000&#9;3500&#9;1200&#10;2024-01-16&#9;13000&#9;3800&#9;1100&#10;..."></textarea>
+        <div class="cap-btn-row">
+          <button class="login-btn" id="cap-btn-apply-paste">Áp Dụng</button>
+          <button class="login-btn" id="cap-btn-cancel-paste" style="background: #475569;">Đóng</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Libraries -->
@@ -468,6 +632,7 @@
   <script src="js/inventory.js"></script>
   <script src="js/inbound.js"></script>
   <script src="js/prediction.js"></script>
+  <script src="js/capacity.js"></script>
   <script src="js/app.js"></script>
 
   <!-- Login Overlay (Modal) -->

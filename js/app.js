@@ -363,22 +363,26 @@
     const tabBtnInventory = document.getElementById('tab-btn-inventory');
     const tabBtnDock = document.getElementById('tab-btn-dock');
     const tabBtnPrediction = document.getElementById('tab-btn-prediction');
+    const tabBtnCapacity = document.getElementById('tab-btn-capacity');
     
     const tabContentInventory = document.getElementById('tab-content-inventory');
     const tabContentDock = document.getElementById('tab-content-dock');
     const tabContentPrediction = document.getElementById('tab-content-prediction');
+    const tabContentCapacity = document.getElementById('tab-content-capacity');
     
     function deactivateAllTabs() {
       if (tabBtnInventory) tabBtnInventory.classList.remove('active');
       if (tabBtnDock) tabBtnDock.classList.remove('active');
       if (tabBtnPrediction) tabBtnPrediction.classList.remove('active');
+      if (tabBtnCapacity) tabBtnCapacity.classList.remove('active');
       
       if (tabContentInventory) tabContentInventory.style.display = 'none';
       if (tabContentDock) tabContentDock.style.display = 'none';
       if (tabContentPrediction) tabContentPrediction.style.display = 'none';
+      if (tabContentCapacity) tabContentCapacity.style.display = 'none';
     }
     
-    if (tabBtnInventory && tabBtnDock && tabBtnPrediction && tabContentInventory && tabContentDock && tabContentPrediction) {
+    if (tabBtnInventory && tabBtnDock && tabBtnPrediction && tabBtnCapacity && tabContentInventory && tabContentDock && tabContentPrediction && tabContentCapacity) {
       tabBtnInventory.addEventListener('click', () => {
         deactivateAllTabs();
         tabBtnInventory.classList.add('active');
@@ -409,6 +413,21 @@
           if (window.prediction && window.prediction.renderPredictionDashboard) {
             window.prediction.renderPredictionDashboard();
           }
+        }
+      });
+
+      let capacityInitialized = false;
+      tabBtnCapacity.addEventListener('click', () => {
+        deactivateAllTabs();
+        tabBtnCapacity.classList.add('active');
+        tabContentCapacity.style.display = 'block';
+        
+        if (window.capacity) {
+          if (!capacityInitialized) {
+            window.capacity.initCapacity();
+            capacityInitialized = true;
+          }
+          window.capacity.renderCapacityDashboard();
         }
       });
     }
