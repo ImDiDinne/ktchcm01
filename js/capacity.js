@@ -163,6 +163,7 @@
   let actualHistory = [];
   // Derived productivity from actual data
   let derivedProductivity = null; // { normal, bulky, freight, maxCapacity, peakDate, sampleDays }
+  let selectedDate = null;
 
   function saveFCData() {
     try {
@@ -1175,19 +1176,51 @@
         deltaBadge = `<span style="display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-weight:700; font-family:'JetBrains Mono',monospace; background:rgba(96,165,250,0.1); color:var(--blue); border:1px solid rgba(96,165,250,0.2);">0</span>`;
       }
 
+      const defaultTodayCalc = allCalc[findTodayIndex()] || allCalc[0];
+      const activeDate = selectedDate || (defaultTodayCalc ? defaultTodayCalc.date : todayStr);
+      const isSelected = calc.date === activeDate;
+
       const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      tr.style.transition = 'background 0.2s, outline 0.2s';
       if (calc.closestActual) {
         tr.title = `Tính dựa trên ngày thực tế ${calc.closestActual.date}\n` +
                    `Sản lượng: ${formatNumber(calc.closestActual.volTotal)} đơn\n` +
                    `Nhân sự thực tế ngày đó: ${calc.closestActual.staffTotal} người`;
       }
-      if (isToday) {
+      
+      if (isSelected) {
+        tr.style.background = 'rgba(59, 130, 246, 0.15)';
+        tr.style.outline = '1.5px solid var(--blue)';
+      } else if (isToday) {
         tr.id = 'cap-row-today';
-        tr.style.background = 'rgba(52, 211, 153, 0.15)';
-        tr.style.outline = '1.5px solid var(--green)';
+        tr.style.background = 'rgba(52, 211, 153, 0.08)';
+        tr.style.border = '1px dashed var(--green)';
       } else if (weekendFlag) {
         tr.style.background = 'rgba(251, 146, 60, 0.04)';
       }
+
+      tr.addEventListener('click', () => {
+        selectedDate = calc.date;
+        renderCapacityDashboard();
+      });
+
+      tr.addEventListener('mouseover', () => {
+        if (!isSelected) {
+          tr.style.background = 'rgba(255, 255, 255, 0.05)';
+        }
+      });
+      tr.addEventListener('mouseout', () => {
+        if (!isSelected) {
+          if (isToday) {
+            tr.style.background = 'rgba(52, 211, 153, 0.08)';
+          } else if (weekendFlag) {
+            tr.style.background = 'rgba(251, 146, 60, 0.04)';
+          } else {
+            tr.style.background = 'transparent';
+          }
+        }
+      });
 
       const monoStyle  = "font-family:'JetBrains Mono',monospace; font-size:0.72rem;";
       const centerCell = "text-align:center; padding:8px 6px;";
@@ -1216,13 +1249,15 @@
       tbody.appendChild(tr);
     });
 
-    // Auto scroll to today's row in the table
-    setTimeout(() => {
-      const todayRow = document.getElementById('cap-row-today');
-      if (todayRow) {
-        todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 150);
+    // Auto scroll to today's row in the table (only on initial load)
+    if (!selectedDate) {
+      setTimeout(() => {
+        const todayRow = document.getElementById('cap-row-today');
+        if (todayRow) {
+          todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 150);
+    }
   }
 
   // ─── Render: Advisory Panel ───────────────────────
@@ -1233,8 +1268,14 @@
 
     if (allCalc.length === 0) return;
 
-    const todayIdx = findTodayIndex();
-    const todayCalc = todayIdx >= 0 && todayIdx < allCalc.length ? allCalc[todayIdx] : allCalc[0];
+    let todayCalc = null;
+    if (selectedDate) {
+      todayCalc = allCalc.find(c => c.date === selectedDate);
+    }
+    if (!todayCalc) {
+      const todayIdx = findTodayIndex();
+      todayCalc = todayIdx >= 0 && todayIdx < allCalc.length ? allCalc[todayIdx] : allCalc[0];
+    }
     if (!todayCalc) return;
 
     const advises = [];
@@ -1246,28 +1287,69 @@
       const pB = dp?.peakBulky;
       const pF = dp?.peakFreight;
 
-      let comparisonMsg = `Phân tích định mức nhân sự cho ngày forecast gần nhất (<strong>${todayCalc.date}</strong>) với sản lượng <strong>FC Tổng: ${formatNumber(todayCalc.fc.total)} đơn</strong>:<br><br>`;
-      
-      comparisonMsg += `• <strong>Chia theo từng nhóm hàng:</strong><br>`;
-      comparisonMsg += `  - Hàng &lt;5kg (Normal): <strong>${formatNumber(todayCalc.fc.normal)} đơn</strong><br>`;
-      comparisonMsg += `  - Hàng vừa (5-15kg - Bulky): <strong>${formatNumber(todayCalc.fc.bulky)} đơn</strong><br>`;
-      comparisonMsg += `  - Hàng to (&gt;15kg - Freight): <strong>${formatNumber(todayCalc.fc.freight)} đơn</strong><br><br>`;
-      
-      comparisonMsg += `• <strong>Nhân sự cần thiết để hoạt động:</strong><br>`;
-      comparisonMsg += `  - Tổng nhân sự cần (đã tính ${config.bufferPercent}% buffer): <strong>${todayCalc.requiredTotal} người</strong><br>`;
-      comparisonMsg += `  - Số NVCT (lấy thực tế ngày N-1): <strong>${todayCalc.nvctTotal} người</strong><br>`;
-      comparisonMsg += `  - Số Freelancer cần bổ sung: <strong>${todayCalc.flNeeded} người</strong><br><br>`;
-      
-      if (todayCalc.closestActual) {
-        comparisonMsg += `• <strong>Cơ sở đối chiếu Actual lịch sử gần nhất:</strong> Ngày <strong>${todayCalc.closestActual.date}</strong> có sản lượng <strong>${formatNumber(todayCalc.closestActual.volTotal)} đơn</strong> Nhận Kiện (huy động <strong>${todayCalc.closestActual.staffTotal} nhân sự</strong>).<br><br>`;
-      }
-      
-      comparisonMsg += `💡 <strong>Nhận xét:</strong> Để chạy sản lượng forecast ngày ${todayCalc.date}, kho cần bố trí tổng cộng <strong>${todayCalc.requiredTotal} người</strong>. Với lực lượng NVCT ngày hôm trước (N-1) hoạt động thực tế là <strong>${todayCalc.nvctTotal} người</strong>, kho cần tuyển/bổ sung thêm <strong>${todayCalc.flNeeded} Freelancer</strong> để bảo đảm vận hành trôi chảy.`;
+      let customHtml = `
+        <div class="kpi-card" style="padding: 16px; border-left: 4px solid var(--blue); display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.45); border-radius: var(--radius-lg); margin-bottom: 8px;">
+          <!-- Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px;">
+            <span style="font-weight: 700; font-size: 0.78rem; color: var(--blue-light);">📊 PHÂN TÍCH ĐỊNH MỨC NGÀY ${todayCalc.date}</span>
+            <span style="font-size: 0.65rem; font-weight: 600; padding: 2px 6px; border-radius: 12px; background: rgba(96, 165, 250, 0.12); color: var(--blue-light);">Forecast N</span>
+          </div>
+          
+          <!-- Vol FC chia theo nhóm hàng -->
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-weight: 600; font-size: 0.74rem; color: var(--text-primary); display: flex; justify-content: space-between;">
+              <span>📦 Sản lượng Forecast (FC Tổng):</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-primary);">${formatNumber(todayCalc.fc.total)} đơn</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 4px;">
+              <div style="background: rgba(96, 165, 250, 0.04); border: 1px solid rgba(96, 165, 250, 0.12); padding: 4px 6px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 0.6rem; color: var(--text-muted);">Normal (&lt;5kg)</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #60a5fa; margin-top: 2px;">${formatNumber(todayCalc.fc.normal)}</div>
+              </div>
+              <div style="background: rgba(251, 191, 36, 0.04); border: 1px solid rgba(251, 191, 36, 0.12); padding: 4px 6px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 0.6rem; color: var(--text-muted);">Bulky (5-15kg)</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #fbbf24; margin-top: 2px;">${formatNumber(todayCalc.fc.bulky)}</div>
+              </div>
+              <div style="background: rgba(251, 146, 60, 0.04); border: 1px solid rgba(251, 146, 60, 0.12); padding: 4px 6px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 0.6rem; color: var(--text-muted);">Freight (&gt;15kg)</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #fb923c; margin-top: 2px;">${formatNumber(todayCalc.fc.freight)}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nhu cầu nhân sự -->
+          <div style="display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary);">
+              <span>👥 Tổng nhân sự cần (gồm ${config.bufferPercent}% buffer):</span>
+              <strong style="font-family: 'JetBrains Mono', monospace; color: var(--text-primary);">${todayCalc.requiredTotal} người</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary);">
+              <span>👔 Số NVCT (lấy từ ngày N-1):</span>
+              <strong style="font-family: 'JetBrains Mono', monospace; color: var(--green);">${todayCalc.nvctTotal} người</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); align-items: center;">
+              <span>🧡 Số Freelancer cần bổ sung:</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(52, 211, 153, 0.12)'}; color: ${todayCalc.flNeeded > 0 ? 'var(--red)' : 'var(--green)'}; border: 1px solid ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(52, 211, 153, 0.2)'};">${todayCalc.flNeeded} người</span>
+            </div>
+          </div>
+
+          <!-- Note/Closest actual day info -->
+          ${todayCalc.closestActual ? `
+          <div style="font-size: 0.65rem; color: var(--text-muted); background: rgba(255, 255, 255, 0.02); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+            📌 <strong>Đối chiếu Actual:</strong> So sánh với ngày lịch sử <strong>${todayCalc.closestActual.date}</strong> có sản lượng <strong>${formatNumber(todayCalc.closestActual.volTotal)} đơn</strong> Nhận Kiện (sử dụng <strong>${todayCalc.closestActual.staffTotal} nhân sự</strong>).
+          </div>
+          ` : ''}
+          
+          <!-- Nhận xét chi tiết bằng chữ -->
+          <div style="font-size: 0.7rem; color: var(--text-secondary); line-height: 1.45; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+            💡 <strong>Nhận xét:</strong> Để đáp ứng sản lượng forecast ngày ${todayCalc.date}, kho cần bố trí tổng cộng <strong>${todayCalc.requiredTotal} nhân sự</strong>. Với lực lượng NVCT hoạt động ngày hôm trước (N-1) là <strong>${todayCalc.nvctTotal} người</strong>, kho cần bổ sung thêm <strong>${todayCalc.flNeeded} Freelancer</strong> để đảm bảo vận hành ổn định.
+          </div>
+        </div>
+      `;
 
       advises.push({
-        type: 'success',
-        title: `📊 Phân Tích Định Mức Ngày ${todayCalc.date}`,
-        message: comparisonMsg
+        isCustomHTML: true,
+        html: customHtml
       });
     }
 
@@ -1380,6 +1462,15 @@
 
     // Render advisory cards
     advises.forEach(adv => {
+      if (adv.isCustomHTML) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = adv.html.trim();
+        const element = tempDiv.firstElementChild;
+        if (element) {
+          container.appendChild(element);
+        }
+        return;
+      }
       const card = document.createElement('div');
       card.className = `kpi-card dock-advisory-card ${adv.type}`;
       card.style.padding = '12px';
