@@ -289,22 +289,22 @@
         const dateStr = headerCols[c].trim();
         if (!dateStr || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) continue;
 
-        const vN = parseVNNumber(nNhan[c]) + parseVNNumber(nDong[c]) + parseVNNumber(nXuat[c]);
-        const vB = parseVNNumber(bNhan[c]) + parseVNNumber(bDong[c]) + parseVNNumber(bXuat[c]);
-        const vF = parseVNNumber(fNhan[c]) + parseVNNumber(fDong[c]) + parseVNNumber(fXuat[c]);
-        const vol   = parseVNNumber(volCols[c] || '0');
+        const vN = parseVNNumber(nNhan[c]);
+        const vB = parseVNNumber(bNhan[c]);
+        const vF = parseVNNumber(fNhan[c]);
+        const volTotal = vN + vB + vF;
         const staff = parseVNNumber(staffCols[c] || '0');
         const nvct  = parseVNNumber(nvctCols[c] || '0');
         const fl    = parseVNNumber(flCols[c] || '0');
 
-        if (vol === 0 && staff === 0) continue; // Skip empty days
+        if (volTotal === 0 && staff === 0) continue; // Skip empty days
 
         result.push({
           date: dateStr,
           volNormal: vN,
           volBulky: vB,
           volFreight: vF,
-          volTotal: vol || (vN + vB + vF),
+          volTotal: volTotal,
           staffTotal: staff,
           nvct: nvct,
           freelancer: fl
