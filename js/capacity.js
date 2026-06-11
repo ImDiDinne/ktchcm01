@@ -252,37 +252,46 @@
       const headerCols = csvSplit(lines[0]); // dates
       const volCols    = csvSplit(lines[1]); // HCM01 volume total
       
-      // Find staff section: look for row starting with "Nhân sự" or "HCM01" after a gap
-      let staffRowIdx = -1;
-      let nvctRowIdx  = -1;
-      let flRowIdx    = -1;
-      
+      // Find sections dynamically
+      let nhanIdx = -1, dongIdx = -1, xuatIdx = -1, staffRowIdx = -1;
       for (let i = 2; i < lines.length; i++) {
-        const firstCell = csvSplit(lines[i])[0].trim();
-        if (firstCell.toLowerCase().includes('nhân sự')) {
-          // Next rows: HCM01 total, NVCT, Freelancers
-          staffRowIdx = i + 1;
-          nvctRowIdx  = i + 2;
-          flRowIdx    = i + 3;
-          break;
-        }
+        const firstCell = csvSplit(lines[i])[0].trim().toLowerCase();
+        if (firstCell.includes('nhận kiện')) nhanIdx = i;
+        else if (firstCell.includes('đóng kiện')) dongIdx = i;
+        else if (firstCell.includes('xuất kiện')) xuatIdx = i;
+        else if (firstCell.includes('nhân sự')) staffRowIdx = i;
       }
 
-      if (staffRowIdx < 0) {
-        console.warn('[Capacity] Could not find Nhân sự section in sheet');
+      if (nhanIdx < 0 || dongIdx < 0 || xuatIdx < 0 || staffRowIdx < 0) {
+        console.warn('[Capacity] Could not find all sections in actual sheet');
         return false;
       }
 
-      const staffCols = csvSplit(lines[staffRowIdx]);
-      const nvctCols  = csvSplit(lines[nvctRowIdx]);
-      const flCols    = csvSplit(lines[flRowIdx]);
+      const nNhan = csvSplit(lines[nhanIdx + 1]);
+      const bNhan = csvSplit(lines[nhanIdx + 2]);
+      const fNhan = csvSplit(lines[nhanIdx + 3]);
 
-      // Transpose: dates are columns, starting from col 1
+      const nDong = csvSplit(lines[dongIdx + 1]);
+      const bDong = csvSplit(lines[dongIdx + 2]);
+      const fDong = csvSplit(lines[dongIdx + 3]);
+
+      const nXuat = csvSplit(lines[xuatIdx + 1]);
+      const bXuat = csvSplit(lines[xuatIdx + 2]);
+      const fXuat = csvSplit(lines[xuatIdx + 3]);
+
+      const staffCols = csvSplit(lines[staffRowIdx + 1]);
+      const nvctCols  = csvSplit(lines[staffRowIdx + 2]);
+      const flCols    = csvSplit(lines[staffRowIdx + 3]);
+
+      // Transpose
       const result = [];
       for (let c = 1; c < headerCols.length; c++) {
         const dateStr = headerCols[c].trim();
         if (!dateStr || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) continue;
 
+        const vN = parseVNNumber(nNhan[c]) + parseVNNumber(nDong[c]) + parseVNNumber(nXuat[c]);
+        const vB = parseVNNumber(bNhan[c]) + parseVNNumber(bDong[c]) + parseVNNumber(bXuat[c]);
+        const vF = parseVNNumber(fNhan[c]) + parseVNNumber(fDong[c]) + parseVNNumber(fXuat[c]);
         const vol   = parseVNNumber(volCols[c] || '0');
         const staff = parseVNNumber(staffCols[c] || '0');
         const nvct  = parseVNNumber(nvctCols[c] || '0');
@@ -292,9 +301,10 @@
 
         result.push({
           date: dateStr,
-          volNormal: 0, volBulky: 0, volFreight: 0, // Not split in this mode
-          volTotal: vol,
-          staffNormal: 0, staffBulky: 0, staffFreight: 0,
+          volNormal: vN,
+          volBulky: vB,
+          volFreight: vF,
+          volTotal: vol || (vN + vB + vF),
           staffTotal: staff,
           nvct: nvct,
           freelancer: fl
@@ -373,46 +383,71 @@
       return;
     }
 
-    // Filter days with staffTotal > 0 and volTotal > 0
-    const useDays = actualHistory.filter(d =>
-      d.staffTotal > 0 && d.volTotal > 0
-    );
-
+    // Filter days with staffTotal > 0
+    const useDays = actualHistory.filter(d => d.staffTotal > 0);
     if (useDays.length === 0) {
       derivedProductivity = null;
       return;
     }
 
-    // Calculate single unified productivity = volTotal / staffTotal per day
-    let sumProd = 0, countProd = 0;
-    let maxVol = 0, peakDate = '';
-    let maxStaffTotal = 0;
+    // Find peak actual volume ever handled for each group
+    let peakNormal  = { date: '', vol: 0, staff: 0, productivity: 0 };
+    let peakBulky   = { date: '', vol: 0, staff: 0, productivity: 0 };
+    let peakFreight = { date: '', vol: 0, staff: 0, productivity: 0 };
 
     useDays.forEach(d => {
-      if (d.staffTotal > 0 && d.volTotal > 0) {
-        sumProd += d.volTotal / d.staffTotal;
-        countProd++;
+      if (d.volNormal > peakNormal.vol) {
+        peakNormal = {
+          date: d.date,
+          vol: d.volNormal,
+          staff: d.staffTotal,
+          productivity: d.volNormal / d.staffTotal
+        };
       }
-      if (d.volTotal > maxVol) {
-        maxVol = d.volTotal;
-        peakDate = d.date;
+      if (d.volBulky > peakBulky.vol) {
+        peakBulky = {
+          date: d.date,
+          vol: d.volBulky,
+          staff: d.staffTotal,
+          productivity: d.volBulky / d.staffTotal
+        };
       }
-      if (d.staffTotal > maxStaffTotal) maxStaffTotal = d.staffTotal;
+      if (d.volFreight > peakFreight.vol) {
+        peakFreight = {
+          date: d.date,
+          vol: d.volFreight,
+          staff: d.staffTotal,
+          productivity: d.volFreight / d.staffTotal
+        };
+      }
     });
 
-    const avgProd = countProd > 0 ? (sumProd / countProd) : null;
-    // Convert package count/person/shift to tons/person/shift (assume 1 package = 1 kg = 0.001 tons)
-    const avgProdTons = avgProd ? avgProd / 1000 : null;
+    // We also calculate overall average metrics for summary cards
+    let sumTotalVol = 0, sumTotalStaff = 0, countProd = 0;
+    useDays.forEach(d => {
+      if (d.volTotal > 0) {
+        sumTotalVol += d.volTotal;
+        sumTotalStaff += d.staffTotal;
+        countProd++;
+      }
+    });
+    const avgOverallProd = sumTotalStaff > 0 ? sumTotalVol / sumTotalStaff : 0;
 
     derivedProductivity = {
-      avgProductivity: avgProdTons,   // tấn/người/ca (e.g. 1.05)
-      maxCapacity: maxVol,
-      peakDate: peakDate,
+      normal: peakNormal.productivity,
+      bulky: peakBulky.productivity,
+      freight: peakFreight.productivity,
+      peakNormal,
+      peakBulky,
+      peakFreight,
+      avgProductivity: avgOverallProd / 1000, // Overall average productivity in tons
       sampleDays: useDays.length,
-      maxStaff: maxStaffTotal
+      maxCapacity: peakNormal.vol + peakBulky.vol + peakFreight.vol, // Estimate capacity peak
+      peakDate: peakNormal.date,
+      maxStaff: Math.max(peakNormal.staff, peakBulky.staff, peakFreight.staff)
     };
 
-    console.log('[Capacity] Derived productivity from actual:', derivedProductivity);
+    console.log('[Capacity] Derived productivity from actual peaks:', derivedProductivity);
   }
 
   // ─── Apply derived staff to config ─────────────────
@@ -655,16 +690,24 @@
     const fl   = config.freelancer || 0;
     const currentTotal = nvct + fl;
 
-    // Get productivity from derived data (tấn/người/ca, e.g. 1.05)
-    const prod = derivedProductivity?.avgProductivity || 0;
-    const prodInPackages = prod * 1000; // e.g. 1050
+    // Get peak productivities from derived data
+    const pN = derivedProductivity?.peakNormal?.productivity || 0;
+    const pB = derivedProductivity?.peakBulky?.productivity || 0;
+    const pF = derivedProductivity?.peakFreight?.productivity || 0;
 
-    // Required staff = FC_total / prodInPackages
-    const requiredRaw = prodInPackages > 0 ? dayData.total / prodInPackages : 0;
-    const requiredTotal = prodInPackages > 0 ? Math.ceil(requiredRaw * (1 + config.bufferPercent / 100)) : 0;
+    // Required staff per group based on their respective peak day productivities
+    const staffN = pN > 0 ? dayData.normal / pN : 0;
+    const staffB = pB > 0 ? dayData.bulky / pB : 0;
+    const staffF = pF > 0 ? dayData.freight / pF : 0;
 
-    // Max capacity = current total staff * prodInPackages
-    const maxCapacity = prodInPackages > 0 ? Math.round(currentTotal * prodInPackages) : 0;
+    const requiredRaw = staffN + staffB + staffF;
+    const requiredTotal = Math.ceil(requiredRaw * (1 + config.bufferPercent / 100));
+
+    // The mixed productivity for this day's FC volume distribution (packages/person/shift)
+    const pMix = requiredRaw > 0 ? dayData.total / requiredRaw : 0;
+    
+    // Max capacity (in packages) based on current staffing
+    const maxCapacity = Math.round(currentTotal * pMix);
 
     // Freelancer delta
     const flNeeded = Math.max(0, requiredTotal - nvct);
@@ -685,7 +728,7 @@
       maxCapacity,
       delta,
       gapPercent,
-      productivity:  prod
+      productivity:  pMix / 1000 // Display productivity in tons/person/shift
     };
   }
 
@@ -749,27 +792,39 @@
     }
 
     const dp = derivedProductivity;
-    const formattedProd = dp.avgProductivity ? dp.avgProductivity.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—';
+    const formatPeak = (peak) => {
+      if (!peak || !peak.vol) return '—';
+      const prodTons = peak.productivity / 1000;
+      return `<div style="background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid var(--border); font-size:0.7rem; display:flex; flex-direction:column; gap:2px;">
+        <div style="display:flex; justify-content:space-between; font-weight:700;">
+          <span>Peak: ${formatNumber(peak.vol)} đơn</span>
+          <span style="color:var(--green); font-family:'JetBrains Mono',monospace;">${prodTons.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2})} t/ng</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.62rem; color:var(--text-muted);">
+          <span>Ngày: ${peak.date}</span>
+          <span>Nhân sự: ${peak.staff} người</span>
+        </div>
+      </div>`;
+    };
+
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div style="font-size:0.72rem;color:var(--green);font-weight:700;">
-          ✅ Tự động tính từ ${dp.sampleDays} ngày Actual
+          ✅ Căn cứ peak lịch sử (${dp.sampleDays} ngày Actual)
         </div>
 
-        <div style="background:rgba(52,211,153,0.08);padding:14px;border-radius:8px;border:1px solid rgba(52,211,153,0.2);text-align:center;">
-          <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:4px;">Năng Suất Trung Bình</div>
-          <div style="font-size:1.6rem;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--green);">${formattedProd}</div>
-          <div style="font-size:0.65rem;color:var(--text-muted);">tấn/người/ca</div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:0.65rem; color:var(--text-secondary); font-weight:600;">📦 Hàng &lt;5kg:</div>
+          ${formatPeak(dp.peakNormal)}
+
+          <div style="font-size:0.65rem; color:var(--text-secondary); font-weight:600;">📦 Hàng vừa (5-15kg):</div>
+          ${formatPeak(dp.peakBulky)}
+
+          <div style="font-size:0.65rem; color:var(--text-secondary); font-weight:600;">📦 Hàng to (&gt;15kg):</div>
+          ${formatPeak(dp.peakFreight)}
         </div>
 
-        <div style="display:flex;gap:12px;font-size:0.68rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
-          <span>📈 Max xử lý: <strong style="color:var(--green);">${formatNumber(dp.maxCapacity)}</strong> đơn (${dp.peakDate})</span>
-        </div>
-        <div style="display:flex;gap:12px;font-size:0.68rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
-          <span>👥 Max NS: <strong>${dp.maxStaff || '—'}</strong> người</span>
-        </div>
-
-        <button id="cap-btn-apply-derived" class="filter-btn" style="border-color:var(--green);color:var(--green);font-weight:600;cursor:pointer;font-size:0.72rem;width:100%;text-align:center;">
+        <button id="cap-btn-apply-derived" class="filter-btn" style="border-color:var(--green);color:var(--green);font-weight:600;cursor:pointer;font-size:0.72rem;width:100%;text-align:center;margin-top:4px;">
           ⚡ Áp Dụng NS Actual → Config
         </button>
       </div>`;
@@ -1097,35 +1152,35 @@
 
     // ── 0. Phân tích so sánh Lịch Sử (Actual) vs Tương Lai (FC) ──
     if (actualHistory && actualHistory.length > 0) {
-      const actualDays = actualHistory.filter(d => d.staffTotal > 0 && d.volTotal > 0);
+      const actualDays = actualHistory.filter(d => d.staffTotal > 0);
       if (actualDays.length > 0) {
-        const avgActualVol = actualDays.reduce((sum, d) => sum + d.volTotal, 0) / actualDays.length;
-        const avgActualStaff = actualDays.reduce((sum, d) => sum + d.staffTotal, 0) / actualDays.length;
+        const dp = derivedProductivity;
+        const pN = dp?.peakNormal;
+        const pB = dp?.peakBulky;
+        const pF = dp?.peakFreight;
 
         const avgFCVol = allCalc.reduce((sum, c) => sum + c.fc.total, 0) / allCalc.length;
         const avgFCStaffNeeded = allCalc.reduce((sum, c) => sum + c.requiredTotal, 0) / allCalc.length;
 
-        const volDiffPct = ((avgFCVol - avgActualVol) / avgActualVol) * 100;
-        const staffDiffPct = ((avgFCStaffNeeded - avgActualStaff) / avgActualStaff) * 100;
-
-        const prodVal = derivedProductivity?.avgProductivity || 0;
-
-        let comparisonMsg = `Năng suất lịch sử đạt trung bình <strong>${prodVal.toLocaleString('vi-VN', {minimumFractionDigits: 2, maximumFractionDigits: 2})} tấn/người/ca</strong> (tính từ ${actualDays.length} ngày thực tế).<br><br>`;
+        let comparisonMsg = `Hệ thống phân tích nhu cầu nhân sự dựa trên <strong>năng suất tại ngày xử lý đỉnh điểm (Peak Day)</strong> của từng nhóm hàng trong quá khứ:<br><br>`;
         
-        comparisonMsg += `• <strong>Khối lượng hàng:</strong> Thực tế quá khứ trung bình <strong>${formatNumber(avgActualVol)}</strong> đơn/ngày. Dự báo tương lai trung bình <strong>${formatNumber(avgFCVol)}</strong> đơn/ngày (biến động <strong>${volDiffPct > 0 ? '+' : ''}${volDiffPct.toFixed(1)}%</strong>).<br>`;
-        comparisonMsg += `• <strong>Nhân sự:</strong> Quá khứ vận hành trung bình <strong>${Math.round(avgActualStaff)}</strong> người/ngày. Dự báo tương lai cần trung bình <strong>${Math.round(avgFCStaffNeeded)}</strong> người/ngày (biến động <strong>${staffDiffPct > 0 ? '+' : ''}${staffDiffPct.toFixed(1)}%</strong>).<br><br>`;
-
-        if (volDiffPct < -15) {
-          comparisonMsg += `💡 <strong>Khuyến nghị:</strong> Lượng hàng tương lai dự kiến giảm trung bình <strong>${Math.abs(volDiffPct).toFixed(1)}%</strong> so với quá khứ. Cần chuẩn bị kế hoạch cắt giảm số ca Freelancer hoặc điều chuyển nhân sự để tối ưu hóa chi phí.`;
-        } else if (volDiffPct > 15) {
-          comparisonMsg += `⚠️ <strong>Khuyến nghị:</strong> Lượng hàng tương lai dự kiến tăng trung bình <strong>${volDiffPct.toFixed(1)}%</strong> so với quá khứ. Cần bổ sung thêm nhân sự hoặc Freelancer để đáp ứng năng lực xử lý.`;
-        } else {
-          comparisonMsg += `💡 <strong>Khuyến nghị:</strong> Quy mô lượng hàng tương lai ổn định tương đương quá khứ (biến động ${volDiffPct > 0 ? '+' : ''}${volDiffPct.toFixed(1)}%). Nên duy trì cấu hình nhân sự hiện có.`;
+        if (pN) {
+          comparisonMsg += `• <strong>Hàng <5kg:</strong> Peak xử lý <strong>${formatNumber(pN.vol)} đơn</strong> ngày ${pN.date} (Nhân sự ngày đó: ${pN.staff} người $\\rightarrow$ <strong>${(pN.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br>`;
         }
+        if (pB) {
+          comparisonMsg += `• <strong>Hàng vừa (5-15kg):</strong> Peak xử lý <strong>${formatNumber(pB.vol)} đơn</strong> ngày ${pB.date} (Nhân sự ngày đó: ${pB.staff} người $\\rightarrow$ <strong>${(pB.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br>`;
+        }
+        if (pF) {
+          comparisonMsg += `• <strong>Hàng to (>15kg):</strong> Peak xử lý <strong>${formatNumber(pF.vol)} đơn</strong> ngày ${pF.date} (Nhân sự ngày đó: ${pF.staff} người $\\rightarrow$ <strong>${(pF.productivity/1000).toLocaleString('vi-VN', {maximumFractionDigits: 2})} t/ng</strong>).<br><br>`;
+        }
+
+        comparisonMsg += `• <strong>Dự báo tương lai:</strong> FC trung bình đạt <strong>${formatNumber(avgFCVol)} đơn/ngày</strong>. Nhân sự cần thiết tương lai trung bình là <strong>${Math.round(avgFCStaffNeeded)} người/ngày</strong> (đã tính ${config.bufferPercent}% buffer).<br><br>`;
+
+        comparisonMsg += `💡 <strong>Nhận xét:</strong> Phân tích nhân sự cần thiết đã căn cứ trực tiếp vào năng lực thực tế lịch sử cao nhất mà kho KTC HCM01 từng chứng minh có thể xử lý được và số nhân sự thực huy động vào các ngày đó.`;
 
         advises.push({
           type: 'success',
-          title: '📊 So Sánh Lịch Sử vs Dự Báo (June 2026 Focus)',
+          title: '📊 Phân tích định mức nhân sự (Theo Peak Lịch Sử)',
           message: comparisonMsg
         });
       }
