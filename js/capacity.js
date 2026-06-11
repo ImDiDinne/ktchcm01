@@ -315,7 +315,8 @@
   }
 
   // ─── Parse Actual History paste ────────────────────
-  // Format: Date\tVol_Normal\tVol_Bulky\tVol_Freight\tStaff_Normal\tStaff_Bulky\tStaff_Freight
+  // Format NEW: Date\tVolTotal\tStaffTotal (3 cols, kho chung)
+  // Format LEGACY: Date\tVol_N\tVol_B\tVol_F\tStf_N\tStf_B\tStf_F (7 cols)
   function parseActualPaste(text) {
     if (!text || typeof text !== 'string') return [];
     const lines = text.trim().split('\n').map(l => l.replace(/\r/g, ''));
@@ -324,30 +325,42 @@
     const result = [];
     for (let i = 0; i < lines.length; i++) {
       const cols = lines[i].split('\t');
-      if (cols.length < 7) continue;
+      if (cols.length < 3) continue;
 
       const dateStr = cols[0].trim();
       // Skip header rows
       if (dateStr.toLowerCase().includes('ngày') || dateStr.toLowerCase().includes('date') || dateStr === '') continue;
       if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) continue;
 
-      const volN = parseVNNumber(cols[1]);
-      const volB = parseVNNumber(cols[2]);
-      const volF = parseVNNumber(cols[3]);
-      const stfN = parseVNNumber(cols[4]);
-      const stfB = parseVNNumber(cols[5]);
-      const stfF = parseVNNumber(cols[6]);
-
-      // Skip rows with zero volume AND zero staff
-      if ((volN + volB + volF) === 0 && (stfN + stfB + stfF) === 0) continue;
-
-      result.push({
-        date: dateStr,
-        volNormal: volN, volBulky: volB, volFreight: volF,
-        volTotal: volN + volB + volF,
-        staffNormal: stfN, staffBulky: stfB, staffFreight: stfF,
-        staffTotal: stfN + stfB + stfF
-      });
+      if (cols.length >= 7) {
+        // Legacy 7-column format
+        const volN = parseVNNumber(cols[1]);
+        const volB = parseVNNumber(cols[2]);
+        const volF = parseVNNumber(cols[3]);
+        const stfN = parseVNNumber(cols[4]);
+        const stfB = parseVNNumber(cols[5]);
+        const stfF = parseVNNumber(cols[6]);
+        if ((volN + volB + volF) === 0 && (stfN + stfB + stfF) === 0) continue;
+        result.push({
+          date: dateStr,
+          volNormal: volN, volBulky: volB, volFreight: volF,
+          volTotal: volN + volB + volF,
+          staffNormal: stfN, staffBulky: stfB, staffFreight: stfF,
+          staffTotal: stfN + stfB + stfF
+        });
+      } else {
+        // Simplified 3-column format: Date, VolTotal, StaffTotal
+        const volTotal   = parseVNNumber(cols[1]);
+        const staffTotal = parseVNNumber(cols[2]);
+        if (volTotal === 0 && staffTotal === 0) continue;
+        result.push({
+          date: dateStr,
+          volNormal: 0, volBulky: 0, volFreight: 0,
+          volTotal,
+          staffNormal: 0, staffBulky: 0, staffFreight: 0,
+          staffTotal
+        });
+      }
     }
     return result;
   }
@@ -359,17 +372,9 @@
       return;
     }
 
-    // Filter days with meaningful data (staff > 0 and volume > 0)
-    const validDays = actualHistory.filter(d =>
-      d.staffNormal > 0 && d.staffBulky > 0 && d.staffFreight > 0 &&
-      d.volNormal > 0 && d.volBulky > 0 && d.volFreight > 0
-    );
-
-    // If strict filter removes too many, allow partial
-    const useDays = validDays.length >= 5 ? validDays : actualHistory.filter(d =>
-      (d.staffNormal > 0 && d.volNormal > 0) ||
-      (d.staffBulky > 0 && d.volBulky > 0) ||
-      (d.staffFreight > 0 && d.volFreight > 0)
+    // Filter days with staffTotal > 0 and volTotal > 0
+    const useDays = actualHistory.filter(d =>
+      d.staffTotal > 0 && d.volTotal > 0
     );
 
     if (useDays.length === 0) {

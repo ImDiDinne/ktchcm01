@@ -532,9 +532,9 @@
           <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
             <div class="card-title">Biểu Đồ FC vs Khả Năng Xử Lý Theo Ngày</div>
             <div style="font-size: 0.72rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 12px;">
-              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--blue); display: inline-block; border-radius: 2px;"></span> Normal</span>
-              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--yellow); display: inline-block; border-radius: 2px;"></span> Bulky</span>
-              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent); display: inline-block; border-radius: 2px;"></span> Freight</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--blue); display: inline-block; border-radius: 2px;"></span> &lt;5kg</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--yellow); display: inline-block; border-radius: 2px;"></span> 5-15kg</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent); display: inline-block; border-radius: 2px;"></span> &gt;15kg</span>
               <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 2px; background: var(--green); display: inline-block;"></span> Capacity Max</span>
             </div>
           </div>
@@ -576,9 +576,9 @@
               <tr>
                 <th style="text-align: left; padding-left: 10px;">Ngày</th>
                 <th style="text-align: center;">Thứ</th>
-                <th style="text-align: center; color: var(--blue);">FC Normal</th>
-                <th style="text-align: center; color: var(--yellow);">FC Bulky</th>
-                <th style="text-align: center; color: var(--accent);">FC Freight</th>
+                <th style="text-align: center; color: var(--blue);">FC &lt;5kg</th>
+                <th style="text-align: center; color: var(--yellow);">FC 5-15kg</th>
+                <th style="text-align: center; color: var(--accent);">FC &gt;15kg</th>
                 <th style="text-align: center; font-weight: 700;">FC Tổng</th>
                 <th style="text-align: center;">Cap Max</th>
                 <th style="text-align: center; color: var(--blue-light);">NS Cần</th>
@@ -598,11 +598,14 @@
 
     <!-- Paste FC Data Modal -->
     <div id="cap-paste-modal" class="login-overlay" style="display: none;">
-      <div class="login-card" style="max-width: 600px;">
+      <div class="login-card" style="max-width: 650px;">
         <div class="login-logo">📋</div>
         <h2>Dán Dữ Liệu Forecast</h2>
-        <p class="login-subtitle">Copy từ Google Sheets (chọn cột Ngày, Normal, Bulky, Freight) rồi dán vào đây:</p>
-        <textarea id="cap-paste-textarea" rows="10" placeholder="VD: Dán từ Google Sheets&#10;2024-01-15&#9;12000&#9;3500&#9;1200&#10;2024-01-16&#9;13000&#9;3800&#9;1100&#10;..."></textarea>
+        <p class="login-subtitle">Copy từ Google Sheets: chọn 4 cột <strong>Ngày, Hàng &lt;5kg, Hàng vừa (5-15kg), Hàng to (&gt;15kg)</strong> rồi dán vào đây.</p>
+        <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;background:rgba(96,165,250,0.06);padding:8px 12px;border-radius:6px;border:1px solid rgba(96,165,250,0.15);">
+          📌 Từ sheet &quot;Tính FC&quot; → dòng HCM01 → Hàng &lt;5kg | Hàng vừa (5-15kg) | Hàng to (&gt;15kg)
+        </div>
+        <textarea id="cap-paste-textarea" rows="10" placeholder="Ngày&#9;Hàng <5kg&#9;Hàng vừa (5-15kg)&#9;Hàng to (>15kg)&#10;12/06/2026&#9;871846&#9;103185&#9;59924&#10;13/06/2026&#9;744017&#9;88056&#9;51138&#10;..." style="width:100%;min-height:180px;background:#0f172a;color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.5;resize:vertical;"></textarea>
         <div class="cap-btn-row">
           <button class="login-btn" id="cap-btn-apply-paste">Áp Dụng</button>
           <button class="login-btn" id="cap-btn-cancel-paste" style="background: #475569;">Đóng</button>
@@ -615,10 +618,13 @@
       <div class="login-card" style="max-width: 700px;">
         <div class="login-logo">📊</div>
         <h2>Dán Dữ Liệu Actual (Lịch Sử Xử Lý)</h2>
-        <p class="login-subtitle">Copy từ Google Sheets với <strong>7 cột</strong> (Ngày, Vol Normal, Vol Bulky, Vol Freight, NS Normal, NS Bulky, NS Freight) rồi dán vào đây. Hệ thống sẽ tự tính năng suất trung bình.</p>
-        <textarea id="cap-actual-textarea" rows="12" placeholder="Ngày&#9;Vol_Normal&#9;Vol_Bulky&#9;Vol_Freight&#9;NS_Normal&#9;NS_Bulky&#9;NS_Freight&#10;01/05/2026&#9;280715&#9;48033&#9;56861&#9;200&#9;45&#9;28&#10;02/05/2026&#9;249567&#9;41226&#9;42573&#9;195&#9;42&#9;25&#10;..." style="width:100%;min-height:200px;background:#0f172a;color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.5;resize:vertical;"></textarea>
+        <p class="login-subtitle">Copy từ Google Sheets: <strong>3 cột</strong> (Ngày, Volume Tổng, NS Tổng).<br>Hệ thống tự tính năng suất trung bình (tấn/người/ca).</p>
+        <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;background:rgba(251,191,36,0.06);padding:8px 12px;border-radius:6px;border:1px solid rgba(251,191,36,0.15);">
+          📌 Actual sẽ tự động lấy từ sheet khi load trang. Chỉ dán nếu muốn nhập thủ công.
+        </div>
+        <textarea id="cap-actual-textarea" rows="12" placeholder="Ngày&#9;Volume Tổng&#9;NS Tổng&#10;01/05/2026&#9;898343&#9;825&#10;02/05/2026&#9;934357&#9;768&#10;03/05/2026&#9;1045729&#9;821&#10;..." style="width:100%;min-height:200px;background:#0f172a;color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.5;resize:vertical;"></textarea>
         <div class="cap-btn-row">
-          <button class="login-btn" id="cap-btn-apply-actual">⚡ Phân Tích & Áp Dụng</button>
+          <button class="login-btn" id="cap-btn-apply-actual">⚡ Phân Tích &amp; Áp Dụng</button>
           <button class="login-btn" id="cap-btn-cancel-actual" style="background: #475569;">Đóng</button>
         </div>
       </div>
