@@ -6,7 +6,7 @@
   'use strict';
 
   // ─── Constants ────────────────────────────────────
-  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Yw7fOwP4f0b4idAmiXF4m4rmeuggr8C_N7m1IG6YOXs/export?format=csv&gid=1918098715';
+  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1RCdEDrhCwHKBQAsTNqZO-4vnxft9lcqa7Fe9IK8auZ8/export?format=csv&gid=1731657616';
   const LS_KEY_FC     = 'capacity_fc_data';
   const LS_KEY_CONF   = 'capacity_config';
   const LS_KEY_ACTUAL = 'capacity_actual_history';
@@ -464,128 +464,60 @@
     const lines = csvText.split('\n').map(l => l.replace(/\r/g, ''));
     const rows  = lines.map(l => parseCSVLine(l));
 
-    const fc      = [];
-    const actual  = [];
+    const fc = [];
 
-    // ── Find FC date header row (column[8] === 'FC - Đơn tạo') ──
-    let fcHeaderIdx = -1;
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i][8] && rows[i][8].trim() === 'FC - Đơn tạo') {
-        fcHeaderIdx = i;
-        break;
-      }
-    }
-
-    if (fcHeaderIdx === -1) {
-      console.warn('[Capacity] Could not find FC date header row');
+    // New sheet structure (transposed, dates as columns):
+    // Row 0: Header with dates starting from col 1
+    // Row 1: HCM01 total
+    // Row 2: Hàng <5kg (Normal)
+    // Row 3: Hàng vừa 5-15kg (Bulky)
+    // Row 4: Hàng to >15kg (Freight)
+    if (rows.length < 5) {
+      console.warn('[Capacity] FC sheet too few rows:', rows.length);
       return { fc: [], actual: [] };
     }
 
-    // Extract FC date columns (column 9 onward)
-    const fcDates = [];
-    for (let c = 9; c < rows[fcHeaderIdx].length; c++) {
-      const val = (rows[fcHeaderIdx][c] || '').trim();
-      if (val && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
-        fcDates.push({ col: c, date: val });
-      }
+    const headerRow  = rows[0];
+
+    // Find data rows by label in col 0
+    let hcm01Row = null, normalRow = null, bulkyRow = null, freightRow = null;
+    for (let i = 1; i < rows.length; i++) {
+      const label = (rows[i][0] || '').trim().toLowerCase();
+      if (label === 'hcm01') hcm01Row = rows[i];
+      else if (label.includes('<5kg') || label.includes('< 5kg')) normalRow = rows[i];
+      else if (label.includes('5-15kg') || label.includes('vừa')) bulkyRow = rows[i];
+      else if (label.includes('>15kg') || label.includes('> 15kg') || label.includes('hàng to')) freightRow = rows[i];
     }
 
-    // ── Find HCM01 FC total row (column[8] === 'HCM01', after fcHeaderIdx) ──
-    let hcm01FcIdx = -1;
-    for (let i = fcHeaderIdx + 1; i < rows.length; i++) {
-      if (rows[i][8] && rows[i][8].trim() === 'HCM01') {
-        hcm01FcIdx = i;
-        break;
-      }
-    }
+    // Fallback: use positional rows if labels not found
+    if (!hcm01Row && rows.length > 1) hcm01Row = rows[1];
+    if (!normalRow && rows.length > 2) normalRow = rows[2];
+    if (!bulkyRow && rows.length > 3) bulkyRow = rows[3];
+    if (!freightRow && rows.length > 4) freightRow = rows[4];
 
-    if (hcm01FcIdx === -1) {
-      console.warn('[Capacity] Could not find HCM01 FC row');
-      return { fc: [], actual: [] };
-    }
+    // Parse dates from header and extract values
+    for (let c = 1; c < headerRow.length; c++) {
+      const dateStr = (headerRow[c] || '').trim();
+      if (!dateStr || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) continue;
 
-    // The breakdown rows follow immediately after HCM01 row
-    const fcNormalRow  = rows[hcm01FcIdx + 1];
-    const fcBulkyRow   = rows[hcm01FcIdx + 2];
-    const fcFreightRow = rows[hcm01FcIdx + 3];
+      const total   = parseVNNumber(hcm01Row[c] || '0');
+      const normal  = normalRow  ? parseVNNumber(normalRow[c] || '0')  : Math.round(total * 0.80);
+      const bulky   = bulkyRow   ? parseVNNumber(bulkyRow[c] || '0')   : Math.round(total * 0.12);
+      const freight = freightRow ? parseVNNumber(freightRow[c] || '0') : Math.round(total * 0.08);
 
-    // Validate breakdown rows by checking percentage markers
-    const isNormalRow  = fcNormalRow  && (fcNormalRow[7]  || '').indexOf('80') !== -1;
-    const isBulkyRow   = fcBulkyRow   && (fcBulkyRow[7]   || '').indexOf('12') !== -1;
-    const isFreightRow = fcFreightRow && (fcFreightRow[7] || '').indexOf('8')  !== -1;
-
-    if (!isNormalRow) {
-      console.warn('[Capacity] FC Normal row validation failed, proceeding with positional fallback');
-    }
-
-    // Build FC data
-    fcDates.forEach(({ col, date }) => {
-      const total   = parseVNNumber(rows[hcm01FcIdx][col]);
-      const normal  = fcNormalRow  ? parseVNNumber(fcNormalRow[col])  : Math.round(total * 0.80);
-      const bulky   = fcBulkyRow   ? parseVNNumber(fcBulkyRow[col])   : Math.round(total * 0.12);
-      const freight = fcFreightRow ? parseVNNumber(fcFreightRow[col]) : Math.round(total * 0.08);
+      if (total === 0 && normal === 0) continue; // Skip empty
 
       fc.push({
-        date,
+        date: dateStr,
         normal,
         bulky,
         freight,
         total: total || (normal + bulky + freight)
       });
-    });
-
-    // ── Find Actual date header row (column[8] contains 'Actual - Đơn tạo') ──
-    let actualHeaderIdx = -1;
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i][8] && rows[i][8].trim().indexOf('Actual - Đơn tạo') !== -1) {
-        actualHeaderIdx = i;
-        break;
-      }
     }
 
-    if (actualHeaderIdx !== -1) {
-      // Find actual HCM01 row
-      let hcm01ActualIdx = -1;
-      for (let i = actualHeaderIdx + 1; i < rows.length; i++) {
-        if (rows[i][0] && rows[i][0].trim() === 'Kho Trung Chuyển Hồ Chí Minh 01') {
-          hcm01ActualIdx = i;
-          break;
-        }
-      }
-
-      if (hcm01ActualIdx !== -1) {
-        // Extract actual dates from header
-        const actualDates = [];
-        for (let c = 9; c < rows[actualHeaderIdx].length; c++) {
-          const val = (rows[actualHeaderIdx][c] || '').trim();
-          if (val && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
-            actualDates.push({ col: c, date: val });
-          }
-        }
-
-        // Find Normal/Bulky/Freight sub-rows
-        const actNormalRow  = rows[hcm01ActualIdx + 1];
-        const actBulkyRow   = rows[hcm01ActualIdx + 2];
-        const actFreightRow = rows[hcm01ActualIdx + 3];
-
-        actualDates.forEach(({ col, date }) => {
-          const total   = parseVNNumber(rows[hcm01ActualIdx][col]);
-          const normal  = actNormalRow  ? parseVNNumber(actNormalRow[col])  : 0;
-          const bulky   = actBulkyRow   ? parseVNNumber(actBulkyRow[col])   : 0;
-          const freight = actFreightRow ? parseVNNumber(actFreightRow[col]) : 0;
-
-          actual.push({
-            date,
-            normal,
-            bulky,
-            freight,
-            total: total || (normal + bulky + freight)
-          });
-        });
-      }
-    }
-
-    return { fc, actual };
+    console.log(`[Capacity] Parsed ${fc.length} FC records from sheet`);
+    return { fc, actual: [] };
   }
 
   // ─── Paste parsing (Tab-separated from Google Sheets) ──
