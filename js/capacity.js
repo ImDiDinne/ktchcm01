@@ -11,6 +11,9 @@
   const LS_KEY_CONF   = 'capacity_config';
   const LS_KEY_ACTUAL = 'capacity_actual_history';
 
+  // Actual data sheet (dates as columns, transposed layout)
+  const ACTUAL_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1RCdEDrhCwHKBQAsTNqZO-4vnxft9lcqa7Fe9IK8auZ8/export?format=csv&gid=0';
+
   const DAY_NAMES_VI = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
   const COLORS = {
@@ -208,6 +211,107 @@
       console.warn('[Capacity] Error loading actual history:', e);
     }
     return false;
+  }
+
+  // ─── Fetch Actual data from Google Sheet (transposed layout) ───
+  async function fetchActualFromSheet() {
+    try {
+      console.log('[Capacity] Fetching Actual data from sheet...');
+      const resp = await fetch(ACTUAL_SHEET_URL);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const csvText = await resp.text();
+
+      const lines = csvText.split('\n').map(l => l.replace(/\r/g, ''));
+      if (lines.length < 26) {
+        console.warn('[Capacity] Actual sheet too few rows');
+        return false;
+      }
+
+      // Parse CSV rows (handle commas in quoted fields)
+      function csvSplit(line) {
+        const result = [];
+        let current = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') { inQ = !inQ; }
+          else if (ch === ',' && !inQ) { result.push(current); current = ''; }
+          else { current += ch; }
+        }
+        result.push(current);
+        return result;
+      }
+
+      // Row 0 (line index 0): Header with dates starting from col 1
+      // Row 1 (line index 1): HCM01 total volume
+      // Row 16 (line index 16): NHân sự header
+      // Row 17 (line index 17): HCM01 total staff
+      // Row 18 (line index 18): NVCT
+      // Row 19 (line index 19): Freelancers
+
+      const headerCols = csvSplit(lines[0]); // dates
+      const volCols    = csvSplit(lines[1]); // HCM01 volume total
+      
+      // Find staff section: look for row starting with "Nhân sự" or "HCM01" after a gap
+      let staffRowIdx = -1;
+      let nvctRowIdx  = -1;
+      let flRowIdx    = -1;
+      
+      for (let i = 2; i < lines.length; i++) {
+        const firstCell = csvSplit(lines[i])[0].trim();
+        if (firstCell.toLowerCase().includes('nhân sự')) {
+          // Next rows: HCM01 total, NVCT, Freelancers
+          staffRowIdx = i + 1;
+          nvctRowIdx  = i + 2;
+          flRowIdx    = i + 3;
+          break;
+        }
+      }
+
+      if (staffRowIdx < 0) {
+        console.warn('[Capacity] Could not find Nhân sự section in sheet');
+        return false;
+      }
+
+      const staffCols = csvSplit(lines[staffRowIdx]);
+      const nvctCols  = csvSplit(lines[nvctRowIdx]);
+      const flCols    = csvSplit(lines[flRowIdx]);
+
+      // Transpose: dates are columns, starting from col 1
+      const result = [];
+      for (let c = 1; c < headerCols.length; c++) {
+        const dateStr = headerCols[c].trim();
+        if (!dateStr || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) continue;
+
+        const vol   = parseVNNumber(volCols[c] || '0');
+        const staff = parseVNNumber(staffCols[c] || '0');
+        const nvct  = parseVNNumber(nvctCols[c] || '0');
+        const fl    = parseVNNumber(flCols[c] || '0');
+
+        if (vol === 0 && staff === 0) continue; // Skip empty days
+
+        result.push({
+          date: dateStr,
+          volNormal: 0, volBulky: 0, volFreight: 0, // Not split in this mode
+          volTotal: vol,
+          staffNormal: 0, staffBulky: 0, staffFreight: 0,
+          staffTotal: staff,
+          nvct: nvct,
+          freelancer: fl
+        });
+      }
+
+      if (result.length > 0) {
+        actualHistory = result;
+        calculateDerivedProductivity();
+        saveActualHistory();
+        console.log(`[Capacity] Loaded ${result.length} days of Actual data from sheet`);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.warn('[Capacity] Error fetching actual sheet:', err.message);
+      return false;
+    }
   }
 
   // ─── Parse Actual History paste ────────────────────
@@ -1159,11 +1263,21 @@
       updateHeartbeat('connected');
     }
 
-    // Try to refresh from sheet in background
+    // Try to refresh FC from sheet in background
     fetchFromSheet().then(success => {
       renderCapacityDashboard();
     }).catch(() => {
       if (hadCache) renderCapacityDashboard();
+    });
+
+    // Also auto-fetch Actual data from sheet
+    fetchActualFromSheet().then(success => {
+      if (success) {
+        console.log('[Capacity] Actual data refreshed from sheet');
+        renderCapacityDashboard();
+      }
+    }).catch(err => {
+      console.warn('[Capacity] Actual sheet fetch failed:', err);
     });
 
     // If we had cache, render immediately while fetch happens
