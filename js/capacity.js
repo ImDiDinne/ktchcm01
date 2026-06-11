@@ -708,7 +708,24 @@
 
     updateControlValues(config);
     renderKPIs(allCalc, config);
-    renderCapacityChart(allCalc, 0, 30);
+
+    // Initialize chartStartIdx once if not yet done
+    if (!hasInitializedStartIdx && allCalc.length > 0) {
+      const todayIdx = findTodayIndex();
+      if (todayIdx >= 0) {
+        chartStartIdx = Math.max(0, todayIdx - 7);
+      } else {
+        chartStartIdx = 0;
+      }
+      hasInitializedStartIdx = true;
+    }
+
+    // Ensure bounds
+    if (chartStartIdx >= allCalc.length) {
+      chartStartIdx = Math.max(0, allCalc.length - CHART_PAGE_SIZE);
+    }
+
+    renderCapacityChart(allCalc, chartStartIdx, CHART_PAGE_SIZE);
     renderStaffingTable(allCalc);
     renderAdvisoryPanel(allCalc, config);
   }
@@ -848,13 +865,17 @@
   }
 
   // ─── Render: Capacity Chart (CSS-only bars) ───────
-  let chartPage = 0;
+  let chartStartIdx = 0;
+  let hasInitializedStartIdx = false;
   const CHART_PAGE_SIZE = 30;
 
   function renderCapacityChart(allCalc, startIdx, count) {
     const container = document.getElementById('cap-chart-container');
     if (!container) return;
     container.innerHTML = '';
+
+    // Update global tracker
+    chartStartIdx = startIdx;
 
     const slice = allCalc.slice(startIdx, startIdx + count);
     if (slice.length === 0) {
@@ -958,58 +979,27 @@
 
     container.appendChild(chartArea);
 
-    // Navigation buttons
-    const navContainer = document.createElement('div');
-    navContainer.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding: 0 4px;';
+    // Update header navigation elements
+    const displayEl = document.getElementById('cap-date-range-display');
+    if (displayEl && slice.length > 0) {
+      displayEl.textContent = `${slice[0].date} – ${slice[slice.length - 1].date}`;
+    }
 
-    // Legend
+    const btnPrevHeader = document.getElementById('cap-chart-prev');
+    const btnNextHeader = document.getElementById('cap-chart-next');
+    if (btnPrevHeader) btnPrevHeader.disabled = startIdx === 0;
+    if (btnNextHeader) btnNextHeader.disabled = startIdx + count >= allCalc.length;
+
+    // Centered Legend at the bottom
     const legend = document.createElement('div');
-    legend.style.cssText = 'display:flex; gap:14px; font-size:0.68rem; color:var(--text-muted); font-family:"JetBrains Mono",monospace;';
+    legend.style.cssText = 'display:flex; justify-content:center; gap:14px; font-size:0.68rem; color:var(--text-muted); font-family:"JetBrains Mono",monospace; margin-top:12px;';
     legend.innerHTML = `
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.normal};display:inline-block;border-radius:2px;"></span> Normal</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.bulky};display:inline-block;border-radius:2px;"></span> Bulky</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.freight};display:inline-block;border-radius:2px;"></span> Freight</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.normal};display:inline-block;border-radius:2px;"></span> &lt;5kg</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.bulky};display:inline-block;border-radius:2px;"></span> 5-15kg</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:${COLORS.freight};display:inline-block;border-radius:2px;"></span> &gt;15kg</span>
       <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:2px;border-top:2px dashed ${COLORS.capLine};display:inline-block;"></span> Capacity</span>
     `;
-
-    const navBtns = document.createElement('div');
-    navBtns.style.cssText = 'display:flex; gap:8px;';
-
-    const btnPrev = document.createElement('button');
-    btnPrev.className = 'filter-btn';
-    btnPrev.style.cssText = 'padding:4px 12px; font-size:0.7rem; cursor:pointer;';
-    btnPrev.textContent = '← Trước';
-    btnPrev.disabled = startIdx === 0;
-    btnPrev.onclick = () => {
-      const newStart = Math.max(0, startIdx - CHART_PAGE_SIZE);
-      chartPage = Math.floor(newStart / CHART_PAGE_SIZE);
-      renderCapacityChart(allCalc, newStart, CHART_PAGE_SIZE);
-    };
-
-    const btnNext = document.createElement('button');
-    btnNext.className = 'filter-btn';
-    btnNext.style.cssText = 'padding:4px 12px; font-size:0.7rem; cursor:pointer;';
-    btnNext.textContent = 'Sau →';
-    btnNext.disabled = startIdx + count >= allCalc.length;
-    btnNext.onclick = () => {
-      const newStart = startIdx + CHART_PAGE_SIZE;
-      if (newStart < allCalc.length) {
-        chartPage = Math.floor(newStart / CHART_PAGE_SIZE);
-        renderCapacityChart(allCalc, newStart, CHART_PAGE_SIZE);
-      }
-    };
-
-    const pageInfo = document.createElement('span');
-    pageInfo.style.cssText = 'font-size:0.68rem; color:var(--text-muted); font-family:"JetBrains Mono",monospace;';
-    pageInfo.textContent = `${startIdx + 1}–${Math.min(startIdx + count, allCalc.length)} / ${allCalc.length} ngày`;
-
-    navBtns.appendChild(btnPrev);
-    navBtns.appendChild(pageInfo);
-    navBtns.appendChild(btnNext);
-
-    navContainer.appendChild(legend);
-    navContainer.appendChild(navBtns);
-    container.appendChild(navContainer);
+    container.appendChild(legend);
   }
 
   // ─── Render: Staffing Table ───────────────────────
@@ -1018,9 +1008,12 @@
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    const todayStr = getTodayString();
+
     allCalc.forEach(calc => {
       const dayName     = getDayOfWeek(calc.date);
       const weekendFlag = isWeekend(calc.date);
+      const isToday     = calc.date === todayStr;
 
       // FL Delta badge
       let deltaBadge;
@@ -1033,7 +1026,11 @@
       }
 
       const tr = document.createElement('tr');
-      if (weekendFlag) {
+      if (isToday) {
+        tr.id = 'cap-row-today';
+        tr.style.background = 'rgba(52, 211, 153, 0.15)';
+        tr.style.outline = '1.5px solid var(--green)';
+      } else if (weekendFlag) {
         tr.style.background = 'rgba(251, 146, 60, 0.04)';
       }
 
@@ -1047,7 +1044,7 @@
         : `${monoStyle} color:var(--text-secondary);`;
 
       tr.innerHTML = `
-        <td style="text-align:left; padding:8px 10px; ${monoStyle} font-weight:600; color:var(--text-primary);">${calc.date}</td>
+        <td style="text-align:left; padding:8px 10px; ${monoStyle} font-weight:600; color:var(--text-primary);">${isToday ? '🎯 ' : ''}${calc.date}</td>
         <td style="${centerCell} font-size:0.72rem; color:${weekendFlag ? 'var(--accent)' : 'var(--text-muted)'}; font-weight:${weekendFlag ? '600' : '400'};">${dayName}</td>
         <td style="${rightCell} ${monoStyle} color:${COLORS.normal};">${formatNumber(calc.fc.normal)}</td>
         <td style="${rightCell} ${monoStyle} color:${COLORS.bulky};">${formatNumber(calc.fc.bulky)}</td>
@@ -1063,6 +1060,14 @@
 
       tbody.appendChild(tr);
     });
+
+    // Auto scroll to today's row in the table
+    setTimeout(() => {
+      const todayRow = document.getElementById('cap-row-today');
+      if (todayRow) {
+        todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
   }
 
   // ─── Render: Advisory Panel ───────────────────────
@@ -1221,6 +1226,31 @@
     // If we had cache, render immediately while fetch happens
     if (hadCache || hadActual) {
       renderCapacityDashboard();
+    }
+
+    // ── Chart header prev button ──
+    const btnPrevHeader = document.getElementById('cap-chart-prev');
+    if (btnPrevHeader) {
+      btnPrevHeader.onclick = () => {
+        const config = loadConfig();
+        const allCalc = calculateAllDays(config);
+        chartStartIdx = Math.max(0, chartStartIdx - CHART_PAGE_SIZE);
+        renderCapacityChart(allCalc, chartStartIdx, CHART_PAGE_SIZE);
+      };
+    }
+
+    // ── Chart header next button ──
+    const btnNextHeader = document.getElementById('cap-chart-next');
+    if (btnNextHeader) {
+      btnNextHeader.onclick = () => {
+        const config = loadConfig();
+        const allCalc = calculateAllDays(config);
+        chartStartIdx = Math.min(allCalc.length - CHART_PAGE_SIZE, chartStartIdx + CHART_PAGE_SIZE);
+        if (chartStartIdx + CHART_PAGE_SIZE > allCalc.length) {
+          chartStartIdx = Math.max(0, allCalc.length - CHART_PAGE_SIZE);
+        }
+        renderCapacityChart(allCalc, chartStartIdx, CHART_PAGE_SIZE);
+      };
     }
 
     // ── NVCT total input ──
