@@ -10,7 +10,7 @@ Sử dụng:
     python3 auto_fetch_data.py --loop 10        # Tự động mỗi 10 phút
     python3 auto_fetch_data.py --output data.xlsx  # Lưu vào file cụ thể
 """
-import os, sys, json, time, argparse, re
+import os, sys, json, time, argparse, re, subprocess
 from pathlib import Path
 from datetime import datetime
 
@@ -487,7 +487,13 @@ def main():
         success = client.download_card_xlsx(CARD_ID, output_path)
         if success and args.run_export:
             print("\n📊 Chạy export_tonkho_v2.py...")
-            os.system(f'cd "{BASE_DIR}" && python3 export_tonkho_v2.py')
+            result = subprocess.run(
+                ['python3', str(BASE_DIR / 'export_tonkho_v2.py')],
+                cwd=str(BASE_DIR)
+            )
+            if result.returncode != 0:
+                print(f"❌ export_tonkho_v2.py thất bại (exit code: {result.returncode})")
+                return False
         return success
 
     # Chạy 1 lần hoặc lặp

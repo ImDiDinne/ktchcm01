@@ -644,7 +644,10 @@ def load_env():
     return env_vars
 
 def upload_to_supabase(data, excel_path):
-    """Tải dữ liệu JSON và báo cáo excel lên Supabase REST API & Storage."""
+    """Tải dữ liệu JSON và báo cáo excel lên Supabase REST API & Storage.
+    
+    Raises Exception nếu JSON upload thất bại (vì dashboard đọc từ Supabase).
+    """
     env = load_env()
     supabase_url = env.get('SUPABASE_URL') or os.environ.get('SUPABASE_URL')
     # Ưu tiên service role key bảo mật, fallback về anon key
@@ -656,12 +659,11 @@ def upload_to_supabase(data, excel_path):
     )
     
     if not supabase_url or not supabase_key:
-        print("⚠️ Không tìm thấy cấu hình Supabase URL/Key. Bỏ qua việc tải dữ liệu lên Supabase.")
-        return
+        raise RuntimeError("Không tìm thấy cấu hình Supabase URL/Key. Dashboard sẽ KHÔNG được cập nhật!")
         
     supabase_url = supabase_url.rstrip('/')
     
-    # 1. Tải JSON dữ liệu lên bảng inventory_data (id=1)
+    # 1. Tải JSON dữ liệu lên bảng inventory_data (id=1) — CRITICAL
     table_url = f"{supabase_url}/rest/v1/inventory_data"
     headers = {
         "apikey": supabase_key,
@@ -681,11 +683,11 @@ def upload_to_supabase(data, excel_path):
         if resp.status_code in [200, 201]:
             print("✅ Đã cập nhật dữ liệu tồn kho lên Supabase (bảng: inventory_data) thành công!")
         else:
-            print(f"❌ Cập nhật JSON lên Supabase thất bại (HTTP {resp.status_code}): {resp.text}")
-    except Exception as e:
-        print(f"❌ Lỗi khi tải dữ liệu lên Supabase: {e}")
+            raise RuntimeError(f"Cập nhật JSON lên Supabase thất bại (HTTP {resp.status_code}): {resp.text[:300]}")
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Lỗi kết nối khi tải dữ liệu lên Supabase: {e}")
         
-    # 2. Tải BaoCao_TonKho.xlsx lên Storage bucket 'reports'
+    # 2. Tải BaoCao_TonKho.xlsx lên Storage bucket 'reports' — non-critical
     if excel_path and Path(excel_path).exists():
         print("🚀 Đang tải file BaoCao_TonKho.xlsx lên Supabase Storage...")
         storage_url = f"{supabase_url}/storage/v1/object/reports/BaoCao_TonKho.xlsx"
@@ -708,9 +710,10 @@ def upload_to_supabase(data, excel_path):
                 if resp_put.status_code in [200, 201]:
                     print("✅ Đã cập nhật file BaoCao_TonKho.xlsx lên Supabase Storage (PUT) thành công!")
                 else:
-                    print(f"❌ Cập nhật Excel lên Supabase Storage thất bại (HTTP {resp.status_code} / {resp_put.status_code}): {resp_put.text}")
+                    print(f"⚠️ Cập nhật Excel lên Supabase Storage thất bại (HTTP {resp.status_code} / {resp_put.status_code}): {resp_put.text}")
         except Exception as e:
-            print(f"❌ Lỗi khi tải Excel lên Supabase Storage: {e}")
+            print(f"⚠️ Lỗi khi tải Excel lên Supabase Storage: {e}")
+
 
 def print_summary(data):
     """In bảng tổng hợp giống PV."""

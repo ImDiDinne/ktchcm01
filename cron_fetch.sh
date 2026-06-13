@@ -72,7 +72,7 @@ if [ $EXIT_CODE -eq 0 ]; then
     TIMESTAMP=$(date "+%d/%m/%Y %H:%M")
     if ! git diff --staged --quiet; then
         git commit -m "chore(data): auto-update $TIMESTAMP" >> "$LOG" 2>&1
-        git pull origin main --rebase --strategy-option=ours >> "$LOG" 2>&1
+        git pull origin main --rebase --strategy-option=theirs >> "$LOG" 2>&1
         git push origin main >> "$LOG" 2>&1
     else
         echo "ℹ️ Không có thay đổi dữ liệu. Bỏ qua commit." >> "$LOG"
