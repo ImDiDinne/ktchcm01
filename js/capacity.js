@@ -391,96 +391,35 @@
       return;
     }
 
-    // Find peak actual volume ever handled for each group (Nhận Kiện only)
-    let peakNormal  = { date: '', vol: 0, staff: 0, volNormal: 0, volBulky: 0, volFreight: 0, productivity: 0 };
-    let peakBulky   = { date: '', vol: 0, staff: 0, volNormal: 0, volBulky: 0, volFreight: 0, productivity: 0 };
-    let peakFreight = { date: '', vol: 0, staff: 0, volNormal: 0, volBulky: 0, volFreight: 0, productivity: 0 };
+    let peakOverall = { date: '', vol: 0, staff: 0, productivity: 0 };
+    let sumTotalVol = 0, sumTotalStaff = 0;
 
     useDays.forEach(d => {
-      if (d.volNormal > peakNormal.vol) {
-        peakNormal = {
+      sumTotalVol += d.volTotal;
+      sumTotalStaff += d.staffTotal;
+
+      if (d.volTotal > peakOverall.vol) {
+        peakOverall = {
           date: d.date,
-          vol: d.volNormal,
+          vol: d.volTotal,
           staff: d.staffTotal,
-          volNormal: d.volNormal,
-          volBulky: d.volBulky,
-          volFreight: d.volFreight,
-          productivity: d.volNormal / d.staffTotal
-        };
-      }
-      if (d.volBulky > peakBulky.vol) {
-        peakBulky = {
-          date: d.date,
-          vol: d.volBulky,
-          staff: d.staffTotal,
-          volNormal: d.volNormal,
-          volBulky: d.volBulky,
-          volFreight: d.volFreight,
-          productivity: d.volBulky / d.staffTotal
-        };
-      }
-      if (d.volFreight > peakFreight.vol) {
-        peakFreight = {
-          date: d.date,
-          vol: d.volFreight,
-          staff: d.staffTotal,
-          volNormal: d.volNormal,
-          volBulky: d.volBulky,
-          volFreight: d.volFreight,
-          productivity: d.volFreight / d.staffTotal
+          productivity: d.volTotal / d.staffTotal
         };
       }
     });
 
-    // We calculate relative weights to adjust productivities for shared staff model
-    const pN_raw = peakNormal.productivity;
-    const pB_raw = peakBulky.productivity;
-    const pF_raw = peakFreight.productivity;
-
-    const w_Bulky = pN_raw / (pB_raw || 1);
-    const w_Freight = pN_raw / (pF_raw || 1);
-
-    // True normal peak productivity (in Normal-Equivalent Units)
-    const NEV_NormalPeak = peakNormal.volNormal + w_Bulky * peakNormal.volBulky + w_Freight * peakNormal.volFreight;
-    const pN_true = NEV_NormalPeak / (peakNormal.staff || 1);
-    const pB_true = pN_true / w_Bulky;
-    const pF_true = pN_true / w_Freight;
-
-    // We also calculate overall average metrics for summary cards
-    let sumTotalVol = 0, sumTotalStaff = 0, countProd = 0;
-    useDays.forEach(d => {
-      if (d.volTotal > 0) {
-        sumTotalVol += d.volTotal;
-        sumTotalStaff += d.staffTotal;
-        countProd++;
-      }
-    });
     const avgOverallProd = sumTotalStaff > 0 ? sumTotalVol / sumTotalStaff : 0;
 
     derivedProductivity = {
-      normal: pN_true,
-      bulky: pB_true,
-      freight: pF_true,
-      peakNormal: {
-        ...peakNormal,
-        productivity: pN_true
-      },
-      peakBulky: {
-        ...peakBulky,
-        productivity: pB_true
-      },
-      peakFreight: {
-        ...peakFreight,
-        productivity: pF_true
-      },
-      avgProductivity: avgOverallProd, // Overall average productivity in packages
+      peakOverall: peakOverall,
+      avgProductivity: avgOverallProd,
       sampleDays: useDays.length,
-      maxCapacity: peakNormal.vol + peakBulky.vol + peakFreight.vol, // Estimate capacity peak
-      peakDate: peakNormal.date,
-      maxStaff: Math.max(peakNormal.staff, peakBulky.staff, peakFreight.staff)
+      maxCapacity: peakOverall.vol,
+      peakDate: peakOverall.date,
+      maxStaff: peakOverall.staff
     };
 
-    console.log('[Capacity] Derived productivity from actual peaks (NEV model):', derivedProductivity);
+    console.log('[Capacity] Derived productivity from actual (Total Warehouse model):', derivedProductivity);
   }
 
   // ─── Apply derived staff to config ─────────────────
@@ -772,14 +711,9 @@
       pMix = dayData.total / requiredRaw;
     } else {
       // Fallback if no actual data is loaded yet
-      const pN = derivedProductivity?.peakNormal?.productivity || 0;
-      const pB = derivedProductivity?.peakBulky?.productivity || 0;
-      const pF = derivedProductivity?.peakFreight?.productivity || 0;
-      const staffN = pN > 0 ? dayData.normal / pN : 0;
-      const staffB = pB > 0 ? dayData.bulky / pB : 0;
-      const staffF = pF > 0 ? dayData.freight / pF : 0;
-      requiredRaw = staffN + staffB + staffF;
-      pMix = requiredRaw > 0 ? dayData.total / requiredRaw : 0;
+      const pTotal = derivedProductivity?.avgProductivity || 1000;
+      requiredRaw = dayData.total / pTotal;
+      pMix = pTotal;
     }
 
     const requiredTotal = Math.ceil(requiredRaw * (1 + config.bufferPercent / 100));
@@ -893,14 +827,11 @@
         </div>
 
         <div style="display:flex; flex-direction:column; gap:6px;">
-          <div style="font-size:0.65rem; color:var(--text-secondary); font-weight:600;">📦 Hàng &lt;5kg:</div>
-          ${formatPeak(dp.peakNormal)}
-
-          <div style="font-size:0.65rem; color:var(--text-secondary); font-weight:600;">📦 Hàng vừa (5-15kg):</div>
-          ${formatPeak(dp.peakBulky)}
-
-          <div style="font-size:0.65rem; color:var(--text-secondary); font-weight:600;">📦 Hàng to (&gt;15kg):</div>
-          ${formatPeak(dp.peakFreight)}
+          <div style="font-size:0.65rem; color:var(--text-secondary); font-weight:600;">📦 Năng suất toàn kho:</div>
+          ${formatPeak(dp.peakOverall)}
+          <div style="margin-top: 4px; font-size: 0.65rem; color: var(--text-muted);">
+            Năng suất trung bình: <strong>${dp.avgProductivity.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 1})} đơn/người</strong>
+          </div>
         </div>
 
         <button id="cap-btn-apply-derived" class="filter-btn" style="border-color:var(--green);color:var(--green);font-weight:600;cursor:pointer;font-size:0.72rem;width:100%;text-align:center;margin-top:4px;">
@@ -1312,32 +1243,7 @@
     // ── 0. Phân tích cụ thể cho ngày Forecast được chọn ──
     if (actualHistory && actualHistory.length > 0) {
       const dp = derivedProductivity;
-      const pN = dp?.peakNormal?.productivity || 0;
-      const pB = dp?.peakBulky?.productivity || 0;
-      const pF = dp?.peakFreight?.productivity || 0;
-      
-      const fallbackPN = 1200;
-      const fallbackPB = 500;
-      const fallbackPF = 200;
-      
-      const pN_use = pN > 0 ? pN : fallbackPN;
-      const pB_use = pB > 0 ? pB : fallbackPB;
-      const pF_use = pF > 0 ? pF : fallbackPF;
-      
-      const staffN = todayCalc.fc.normal / pN_use;
-      const staffB = todayCalc.fc.bulky / pB_use;
-      const staffF = todayCalc.fc.freight / pF_use;
-      const staffSum = staffN + staffB + staffF;
-      
-      let requiredN = 0;
-      let requiredB = 0;
-      let requiredF = 0;
-      
-      if (staffSum > 0) {
-        requiredN = Math.round(todayCalc.requiredTotal * (staffN / staffSum));
-        requiredB = Math.round(todayCalc.requiredTotal * (staffB / staffSum));
-        requiredF = Math.max(0, todayCalc.requiredTotal - requiredN - requiredB);
-      }
+      const pTotal = dp?.avgProductivity || 1000;
 
       let customHtml = `
         <div class="kpi-card dock-advisory-card daily-analysis-card" style="padding: 16px; border-left: 4px solid var(--blue) !important; display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.45); border-radius: var(--radius-lg); margin-bottom: 8px;">
@@ -1387,9 +1293,7 @@
                   <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(52, 211, 153, 0.12)'}; color: ${todayCalc.flNeeded > 0 ? 'var(--red)' : 'var(--green)'}; border: 1px solid ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(52, 211, 153, 0.2)'};">${todayCalc.flNeeded} người</span>
                 </div>
                 <div style="padding: 4px 8px; color: var(--text-muted); line-height: 1.4; font-size: 0.65rem; display: flex; flex-direction: column; gap: 2px; background: rgba(255, 255, 255, 0.02); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
-                  <span style="display:flex; justify-content:space-between;">• Normal (&lt;5kg): <strong style="color: #60a5fa;">${requiredN} ng</strong> <span style="font-size:0.58rem; color:var(--text-muted);">(~${formatNumber(Math.round(pN_use))}/ng)</span></span>
-                  <span style="display:flex; justify-content:space-between;">• Bulky (5-15kg): <strong style="color: #fbbf24;">${requiredB} ng</strong> <span style="font-size:0.58rem; color:var(--text-muted);">(~${formatNumber(Math.round(pB_use))}/ng)</span></span>
-                  <span style="display:flex; justify-content:space-between;">• Freight (&gt;15kg): <strong style="color: #fb923c;">${requiredF} ng</strong> <span style="font-size:0.58rem; color:var(--text-muted);">(~${formatNumber(Math.round(pF_use))}/ng)</span></span>
+                  <span style="display:flex; justify-content:space-between;">• Năng suất tham chiếu: <strong style="color: var(--blue-light);">${todayCalc.productivity ? todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 1}) : formatNumber(Math.round(pTotal))} đơn/người</strong></span>
                 </div>
               </div>
             </div>
