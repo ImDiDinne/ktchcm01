@@ -1,10 +1,12 @@
 .DS_Store
 *.xlsx
+!BaoCao_TonKho.xlsx
 *.xls
 *.xlsm
 *.xlsb
 *.xls
 *.csv
+!mapping_params.csv
 *.log
 __pycache__/
 *.pyc
@@ -13,5 +15,3 @@ node_modules/
 logs/
 .session_token
 .browser_data/
-tonkho_data.js
-tonkho_tuyen.json

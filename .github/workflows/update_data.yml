@@ -70,13 +70,14 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
-        git add mapping_params.csv
+        git add tonkho_data.js tonkho_tuyen.json BaoCao_TonKho.xlsx mapping_params.csv
         if git diff --staged --quiet; then
-          echo "✅ No config changes. Skipping commit."
+          echo "✅ No data changes. Skipping commit."
         else
-          git commit -m "chore(config): auto-update mapping parameters [skip ci]"
+          TIMESTAMP=$(date -u "+%d/%m/%Y %H:%M")
+          git commit -m "chore(data): auto-update $TIMESTAMP"
           # Pull rebase trước để tránh conflict với local pushes
           git pull origin main --rebase --strategy-option=theirs || true
           git push origin main
-          echo "🚀 Config pushed successfully!"
+          echo "🚀 Data pushed successfully!"
         fi
