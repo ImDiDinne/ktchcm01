@@ -147,9 +147,9 @@
         recDocks = Math.max(1, Math.ceil((avgArrivals * tAvg) / (60 * uTarget)));
       }
 
-      // Cap recommended doors at 8 for physical capacity safety
-      if (recDocks > 8) {
-        recDocks = 8;
+      // Cap recommended doors at 35 for physical capacity safety
+      if (recDocks > 35) {
+        recDocks = 35;
       }
 
       prediction.push({
