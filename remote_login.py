@@ -67,12 +67,23 @@ def main():
         page = context.new_page()
 
         try:
-            page.goto("https://sso.ghn.vn/ssoLogin?app=SSO", wait_until="networkidle")
+            page.goto("https://data-bi.ghn.vn", wait_until="domcontentloaded")
+            time.sleep(5)
             
-            # 1. Đăng nhập Username / Password
-            page.fill('input[placeholder="Nhập email/số điện thoại"]', username)
-            page.fill('input[type="password"]', password)
-            page.click('button:has-text("Đăng nhập")')
+            # Kiểm tra URL hiện tại, nếu đang ở trang login thì tiến hành điền
+            if "sso.ghn.vn" in page.url or "login" in page.url:
+                try:
+                    # Chờ ô input xuất hiện
+                    page.wait_for_selector('input[type="text"], input[type="email"], input[placeholder*="email"], input[placeholder*="tài khoản"]', timeout=10000)
+                    page.fill('input[type="text"], input[type="email"], input[placeholder*="email"], input[placeholder*="tài khoản"]', username)
+                    page.fill('input[type="password"]', password)
+                    page.click('button:has-text("Đăng nhập"), button[type="submit"]')
+                except Exception as form_err:
+                    raise Exception(f"Không tìm thấy form đăng nhập (URL: {page.url}). Lỗi: {form_err}")
+            else:
+                send_telegram("⚠️ Có vẻ như hệ thống không chuyển hướng đến trang Đăng nhập.", env)
+            
+
             
             time.sleep(3)
             
