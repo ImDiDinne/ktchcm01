@@ -33,3 +33,19 @@ jobs:
           GHN_PASSWORD: ${{ secrets.GHN_PASSWORD }}
         run: |
           python remote_login.py
+
+      - name: 🔑 Auto-Renew Session Secret
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -f ".session_token" ]; then
+            NEW_TOKEN=$(cat .session_token)
+            if [ -n "$GH_TOKEN" ]; then
+              echo "$NEW_TOKEN" | gh secret set METABASE_SESSION --repo ${{ github.repository }}
+              echo "✅ Đã tự động cập nhật METABASE_SESSION trong GitHub Secrets!"
+            else
+              echo "⚠️ Thiếu GH_PAT, không thể cập nhật secret."
+            fi
+            rm -f .session_token
+          fi

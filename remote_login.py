@@ -160,6 +160,18 @@ def main():
             headers = {"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"}
             requests.post(f"{supabase_url}/rest/v1/system_secrets", headers=headers, json={"key": "ghn_browser_state", "value": json.dumps(state_json)})
             
+            # Lấy thêm cookie cho data-bi.ghn.vn (Metabase)
+            try:
+                page.goto("https://data-bi.ghn.vn", wait_until="networkidle", timeout=15000)
+                time.sleep(3)
+                for cookie in context.cookies():
+                    if cookie['name'] == 'metabase.SESSION':
+                        with open('.session_token', 'w') as f:
+                            f.write(cookie['value'])
+                        break
+            except Exception as e:
+                print(f"Không thể lấy metabase session: {e}")
+
             send_telegram("✅ ĐĂNG NHẬP THÀNH CÔNG! Chìa khoá Cookies đã được làm mới tự động trên Cloud. Bạn đã có thể chạy quy trình Automation một cách mượt mà!", env)
 
         except Exception as e:

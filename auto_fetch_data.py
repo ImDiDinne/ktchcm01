@@ -128,6 +128,7 @@ class MetabaseClient:
 
             print("❌ Đăng nhập thất bại. Nếu bạn đăng nhập bằng Google/SSO:")
             print("   → Dùng METABASE_SESSION trong .env (xem hướng dẫn)")
+            self._notify_telegram_auth_failed()
             self.auth_failed = True
             return False
         except requests.exceptions.ConnectionError:
@@ -138,6 +139,21 @@ class MetabaseClient:
             print(f"❌ Lỗi đăng nhập: {e}")
             self.auth_failed = False
             return False
+
+    def _notify_telegram_auth_failed(self):
+        env = load_env()
+        bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+        chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+        if bot_token and chat_id:
+            try:
+                msg = "⚠️ *CẢNH BÁO: CHÌA KHOÁ TỒN KHO ĐÃ HẾT HẠN!*\n\nHệ thống không thể tải dữ liệu Tồn Kho từ Metabase vì phiên đăng nhập đã hết hạn. Vui lòng vào Telegram và gõ lệnh `/login` để hệ thống tự động làm mới."
+                requests.post(
+                    f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                    json={"chat_id": chat_id, "text": msg, "parse_mode": "Markdown"},
+                    timeout=5
+                )
+            except:
+                pass
 
     def _save_new_token(self):
         """Lưu session token mới vào file để GitHub Actions cập nhật Secrets."""
