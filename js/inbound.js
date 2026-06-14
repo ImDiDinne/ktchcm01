@@ -103,6 +103,7 @@
   }
 
   function getWaitTimeMinutes(trip) {
+    if (trip.remainingMinutes !== undefined) return trip.remainingMinutes;
     if (!trip.time) return 0;
     
     const todayStr = getTodayString();
@@ -239,23 +240,44 @@
   function getTodayTrips() {
     const targetDateStr = window.selectedInboundDate || getTodayString();
     const trips = window.tripScanData.filter(t => isSameDay(t.date, targetDateStr));
-    const tAvg = getDockTAvg();
-    
-    const todayStr = getTodayString();
-    const isViewingToday = isSameDay(targetDateStr, todayStr);
+    const isViewingToday = isSameDay(targetDateStr, getTodayString());
     
     trips.forEach(t => {
       if (t.code && window.unloadingTripsMap[t.code]) {
+        // CÓ trong Telegram bot
         const tripData = window.unloadingTripsMap[t.code];
-        const isCompleted = tripData.unloaded_at || t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
-        if (!isCompleted) {
+        if (tripData.unloaded_at) {
+          // Đã xong
+          t.status = 'Đã nhận';
+        } else {
+          // Đang nhập (Chưa có log kết thúc)
+          t.status = 'Đang nhập';
           if (isViewingToday) {
             const startedAt = new Date(tripData.started_at);
             const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
-            t.status = 'Đang nhập';
-            t.remainingMinutes = tAvg - elapsedMin;
-          } else {
-            t.status = 'Đã nhận';
+            // User requested to simulate 30 mins
+            t.remainingMinutes = 30 - elapsedMin;
+          }
+        }
+      } else {
+        // KHÔNG có trong Telegram bot -> Chờ dỡ
+        t.status = 'Chờ dỡ';
+        if (isViewingToday && t.time) {
+          const parts = t.time.split(':');
+          if (parts.length >= 2) {
+            const now = new Date();
+            const tzOffset = 7 * 60;
+            const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
+            
+            const arrivalDate = new Date(localTime);
+            arrivalDate.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parts.length > 2 ? parseInt(parts[2], 10) : 0, 0);
+            
+            const diffMs = localTime - arrivalDate;
+            if (diffMs > 0) {
+              t.remainingMinutes = Math.floor(diffMs / (1000 * 60));
+            } else {
+              t.remainingMinutes = 0;
+            }
           }
         }
       }
@@ -320,16 +342,16 @@
     let fg = 'var(--text-muted)';
     let text = status;
     
-    const isWaiting = s === 'đăng chờ' || s === 'đang chờ' || s === 'waiting';
+    const isWaiting = s === 'đăng chờ' || s === 'đang chờ' || s === 'chờ dỡ' || s === 'waiting';
     const isUnloading = s === 'đang nhập' || s === 'đang xử lý' || s === 'unloading' || s === 'processing';
     const isReceived = s === 'đã nhận' || s === 'đã giao' || s === 'completed' || s === 'received';
 
     if (isWaiting) {
+      bg = 'rgba(255, 100, 100, 0.15)';
+      fg = 'var(--red)';
+    } else if (isUnloading) {
       bg = 'rgba(251, 191, 36, 0.15)';
       fg = 'var(--yellow)';
-    } else if (isUnloading) {
-      bg = 'rgba(96, 165, 250, 0.15)';
-      fg = 'var(--blue-light)';
       if (trip && trip.remainingMinutes != null) {
         text = `Đang nhập (Còn ${trip.remainingMinutes}p)`;
       }
