@@ -1292,6 +1292,13 @@
                   <span>🧡 Freelancer cần:</span>
                   <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(52, 211, 153, 0.12)'}; color: ${todayCalc.flNeeded > 0 ? 'var(--red)' : 'var(--green)'}; border: 1px solid ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(52, 211, 153, 0.2)'};">${todayCalc.flNeeded} người</span>
                 </div>
+                ${todayCalc.flNeeded > 0 ? `
+                <div style="padding: 4px 8px; margin-top: 2px; color: var(--text-muted); line-height: 1.4; font-size: 0.65rem; display: flex; flex-direction: column; gap: 3px; background: rgba(251, 146, 60, 0.04); border-radius: 6px; border: 1px solid rgba(251, 146, 60, 0.12);">
+                  <div style="display:flex; justify-content:space-between;"><span>• Ca 1 (15%):</span> <strong style="color: #fb923c;">${Math.round(todayCalc.flNeeded * 0.15)} người</strong></div>
+                  <div style="display:flex; justify-content:space-between;"><span>• Ca 2 (35%):</span> <strong style="color: #fb923c;">${Math.round(todayCalc.flNeeded * 0.35)} người</strong></div>
+                  <div style="display:flex; justify-content:space-between;"><span>• Ca 3 (50%):</span> <strong style="color: #fb923c;">${todayCalc.flNeeded - Math.round(todayCalc.flNeeded * 0.15) - Math.round(todayCalc.flNeeded * 0.35)} người</strong></div>
+                </div>
+                ` : ''}
                 <div style="padding: 4px 8px; color: var(--text-muted); line-height: 1.4; font-size: 0.65rem; display: flex; flex-direction: column; gap: 2px; background: rgba(255, 255, 255, 0.02); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
                   <span style="display:flex; justify-content:space-between;">• Năng suất tham chiếu: <strong style="color: var(--blue-light);">${todayCalc.productivity ? todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 1}) : formatNumber(Math.round(pTotal))} đơn/người</strong></span>
                 </div>
