@@ -316,41 +316,54 @@ def renew_session_with_playwright(force_login=False, headless_mode=True):
         page = context.new_page()
         try:
             page.goto(METABASE_URL, wait_until='load', timeout=60000)
+            # Mở thêm tab cho nhanh.ghn.vn
+            page2 = context.new_page()
+            page2.goto("https://nhanh.ghn.vn", wait_until='load', timeout=60000)
         except Exception as goto_err:
             print(f"⚠️ Page.goto load error in GUI browser: {goto_err}")
 
-        # Chờ cho đến khi có cookie metabase.SESSION (tối đa 5 phút)
-        print("⏳ Chờ bạn đăng nhập... (tự động tắt sau khi hoàn tất, tối đa 5 phút)")
-
         session_cookie = None
-        max_wait = 300  # 5 phút
-        start_time = time.time()
-
-        while time.time() - start_time < max_wait:
-            cookies = context.cookies(METABASE_URL)
-            for c in cookies:
+        
+        if force_login:
+            print("\n🚨 QUAN TRỌNG: Hãy đăng nhập vào CẢ 2 TRANG (Metabase và Nhanh.GHN).")
+            input("👉 Sau khi đăng nhập thành công cả 2, hãy quay lại đây và bấm ENTER để tiếp tục...")
+            
+            # Sau khi bấm Enter, lấy metabase cookie
+            for c in context.cookies(METABASE_URL):
                 if c['name'] == 'metabase.SESSION':
                     session_cookie = c['value']
                     break
+        else:
+            # Chờ cho đến khi có cookie metabase.SESSION (tối đa 5 phút)
+            print("⏳ Chờ bạn đăng nhập... (tự động tắt sau khi hoàn tất, tối đa 5 phút)")
+            max_wait = 300  # 5 phút
+            start_time = time.time()
 
-            if session_cookie:
-                # Xác nhận token hợp lệ
-                res = verify_token(session_cookie)
-                if res == True:
-                    print("🎉 Đã lấy session token thành công!")
-                    break
-                elif res == "connection_error":
-                    print("⚠️ Lỗi kết nối mạng khi kiểm tra token mới. Sẽ thử lại sau...")
-                    session_cookie = None
-                else:
-                    session_cookie = None
+            while time.time() - start_time < max_wait:
+                cookies = context.cookies(METABASE_URL)
+                for c in cookies:
+                    if c['name'] == 'metabase.SESSION':
+                        session_cookie = c['value']
+                        break
 
-            elapsed = int(time.time() - start_time)
-            remaining = max_wait - elapsed
-            if elapsed % 10 == 0:
-                print(f"   ⏳ Đang chờ đăng nhập... ({remaining}s còn lại)")
+                if session_cookie:
+                    # Xác nhận token hợp lệ
+                    res = verify_token(session_cookie)
+                    if res == True:
+                        print("🎉 Đã lấy session token thành công!")
+                        break
+                    elif res == "connection_error":
+                        print("⚠️ Lỗi kết nối mạng khi kiểm tra token mới. Sẽ thử lại sau...")
+                        session_cookie = None
+                    else:
+                        session_cookie = None
 
-            time.sleep(2)
+                elapsed = int(time.time() - start_time)
+                remaining = max_wait - elapsed
+                if elapsed % 10 == 0:
+                    print(f"   ⏳ Đang chờ đăng nhập... ({remaining}s còn lại)")
+
+                time.sleep(2)
 
         upload_cookies_to_supabase(context)
         context.close()
