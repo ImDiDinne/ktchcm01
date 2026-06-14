@@ -74,26 +74,57 @@ def main():
             # Khởi tạo biến lưu kết quả api
             session_completed_time = None
             
+            # Rewrite locationId to 1626 (KTC HCM 01) to avoid INVALID_CURRENT_STOP
+            def handle_route(route):
+                if 'locationId=' in route.request.url:
+                    import re
+                    new_url = re.sub(r'locationId=\d+', 'locationId=1626', route.request.url)
+                    route.continue_(url=new_url)
+                else:
+                    route.continue_()
+            page.route("**/*", handle_route)
+            
             def handle_response(response):
                 nonlocal session_completed_time
-                if 'application/json' in response.headers.get('content-type', '') and 'session' in response.url:
-                    try:
-                        data = response.json()
-                        if data and data.get('data'):
-                            for session in data['data']:
-                                # Tìm session DROPOFF đã COMPLETED
-                                if session.get('type') == 'DROPOFF' and session.get('status') == 'COMPLETED':
-                                    end_time = session.get('endTime')
-                                    if end_time:
-                                        session_completed_time = end_time
-                    except:
-                        pass
+                if 'application/json' in response.headers.get('content-type', ''):
+                    if 'session' in response.url:
+                        try:
+                            data = response.json()
+                            if data and data.get('data'):
+                                for session in data['data']:
+                                    # Tìm session DROPOFF đã COMPLETED
+                                    if session.get('type') == 'DROPOFF' and session.get('status') == 'COMPLETED':
+                                        end_time = session.get('endTime')
+                                        if end_time:
+                                            session_completed_time = end_time
+                        except:
+                            pass
+                    elif 'tms-history' in response.url:
+                        try:
+                            data = response.json()
+                            if data and data.get('data'):
+                                for item in data['data']:
+                                    # Nếu đã kết thúc quét kiện bàn giao (nhưng quên bấm xác nhận hoàn tất)
+                                    if item.get('actionType') == 'STOP_SCAN_WAITING_FOR_CONFIRMATION':
+                                        end_time = item.get('actionTime')
+                                        if end_time and not session_completed_time:
+                                            session_completed_time = end_time
+                                        break
+                        except:
+                            pass
             
             page.on("response", handle_response)
             
             try:
                 page.goto(url, wait_until='networkidle', timeout=30000)
                 time.sleep(3) # Wait for APIs to resolve
+                
+                # Bấm vào LỊCH SỬ CHUYẾN ĐI để load log lịch sử
+                try:
+                    page.click("text='LỊCH SỬ CHUYẾN ĐI'", timeout=5000)
+                    time.sleep(2)
+                except:
+                    pass
                 
                 # Kiểm tra xem có bị văng ra trang đăng nhập không
                 body_text = page.inner_text('body').lower()
@@ -103,7 +134,7 @@ def main():
                     bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
                     chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
                     if bot_token and chat_id:
-                        msg = "⚠️ *CẢNH BÁO: CHÌA KHOÁ GHN ĐÃ HẾT HẠN!*\n\nCỗ máy cào dữ liệu xe tải trên Cloud vừa bị văng ra ngoài. Vui lòng mở máy Mac và chạy lệnh cấp phép lại:\n`cd \"/Users/duyhuynh/Desktop/AI dashboard\" && python3 auto_renew_session.py --force-login`"
+                        msg = "⚠️ *CẢNH BÁO: CHÌA KHOÁ GHN ĐÃ HẾT HẠN!*\n\nCỗ máy cào dữ liệu xe tải trên Cloud vừa bị văng ra ngoài. Vui lòng gõ lệnh `/login` cho bot này để bắt đầu quá trình đăng nhập lại tự động qua Telegram."
                         requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", json={
                             "chat_id": chat_id,
                             "text": msg,
