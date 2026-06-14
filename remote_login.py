@@ -71,11 +71,21 @@ def main():
             time.sleep(5)
             
             try:
-                # Chờ ô input xuất hiện (chờ tối đa 20s cho việc chuyển hướng và tải trang)
-                page.wait_for_selector('input[type="text"], input[type="email"], input[placeholder*="email"], input[placeholder*="tài khoản"]', timeout=20000)
-                page.fill('input[type="text"], input[type="email"], input[placeholder*="email"], input[placeholder*="tài khoản"]', username)
-                page.fill('input[type="password"]', password)
-                page.click('button:has-text("Đăng nhập"), button[type="submit"]')
+                # Chờ form xuất hiện bằng cách chờ ô password
+                page.wait_for_selector('input[type="password"]', timeout=20000)
+                
+                # Tìm ô input đầu tiên hiển thị (thường là username)
+                # Dùng thuộc tính password để định vị, ô phía trên nó thường là username
+                # Tuy nhiên cách an toàn nhất là lấy tất cả các thẻ input hiển thị trên màn hình
+                visible_inputs = page.query_selector_all('input:not([type="hidden"])')
+                if len(visible_inputs) >= 2:
+                    visible_inputs[0].fill(username)
+                    visible_inputs[1].fill(password)
+                else:
+                    page.fill('input[type="text"]', username)
+                    page.fill('input[type="password"]', password)
+                    
+                page.click('button:has-text("Đăng nhập"), button[type="submit"], button.btn-login')
             except Exception as form_err:
                 page.screenshot(path="redirect_fail.png")
                 send_telegram(f"⚠️ Không tìm thấy form đăng nhập. URL hiện tại: {page.url}", env)
