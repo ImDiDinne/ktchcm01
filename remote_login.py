@@ -67,7 +67,7 @@ def main():
         page = context.new_page()
 
         try:
-            page.goto("https://data-bi.ghn.vn", wait_until="domcontentloaded")
+            page.goto("https://nhanh.ghn.vn/ktc-van-tai", wait_until="domcontentloaded")
             time.sleep(5)
             
             # Kiểm tra URL hiện tại, nếu đang ở trang login thì tiến hành điền
