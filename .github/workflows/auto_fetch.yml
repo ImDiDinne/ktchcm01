@@ -33,6 +33,8 @@ jobs:
           METABASE_USERNAME: ${{ secrets.METABASE_USERNAME }}
           METABASE_PASSWORD: ${{ secrets.METABASE_PASSWORD }}
           METABASE_SESSION: ${{ secrets.METABASE_SESSION }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python auto_fetch_data.py --run-export
 
