@@ -45,12 +45,22 @@ def poll_supabase(key, env, timeout_sec=180):
     return None
 
 def handle_2fa_if_needed(page, env, supabase_url, supabase_key, context_name):
-    try:
-        page.wait_for_load_state("networkidle", timeout=10000)
-    except:
-        pass
-    
-    if "sso" in page.url or "login" in page.url:
+    max_steps = 3
+    for step in range(max_steps):
+        time.sleep(5)
+        try:
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except:
+            pass
+        
+        if "sso" not in page.url and "login" not in page.url:
+            break
+            
+        # Check if there are input fields
+        inputs = page.query_selector_all('input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="password"])')
+        if len(inputs) == 0:
+            break
+            
         page.screenshot(path="2fa_screen.png")
         bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
         chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
@@ -62,15 +72,17 @@ def handle_2fa_if_needed(page, env, supabase_url, supabase_key, context_name):
         
         if bot_token and chat_id:
             with open('2fa_screen.png', 'rb') as photo:
-                requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": f"🔐 {context_name} yêu cầu xác thực bảo mật.\n\nVui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút)"}, files={"photo": photo})
+                step_text = "tiếp theo" if step > 0 else "bảo mật"
+                requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": f"🔐 {context_name} yêu cầu xác thực {step_text}.\n\nVui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút)"}, files={"photo": photo})
         
         code_2fa = poll_supabase('ghn_2fa_code', env)
         if not code_2fa:
             code_2fa = poll_supabase('ghn_otp_code', env)
             
         if not code_2fa:
-            raise Exception(f"Quá thời gian chờ mã cho {context_name}")
+            raise Exception(f"Quá thời gian chờ mã cho {context_name} (Bước {step+1})")
             
+        # Refetch inputs as page might have slightly updated
         inputs = page.query_selector_all('input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="password"])')
         if len(inputs) == 6:
             for i, char in enumerate(code_2fa):
@@ -83,12 +95,6 @@ def handle_2fa_if_needed(page, env, supabase_url, supabase_key, context_name):
             
         try:
             page.click('button:has-text("Xác nhận"), button:has-text("Đăng nhập"), button[type="submit"]', timeout=3000)
-        except:
-            pass
-            
-        time.sleep(5)
-        try:
-            page.wait_for_load_state("networkidle", timeout=10000)
         except:
             pass
 
