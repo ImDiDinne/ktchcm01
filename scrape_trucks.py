@@ -1,20 +1,40 @@
 import os
 import json
 import time
+import logging
 from datetime import datetime
+from pathlib import Path
 import requests
 from playwright.sync_api import sync_playwright
 
+# Thiết lập logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Đọc cấu hình
+BASE_DIR = Path(__file__).resolve().parent
+ENV_FILE = BASE_DIR / '.env'
+
 def load_env():
-    env_vars = {}
-    if os.path.exists('.env'):
-        with open('.env', 'r') as f:
+    env = {}
+    if ENV_FILE.exists():
+        with open(ENV_FILE) as f:
             for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, val = line.split('=', 1)
-                    env_vars[key.strip()] = val.strip().strip('"').strip("'")
-    return env_vars
+                if '=' in line and not line.startswith('#'):
+                    k, v = line.strip().split('=', 1)
+                    env[k] = v.strip("'").strip('"')
+    return env
+
+def send_telegram_alert(message):
+    """Gửi thông báo lỗi qua Telegram"""
+    env = load_env()
+    bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+    chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+    if bot_token and chat_id:
+        try:
+            requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", json={"chat_id": chat_id, "text": message})
+        except:
+            pass
 
 def main():
     env = load_env()
@@ -159,7 +179,9 @@ def main():
                     print(f"Trip {trip_code} is still pending or API not found.")
                     
             except Exception as e:
-                print(f"Error scraping {trip_code}: {e}")
+                print(f"Error checking pending trips: {e}")
+                send_telegram_alert(f"❌ [LỖI NGHIÊM TRỌNG] Quét chuyến xe tới thất bại!\nLỗi chi tiết: {e}")
+                sys.exit(1)
                 
         browser.close()
 

@@ -2,14 +2,17 @@ name: Auto Scrape Unloading Times
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
   repository_dispatch:
-    types: [manual_scrape]
+    types: [trigger_auto_scrape, manual_scrape]
 
 jobs:
   scrape_data:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,3 +36,15 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python scrape_trucks.py
+
+      - name: Trigger Remote Login on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'remote_login.yml',
+              ref: 'main'
+            })

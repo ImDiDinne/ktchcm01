@@ -254,6 +254,7 @@ class MetabaseClient:
             return False
         except Exception as e:
             print(f"❌ Lỗi: {e}")
+            send_telegram_alert(f"❌ [LỖI NGHIÊM TRỌNG] Tải dữ liệu tồn kho thất bại!\nLỗi chi tiết: {e}")
             return False
 
     def _wait_and_download(self, query_url, output_path, body, max_retries=24):
@@ -296,6 +297,17 @@ class MetabaseClient:
 
 
 # ── Helpers for Expiration Notifications ─────────────────
+def send_telegram_alert(message):
+    """Gửi thông báo lỗi qua Telegram"""
+    env = load_env()
+    bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+    chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+    if bot_token and chat_id:
+        try:
+            requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", json={"chat_id": chat_id, "text": message})
+        except:
+            pass
+
 def send_macos_notification(title, subtitle, message):
     """Gửi thông báo hệ thống trên macOS"""
     if sys.platform == 'darwin':
@@ -566,7 +578,7 @@ def main():
                 send_macos_notification(
                     title="KTC HCM 01 Dashboard",
                     subtitle="Phiên đăng nhập hết hạn",
-                    message="Session Token Metabase đã hết hạn. Hãy chạy '🔄 Cập Nhật Session.command'!"
+                    message="Vui lòng cung cấp Session Token mới cho Metabase."
                 )
                 if not already_expired:
                     open_terminal_for_session_update()

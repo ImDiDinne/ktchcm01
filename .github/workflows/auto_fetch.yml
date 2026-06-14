@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '*/15 * * * *' # Chạy mỗi 15 phút
   workflow_dispatch: # Cho phép bấm chạy bằng tay từ Github Actions
+  repository_dispatch:
+    types: [trigger_auto_fetch]
 
 jobs:
   fetch_data:
@@ -11,6 +13,7 @@ jobs:
 
     permissions:
       contents: write # Cấp quyền cho GitHub Actions được phép commit và push code
+      actions: write # Cấp quyền kích hoạt workflow khác
 
     steps:
       - name: Checkout repository
@@ -51,3 +54,15 @@ jobs:
           else
             echo "Không có dữ liệu mới để commit."
           fi
+
+      - name: Trigger Remote Login on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'remote_login.yml',
+              ref: 'main'
+            })
