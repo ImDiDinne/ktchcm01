@@ -71,31 +71,45 @@ def main():
             print(f"Scraping trip {trip_code}...")
             url = f"https://nhanh.ghn.vn/ktc-van-tai/transport/detail?transportationCode={trip_code}&transportationStatus=SEARCH"
             
+            # Khởi tạo biến lưu kết quả api
+            session_completed_time = None
+            
+            def handle_response(response):
+                nonlocal session_completed_time
+                if 'application/json' in response.headers.get('content-type', '') and 'session' in response.url:
+                    try:
+                        data = response.json()
+                        if data and data.get('data'):
+                            for session in data['data']:
+                                # Tìm session DROPOFF đã COMPLETED
+                                if session.get('type') == 'DROPOFF' and session.get('status') == 'COMPLETED':
+                                    end_time = session.get('endTime')
+                                    if end_time:
+                                        session_completed_time = end_time
+                    except:
+                        pass
+            
+            page.on("response", handle_response)
+            
             try:
                 page.goto(url, wait_until='networkidle', timeout=30000)
-                time.sleep(3) # Extra wait for React/Vue to render
+                time.sleep(3) # Wait for APIs to resolve
                 
-                # Extract text to find status
-                body_text = page.inner_text('body').lower()
+                # Hủy lắng nghe để không bị trùng cho xe tiếp theo
+                page.remove_listener("response", handle_response)
                 
-                # Các từ khoá chứng tỏ xe đã hạ tải xong (tạm đoán, có thể tuỳ chỉnh sau)
-                finished_keywords = ['đã bàn giao', 'đã nhận', 'đã hoàn tất', 'hoàn thành dỡ hàng', 'đã dỡ', 'completed']
-                is_finished = any(k in body_text for k in finished_keywords)
-                
-                if is_finished:
-                    print(f"Trip {trip_code} is FINISHED!")
-                    unloaded_at = datetime.now().isoformat()
-                    
+                if session_completed_time:
+                    print(f"Trip {trip_code} is FINISHED! Unloaded at: {session_completed_time}")
                     # Cập nhật DB
                     update_resp = requests.patch(
                         f"{supabase_url}/rest/v1/unloading_trips?code=eq.{trip_code}",
                         headers=headers,
-                        json={"unloaded_at": unloaded_at}
+                        json={"unloaded_at": session_completed_time}
                     )
                     if update_resp.status_code in [200, 204]:
                         print(f"Updated {trip_code} unloaded_at successfully.")
                 else:
-                    print(f"Trip {trip_code} is still pending.")
+                    print(f"Trip {trip_code} is still pending or API not found.")
                     
             except Exception as e:
                 print(f"Error scraping {trip_code}: {e}")
