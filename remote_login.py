@@ -174,8 +174,20 @@ def main():
                         break
             except Exception as bi_e:
                 print(f"Lỗi Metabase: {bi_e}")
-
-            send_telegram("✅ ĐĂNG NHẬP THÀNH CÔNG! Chìa khoá đã được tự động cấp mới. Bạn hãy nhấn F5 làm mới lại trang báo cáo nhé!", env)
+                
+            # Take a success screenshot
+            page.screenshot(path="success_screen.png")
+            bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+            chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+            success_msg = "✅ ĐĂNG NHẬP THÀNH CÔNG! Chìa khoá đã được tự động cấp mới. Bạn hãy nhấn F5 làm mới lại trang báo cáo nhé!"
+            if bot_token and chat_id:
+                try:
+                    with open('success_screen.png', 'rb') as photo:
+                        requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": success_msg}, files={"photo": photo})
+                except Exception as pic_err:
+                    send_telegram(f"{success_msg}\n(Không thể gửi ảnh: {pic_err})", env)
+            else:
+                send_telegram(success_msg, env)
 
         except Exception as e:
             try:
