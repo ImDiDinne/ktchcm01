@@ -252,13 +252,8 @@
           if (isViewingToday) {
             const startedAt = new Date(tripData.started_at);
             const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
-            if (elapsedMin >= tAvg) {
-              t.status = 'Đã nhận';
-              t.autoCompleted = true;
-            } else {
-              t.status = 'Đang nhập';
-              t.remainingMinutes = tAvg - elapsedMin;
-            }
+            t.status = 'Đang nhập';
+            t.remainingMinutes = tAvg - elapsedMin;
           } else {
             t.status = 'Đã nhận';
           }
