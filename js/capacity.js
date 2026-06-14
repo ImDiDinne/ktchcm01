@@ -1292,13 +1292,21 @@
                   <span>🧡 Freelancer cần:</span>
                   <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(52, 211, 153, 0.12)'}; color: ${todayCalc.flNeeded > 0 ? 'var(--red)' : 'var(--green)'}; border: 1px solid ${todayCalc.flNeeded > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(52, 211, 153, 0.2)'};">${todayCalc.flNeeded} người</span>
                 </div>
-                ${todayCalc.flNeeded > 0 ? `
-                <div style="padding: 4px 8px; margin-top: 2px; color: var(--text-muted); line-height: 1.4; font-size: 0.65rem; display: flex; flex-direction: column; gap: 3px; background: rgba(251, 146, 60, 0.04); border-radius: 6px; border: 1px solid rgba(251, 146, 60, 0.12);">
-                  <div style="display:flex; justify-content:space-between;"><span>• Ca 1 (15%):</span> <strong style="color: #fb923c;">${Math.round(todayCalc.flNeeded * 0.15)} người</strong></div>
-                  <div style="display:flex; justify-content:space-between;"><span>• Ca 2 (35%):</span> <strong style="color: #fb923c;">${Math.round(todayCalc.flNeeded * 0.35)} người</strong></div>
-                  <div style="display:flex; justify-content:space-between;"><span>• Ca 3 (50%):</span> <strong style="color: #fb923c;">${todayCalc.flNeeded - Math.round(todayCalc.flNeeded * 0.15) - Math.round(todayCalc.flNeeded * 0.35)} người</strong></div>
-                </div>
-                ` : ''}
+                ${(() => {
+                  if (todayCalc.flNeeded <= 0) return '';
+                  const savedRatios = JSON.parse(localStorage.getItem('shiftRatios') || '[15, 35, 50]');
+                  const r1 = savedRatios[0] / 100;
+                  const r2 = savedRatios[1] / 100;
+                  const r3 = savedRatios[2] / 100;
+                  return `
+                  <div style="padding: 4px 8px; margin-top: 2px; color: var(--text-muted); line-height: 1.4; font-size: 0.65rem; display: flex; flex-direction: column; gap: 3px; background: rgba(251, 146, 60, 0.04); border-radius: 6px; border: 1px solid rgba(251, 146, 60, 0.12); position: relative;">
+                    <button onclick="window.openShiftRatiosModal()" style="position: absolute; right: 8px; top: 4px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; padding: 0; outline: none; opacity: 0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">⚙️</button>
+                    <div style="display:flex; justify-content:space-between; padding-right: 20px;"><span>• Ca 1 (${savedRatios[0]}%):</span> <strong style="color: #fb923c;">${Math.round(todayCalc.flNeeded * r1)} người</strong></div>
+                    <div style="display:flex; justify-content:space-between; padding-right: 20px;"><span>• Ca 2 (${savedRatios[1]}%):</span> <strong style="color: #fb923c;">${Math.round(todayCalc.flNeeded * r2)} người</strong></div>
+                    <div style="display:flex; justify-content:space-between; padding-right: 20px;"><span>• Ca 3 (${savedRatios[2]}%):</span> <strong style="color: #fb923c;">${todayCalc.flNeeded - Math.round(todayCalc.flNeeded * r1) - Math.round(todayCalc.flNeeded * r2)} người</strong></div>
+                  </div>
+                  `;
+                })()}
                 <div style="padding: 4px 8px; color: var(--text-muted); line-height: 1.4; font-size: 0.65rem; display: flex; flex-direction: column; gap: 2px; background: rgba(255, 255, 255, 0.02); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
                   <span style="display:flex; justify-content:space-between;">• Năng suất tham chiếu: <strong style="color: var(--blue-light);">${todayCalc.productivity ? todayCalc.productivity.toLocaleString('vi-VN', {minimumFractionDigits: 0, maximumFractionDigits: 1}) : formatNumber(Math.round(pTotal))} đơn/người</strong></span>
                 </div>
@@ -1706,3 +1714,40 @@
   };
 
 })();
+
+
+  // Modal Ratios Shift logic
+  window.openShiftRatiosModal = function() {
+    const savedRatios = JSON.parse(localStorage.getItem('shiftRatios') || '[15, 35, 50]');
+    document.getElementById('ratio-ca1').value = savedRatios[0];
+    document.getElementById('ratio-ca2').value = savedRatios[1];
+    document.getElementById('ratio-ca3').value = savedRatios[2];
+    document.getElementById('ratio-error').style.display = 'none';
+    document.getElementById('shift-ratios-modal').style.display = 'flex';
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('close-shift-ratios-btn')?.addEventListener('click', () => {
+      document.getElementById('shift-ratios-modal').style.display = 'none';
+    });
+    document.getElementById('shift-ratios-modal')?.addEventListener('click', (e) => {
+      if(e.target.id === 'shift-ratios-modal') e.target.style.display = 'none';
+    });
+    document.getElementById('save-shift-ratios-btn')?.addEventListener('click', () => {
+      const r1 = parseInt(document.getElementById('ratio-ca1').value) || 0;
+      const r2 = parseInt(document.getElementById('ratio-ca2').value) || 0;
+      const r3 = parseInt(document.getElementById('ratio-ca3').value) || 0;
+      if (r1 + r2 + r3 !== 100) {
+        document.getElementById('ratio-error').style.display = 'block';
+        return;
+      }
+      localStorage.setItem('shiftRatios', JSON.stringify([r1, r2, r3]));
+      document.getElementById('shift-ratios-modal').style.display = 'none';
+      if (typeof window.capacity !== 'undefined' && typeof window.capacity.renderCapacityDashboard === 'function') {
+        window.capacity.renderCapacityDashboard();
+      } else {
+        window.location.reload();
+      }
+    });
+  });
+
