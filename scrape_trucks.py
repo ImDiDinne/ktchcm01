@@ -95,6 +95,22 @@ def main():
                 page.goto(url, wait_until='networkidle', timeout=30000)
                 time.sleep(3) # Wait for APIs to resolve
                 
+                # Kiểm tra xem có bị văng ra trang đăng nhập không
+                body_text = page.inner_text('body').lower()
+                if "mật khẩu" in body_text and "đăng nhập" in body_text:
+                    print(f"⚠️ Cookies expired! Redirected to login page.")
+                    # Gửi thông báo Telegram
+                    bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+                    chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+                    if bot_token and chat_id:
+                        msg = "⚠️ *CẢNH BÁO: CHÌA KHOÁ GHN ĐÃ HẾT HẠN!*\n\nCỗ máy cào dữ liệu xe tải trên Cloud vừa bị văng ra ngoài. Vui lòng mở máy Mac và chạy lệnh cấp phép lại:\n`cd \"/Users/duyhuynh/Desktop/AI dashboard\" && python3 auto_renew_session.py --force-login`"
+                        requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", json={
+                            "chat_id": chat_id,
+                            "text": msg,
+                            "parse_mode": "Markdown"
+                        })
+                    break # Ngừng scrape cho các xe khác vì cookie đã hỏng
+                
                 # Hủy lắng nghe để không bị trùng cho xe tiếp theo
                 page.remove_listener("response", handle_response)
                 
