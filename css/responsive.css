@@ -1,0 +1,13 @@
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 1200px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .dashboard { padding: 12px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .header { flex-direction: column; gap: 12px; text-align: center; }
+  .dest-grid { grid-template-columns: 1fr; }
+}
+

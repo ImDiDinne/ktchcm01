@@ -643,7 +643,7 @@ def load_env():
             print(f"⚠️ Không thể đọc file .env: {e}")
     return env_vars
 
-def upload_to_supabase(data, excel_path):
+def upload_to_supabase(data, excel_path, df=None):
     """Tải dữ liệu JSON và báo cáo excel lên Supabase REST API & Storage.
     
     Raises Exception nếu JSON upload thất bại (vì dashboard đọc từ Supabase).
@@ -713,6 +713,48 @@ def upload_to_supabase(data, excel_path):
                     print(f"⚠️ Cập nhật Excel lên Supabase Storage thất bại (HTTP {resp.status_code} / {resp_put.status_code}): {resp_put.text}")
         except Exception as e:
             print(f"⚠️ Lỗi khi tải Excel lên Supabase Storage: {e}")
+
+    # 3. Tải raw_orders.json lên Supabase Storage cho tính năng Drill-down
+    if df is not None:
+        try:
+            print("🚀 Đang tải raw_orders.json lên Supabase Storage...")
+            cols = ['order_code', 'loaihang', 'deliver_province', 'next_warehouse_name', '_aging', '_loai_kho', '_kho_den', 'diff_hours']
+            df_min = df[cols].copy()
+            df_min.fillna('', inplace=True)
+            
+            # Rename columns to be user-friendly in Excel export later
+            df_min.columns = ['Mã Đơn', 'Loại Hàng', 'Tỉnh Giao', 'Kho Tiếp', 'Nhóm Thời Gian', 'Loại Kho', 'Kho Đến', 'Giờ Tồn']
+            
+            raw_data_list = df_min.values.tolist()
+            raw_payload = {
+                "columns": df_min.columns.tolist(),
+                "data": raw_data_list,
+                "updated": data.get('updated', '')
+            }
+            raw_json_str = json.dumps(raw_payload, ensure_ascii=False)
+            
+            RAW_FILE = BASE / 'raw_orders.json'
+            RAW_FILE.write_text(raw_json_str, encoding='utf-8')
+            
+            storage_url_raw = f"{supabase_url}/storage/v1/object/reports/raw_orders.json"
+            storage_headers_raw = {
+                "apikey": supabase_key,
+                "Authorization": f"Bearer {supabase_key}",
+                "Content-Type": "application/json",
+                "x-upsert": "true"
+            }
+            
+            resp = requests.post(storage_url_raw, headers=storage_headers_raw, data=raw_json_str.encode('utf-8'), timeout=60)
+            if resp.status_code in [200, 201]:
+                print("✅ Đã cập nhật file raw_orders.json lên Supabase Storage thành công!")
+            else:
+                resp_put = requests.put(storage_url_raw, headers=storage_headers_raw, data=raw_json_str.encode('utf-8'), timeout=60)
+                if resp_put.status_code in [200, 201]:
+                    print("✅ Đã cập nhật file raw_orders.json lên Supabase Storage (PUT) thành công!")
+                else:
+                    print(f"⚠️ Cập nhật raw_orders lên Supabase Storage thất bại (HTTP {resp_put.status_code}): {resp_put.text}")
+        except Exception as e:
+            print(f"⚠️ Lỗi khi tải raw_orders lên Supabase Storage: {e}")
 
 
 def print_summary(data):
@@ -826,7 +868,7 @@ def main():
         export_pivot_xlsx(df, pivot)
         
         # Tải dữ liệu lên Supabase bảo mật
-        upload_to_supabase(data, PIVOT_FILE)
+        upload_to_supabase(data, PIVOT_FILE, df)
 
         # In tổng hợp
         print_summary(data)

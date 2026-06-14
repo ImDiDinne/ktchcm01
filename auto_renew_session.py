@@ -77,6 +77,24 @@ def update_github_secret(new_token):
         return
 
     repo = 'ImDiDinne/ktchcm01'
+
+    # Thử dùng gh CLI trước vì nó ổn định hơn và không cần PyNaCl
+    try:
+        import subprocess
+        # Pass GH_TOKEN env var to authenticate gh CLI
+        env_vars = os.environ.copy()
+        env_vars['GH_TOKEN'] = gh_pat
+        
+        cmd = f'echo "{new_token}" | gh secret set METABASE_SESSION --repo {repo}'
+        result = subprocess.run(cmd, shell=True, env=env_vars, capture_output=True, text=True)
+        if result.returncode == 0:
+            print("✅ Đã tự động cập nhật METABASE_SESSION bằng gh CLI thành công!")
+            return
+        else:
+            print(f"⚠️ Thử dùng gh CLI thất bại: {result.stderr.strip()}. Chuyển sang dùng API...")
+    except Exception as e:
+        print(f"⚠️ Lỗi chạy gh CLI: {e}. Chuyển sang dùng API...")
+
     headers = {
         'Authorization': f'Bearer {gh_pat}',
         'Accept': 'application/vnd.github+json',
@@ -111,7 +129,7 @@ def update_github_secret(new_token):
             print("⚠️ PyNaCl chưa được cài. Đang thử cài tự động...")
             try:
                 import subprocess
-                subprocess.run([sys.executable, '-m', 'pip', 'install', 'PyNaCl', '--quiet'],
+                subprocess.run([sys.executable, '-m', 'pip', 'install', 'PyNaCl', '--quiet', '--break-system-packages'],
                                capture_output=True, timeout=60)
                 from nacl import encoding, public as nacl_public
                 sealed_box = nacl_public.SealedBox(

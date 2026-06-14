@@ -107,7 +107,7 @@
     // Build top 5 risks rows
     const topRisks = risks.slice(0, 5);
     const tableRows = topRisks.map(r => `
-      <tr>
+      <tr class="clickable" onclick="window.openDrilldown(event, 'child', '${escapeHTML(r.groupName).replace(/'/g, "\\'")}', '${escapeHTML(r.shortName).replace(/'/g, "\\'")}', '>24H')">
         <td style="text-align: left; font-weight: 500; color: var(--text-primary); padding-left: 10px;">${escapeHTML(r.shortName)}</td>
         <td style="text-align: left; color: var(--text-secondary);">${escapeHTML(r.groupName)}</td>
         <td style="text-align: right; font-weight: 700; color: var(--red); font-family: 'JetBrains Mono', monospace;">${fmt(r.overdueCount)}</td>
@@ -270,11 +270,16 @@
           pr.className = 'group-parent';
           pr.dataset.group = ri;
           let cells = `<td><span class="group-toggle" id="toggle-${ri}">▼</span> ${escapeHTML(route.name)}</td>`;
-          AGING_KEYS.forEach(k => {
-            const v = (route.aging || {})[k] || 0;
-            const heatStyle = getHeatmapStyle(k, v, maxOverdueVal);
-            cells += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}" ${heatStyle}>${v ? fmt(v) : '—'}</td>`;
-          });
+                      AGING_KEYS.forEach(k => {
+              const v = (route.aging || {})[k] || 0;
+              const heatStyle = getHeatmapStyle(k, v, maxOverdueVal);
+              if (v > 0) {
+                const safeName = escapeHTML(route.name).replace(/'/g, "\'");
+                cells += `<td class="${agingClass(k, v)} clickable" ${heatStyle} onclick="window.openDrilldown(event, 'group', '${safeName}', null, '${k}')">${fmt(v)}</td>`;
+              } else {
+                cells += `<td class="zero" ${heatStyle}>—</td>`;
+              }
+            });
           cells += `<td>${fmt(route.total)}</td>`;
           pr.innerHTML = cells;
           pr.addEventListener('click', () => toggleGroup(ri));
@@ -288,7 +293,13 @@
             AGING_KEYS.forEach(k => {
               const v = (child.aging || {})[k] || 0;
               const heatStyle = getHeatmapStyle(k, v, maxOverdueVal);
-              cc += `<td class="${v === 0 ? 'zero' : agingClass(k, v)}" ${heatStyle}>${v ? fmt(v) : '—'}</td>`;
+              if (v > 0) {
+                const safeGroupName = escapeHTML(route.name).replace(/'/g, "\\'");
+                const safeChildName = escapeHTML(child.short_name || child.name).replace(/'/g, "\\'");
+                cc += `<td class="${agingClass(k, v)} clickable" ${heatStyle} onclick="window.openDrilldown(event, 'child', '${safeGroupName}', '${safeChildName}', '${k}')">${fmt(v)}</td>`;
+              } else {
+                cc += `<td class="zero" ${heatStyle}>—</td>`;
+              }
             });
             cc += `<td>${fmt(child.total)}</td>`;
             cr.innerHTML = cc;
@@ -444,5 +455,142 @@
   // Expose global methods
   window.renderDashboard = renderDashboard;
   window.clearDashboardData = clearDashboardData;
+
+
+  // ==========================================
+  // DRILL-DOWN LOGIC
+  // ==========================================
+  let cachedRawOrders = null;
+  
+  async function fetchRawOrders() {
+    if (cachedRawOrders) return cachedRawOrders;
+    
+    if (!window.supabaseClient) {
+      alert("⚠️ Supabase client is not ready. Vui lòng thử lại sau.");
+      return null;
+    }
+    
+    const loadingEl = document.getElementById('drilldown-loading');
+    const tableWrapper = document.getElementById('drilldown-table-wrapper');
+    if (loadingEl) loadingEl.style.display = 'block';
+    if (tableWrapper) tableWrapper.style.display = 'none';
+
+    try {
+      const { data, error } = await window.supabaseClient
+        .storage
+        .from('reports')
+        .createSignedUrl('raw_orders.json', 300);
+
+      if (error) throw error;
+      
+      const response = await fetch(data.signedUrl);
+      if (!response.ok) throw new Error("Lỗi tải file JSON (" + response.status + ")");
+      const json = await response.json();
+      cachedRawOrders = json;
+      return json;
+    } catch (err) {
+      console.error("Lỗi tải dữ liệu chi tiết:", err);
+      if (loadingEl) loadingEl.innerHTML = `<span style="color:var(--red);">❌ Lỗi tải dữ liệu: ${err.message}</span>`;
+      return null;
+    }
+  }
+
+  window.openDrilldown = async function(e, type, groupName, childName, agingKey) {
+    if (e) e.stopPropagation();
+    
+    const modal = document.getElementById('drilldown-modal');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    document.getElementById('drilldown-title').innerText = `Chi Tiết: ${childName || groupName} (${agingKey})`;
+    document.getElementById('drilldown-loading').style.display = 'block';
+    document.getElementById('drilldown-table-wrapper').style.display = 'none';
+    document.getElementById('export-drilldown-btn').style.display = 'none';
+    document.getElementById('drilldown-count').innerText = '';
+    
+    const rawData = await fetchRawOrders();
+    if (!rawData || !rawData.data) return;
+    
+    const idxAging = rawData.columns.indexOf('Nhóm Thời Gian');
+    const idxLoaiKho = rawData.columns.indexOf('Loại Kho');
+    const idxKhoDen = rawData.columns.indexOf('Kho Đến');
+    const idxHours = rawData.columns.indexOf('Giờ Tồn');
+    
+    let filtered = rawData.data.filter(row => {
+      let isAgingMatch = false;
+      if (agingKey === '>24H') {
+         isAgingMatch = row[idxAging] && row[idxAging].match(/^[4-9]\./);
+      } else {
+         isAgingMatch = row[idxAging] === agingKey;
+      }
+      if (!isAgingMatch) return false;
+      
+      if (type === 'group') {
+        return row[idxLoaiKho] === groupName;
+      } else {
+        return row[idxLoaiKho] === groupName && row[idxKhoDen] === childName;
+      }
+    });
+    
+    filtered.sort((a, b) => b[idxHours] - a[idxHours]);
+    
+    const thead = document.getElementById('drilldown-thead');
+    const tbody = document.getElementById('drilldown-tbody');
+    
+    thead.innerHTML = '<tr>' + rawData.columns.map(c => `<th style="padding: 8px; border-bottom: 1px solid var(--border);">${c}</th>`).join('') + '</tr>';
+    tbody.innerHTML = filtered.map(row => 
+      '<tr>' + row.map((val, i) => {
+        let align = (i === idxHours) ? 'right' : 'left';
+        return `<td style="text-align: ${align}; padding: 6px 10px; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05);">${val}</td>`;
+      }).join('') + '</tr>'
+    ).join('');
+    
+    document.getElementById('drilldown-loading').style.display = 'none';
+    document.getElementById('drilldown-table-wrapper').style.display = 'block';
+    document.getElementById('drilldown-count').innerText = `Tổng cộng: ${filtered.length.toLocaleString('vi-VN')} đơn hàng`;
+    
+    const exportBtn = document.getElementById('export-drilldown-btn');
+    exportBtn.style.display = 'block';
+    exportBtn.onclick = () => {
+      const originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = '⏳ Đang tạo Excel...';
+      exportBtn.style.pointerEvents = 'none';
+      
+      setTimeout(() => {
+        try {
+          const ws_data = [rawData.columns, ...filtered];
+          const ws = window.XLSX.utils.aoa_to_sheet(ws_data);
+          const wb = window.XLSX.utils.book_new();
+          window.XLSX.utils.book_append_sheet(wb, ws, "Chi_Tiet");
+          window.XLSX.writeFile(wb, `ChiTiet_${childName || groupName}_${agingKey}.xlsx`);
+        } catch (err) {
+          console.error(err);
+          alert("Lỗi xuất Excel: " + err.message);
+        } finally {
+          exportBtn.innerHTML = originalText;
+          exportBtn.style.pointerEvents = 'auto';
+        }
+      }, 50);
+    };
+  };
+
+  // Close modal
+  const attachModalHandlers = () => {
+    const closeBtn = document.getElementById('close-drilldown-btn');
+    if (closeBtn) {
+      closeBtn.onclick = () => { document.getElementById('drilldown-modal').style.display = 'none'; };
+    }
+    const modal = document.getElementById('drilldown-modal');
+    if (modal) {
+      modal.onclick = (e) => { if(e.target.id === 'drilldown-modal') e.target.style.display = 'none'; };
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachModalHandlers);
+  } else {
+    attachModalHandlers();
+  }
+
 
 })();
