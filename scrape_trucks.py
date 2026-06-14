@@ -79,7 +79,7 @@ def main():
                 body_text = page.inner_text('body').lower()
                 
                 # Các từ khoá chứng tỏ xe đã hạ tải xong (tạm đoán, có thể tuỳ chỉnh sau)
-                finished_keywords = ['đã nhận', 'đã hoàn tất', 'hoàn thành dỡ hàng', 'đã dỡ', 'completed']
+                finished_keywords = ['đã bàn giao', 'đã nhận', 'đã hoàn tất', 'hoàn thành dỡ hàng', 'đã dỡ', 'completed']
                 is_finished = any(k in body_text for k in finished_keywords)
                 
                 if is_finished:
