@@ -143,7 +143,15 @@ def main():
             send_telegram("✅ ĐĂNG NHẬP THÀNH CÔNG! Chìa khoá Cookies đã được làm mới tự động trên Cloud.", env)
 
         except Exception as e:
-            send_telegram(f"❌ Lỗi trong quá trình đăng nhập ngầm: {e}", env)
+            try:
+                page.screenshot(path="error.png")
+                bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+                chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+                if bot_token and chat_id:
+                    with open('error.png', 'rb') as photo:
+                        requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": f"❌ Lỗi: {e}"}, files={"photo": photo})
+            except Exception as pic_err:
+                send_telegram(f"❌ Lỗi trong quá trình đăng nhập ngầm: {e}\n(Không thể chụp ảnh màn hình: {pic_err})", env)
             
         browser.close()
 
