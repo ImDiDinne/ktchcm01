@@ -21,6 +21,9 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/tables.css">
   <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="dashboard" id="dashboard">
@@ -93,6 +96,14 @@
 
       <!-- KPI Cards -->
       <div class="kpi-grid" id="kpi-grid"></div>
+
+      <!-- History Chart -->
+      <div class="chart-card animate-in delay-2" style="margin-bottom: 24px; padding: 20px;">
+        <div class="card-title" style="margin-bottom: 16px;">Biểu Đồ Xu Hướng Tồn Kho (Lịch Sử)</div>
+        <div style="height: 250px; width: 100%;">
+          <canvas id="inventoryHistoryChart"></canvas>
+        </div>
+      </div>
 
       <!-- Action Insights / Top Risks Panel -->
       <div id="action-insights-panel" class="section animate-in" style="display: none;"></div>

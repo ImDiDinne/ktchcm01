@@ -684,6 +684,24 @@ def upload_to_supabase(data, excel_path, df=None):
             print("✅ Đã cập nhật dữ liệu tồn kho lên Supabase (bảng: inventory_data) thành công!")
         else:
             raise RuntimeError(f"Cập nhật JSON lên Supabase thất bại (HTTP {resp.status_code}): {resp.text[:300]}")
+            
+        # 1.5 Lưu lịch sử tồn kho (Trend)
+        history_url = f"{supabase_url}/rest/v1/inventory_history"
+        total_tonkho = data.get('all', {}).get('grand_total', 0)
+        history_payload = {
+            "timestamp": datetime.now().isoformat(),
+            "total_inventory": int(total_tonkho)
+        }
+        # Nếu bảng chưa có thì thôi, không raise error để tránh làm hỏng luồng chính
+        try:
+            h_resp = requests.post(history_url, headers=headers, json=history_payload, timeout=10)
+            if h_resp.status_code in [200, 201]:
+                print(f"✅ Đã lưu lịch sử tồn kho: {total_tonkho} đơn.")
+            else:
+                print(f"⚠️ Không thể lưu lịch sử tồn kho (có thể bảng inventory_history chưa được tạo): {h_resp.status_code}")
+        except Exception as he:
+            print(f"⚠️ Lỗi kết nối khi lưu lịch sử: {he}")
+            
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Lỗi kết nối khi tải dữ liệu lên Supabase: {e}")
         

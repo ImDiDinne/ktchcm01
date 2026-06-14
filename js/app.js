@@ -99,6 +99,9 @@
         checkSessionExpiryAndFreshness();
         window.renderDashboard(currentFilter);
         
+        // Fetch inventory history and render chart
+        fetchAndRenderHistoryChart();
+        
         // Trigger Inbound refresh if tab active
         const dockTabBtn = document.getElementById('tab-btn-dock');
         if (dockTabBtn && dockTabBtn.classList.contains('active')) {
@@ -687,5 +690,76 @@
 
   // Expose global methods
   window.fetchAndRenderDashboard = fetchAndRenderDashboard;
+
+  let historyChartInstance = null;
+  async function fetchAndRenderHistoryChart() {
+    if (!window.supabaseClient) return;
+    try {
+      // Lấy data trong 24h qua (1 ngày = 96 mốc 15 phút)
+      const { data, error } = await window.supabaseClient
+        .from('inventory_history')
+        .select('timestamp, total_inventory')
+        .order('timestamp', { ascending: true })
+        .limit(96);
+      
+      if (error) throw error;
+      if (!data || data.length === 0) return;
+
+      const labels = data.map(r => {
+        const d = new Date(r.timestamp);
+        return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      });
+      const values = data.map(r => r.total_inventory);
+
+      const ctx = document.getElementById('inventoryHistoryChart');
+      if (!ctx) return;
+
+      if (historyChartInstance) {
+        historyChartInstance.destroy();
+      }
+
+      historyChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Tổng Tồn Kho',
+            data: values,
+            borderColor: '#fb923c',
+            backgroundColor: 'rgba(251, 146, 60, 0.1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            pointRadius: 2,
+            pointBackgroundColor: '#fb923c'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8', maxTicksLimit: 12 }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' },
+              beginAtZero: false
+            }
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Lỗi vẽ biểu đồ lịch sử:", err);
+    }
+  }
 
 })();
