@@ -117,8 +117,8 @@ def main():
         page = context.new_page()
 
         try:
-            # 1. NHANH.GHN.VN
-            page.goto("https://nhanh.ghn.vn", wait_until="domcontentloaded")
+            # 1. NHANH.GHN.VN/KTC-VAN-TAI
+            page.goto("https://nhanh.ghn.vn/ktc-van-tai", wait_until="domcontentloaded")
             time.sleep(5)
             
             # Form login
@@ -153,7 +153,7 @@ def main():
                 if "login" in page.url or "sso" in page.url:
                     raise Exception(f"Bị kẹt ở trang đăng nhập: {page.url}")
             except:
-                raise Exception(f"Không thể truy cập nhanh.ghn.vn. URL hiện tại: {page.url}")
+                raise Exception(f"Không thể truy cập nhanh.ghn.vn/ktc-van-tai. URL hiện tại: {page.url}")
 
             # Lưu browser state
             state_json = context.storage_state()
