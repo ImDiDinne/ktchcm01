@@ -201,7 +201,10 @@
       if (Array.isArray(data)) {
         data.forEach(item => {
           if (item.code && item.started_at) {
-            window.unloadingTripsMap[item.code] = item.started_at;
+            window.unloadingTripsMap[item.code] = {
+              started_at: item.started_at,
+              unloaded_at: item.unloaded_at || null
+            };
           }
         });
         console.log(`Loaded ${data.length} unloading records from Supabase.`);
@@ -220,8 +223,10 @@
         totalMin += getDurationMinutes(t.time, t.syncedAt);
         count++;
       } else if (t.code && window.unloadingTripsMap[t.code]) {
-        const startedAt = new Date(window.unloadingTripsMap[t.code]);
-        const elapsed = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
+        const tripData = window.unloadingTripsMap[t.code];
+        const startedAt = new Date(tripData.started_at);
+        const endAt = tripData.unloaded_at ? new Date(tripData.unloaded_at) : new Date();
+        const elapsed = Math.floor((endAt.getTime() - startedAt.getTime()) / (1000 * 60));
         if (elapsed > 0) {
           totalMin += elapsed;
           count++;
@@ -241,10 +246,11 @@
     
     trips.forEach(t => {
       if (t.code && window.unloadingTripsMap[t.code]) {
-        const isCompleted = t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
+        const tripData = window.unloadingTripsMap[t.code];
+        const isCompleted = tripData.unloaded_at || t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
         if (!isCompleted) {
           if (isViewingToday) {
-            const startedAt = new Date(window.unloadingTripsMap[t.code]);
+            const startedAt = new Date(tripData.started_at);
             const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
             if (elapsedMin >= tAvg) {
               t.status = 'Đã nhận';

@@ -199,6 +199,48 @@ def send_notification(title, message):
             pass
 
 
+# ── Supabase Cookie Sync ─────────────────────────────────
+
+def upload_cookies_to_supabase(context):
+    """Lấy toàn bộ Cookies từ browser và upload lên bảng system_secrets trên Supabase"""
+    print("🍪 Đang trích xuất toàn bộ Session Cookies...")
+    try:
+        import requests
+        env = load_env()
+        supabase_url = env.get('SUPABASE_URL') or os.environ.get('SUPABASE_URL')
+        supabase_key = env.get('SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+
+        if not supabase_url or not supabase_key:
+            print("⚠️ Không tìm thấy SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY để upload cookies.")
+            return
+
+        # Trích xuất storage state (chứa toàn bộ cookie của các domain đã truy cập)
+        state = context.storage_state()
+        state_json = json.dumps(state)
+
+        url = f"{supabase_url}/rest/v1/system_secrets"
+        headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {supabase_key}",
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+        }
+        
+        payload = {
+            "key": "ghn_browser_state",
+            "value": state_json,
+            "updated_at": datetime.now().isoformat()
+        }
+
+        resp = requests.post(url, headers=headers, json=payload, timeout=15)
+        if resp.status_code in [200, 201]:
+            print("✅ Đã tải Cookies an toàn lên Supabase (system_secrets)!")
+        else:
+            print(f"⚠️ Lỗi tải Cookies lên Supabase ({resp.status_code}): {resp.text[:200]}")
+            
+    except Exception as e:
+        print(f"⚠️ Lỗi khi trích xuất và tải Cookies: {e}")
+
 # ── Playwright Session Renewal ───────────────────────────
 
 def renew_session_with_playwright(force_login=False, headless_mode=True):
@@ -251,6 +293,7 @@ def renew_session_with_playwright(force_login=False, headless_mode=True):
 
                 if session_cookie and verify_token(session_cookie) == True:
                     print("🎉 Lấy session thành công ở chế độ tự động!")
+                    upload_cookies_to_supabase(context)
                     context.close()
                     return session_cookie
 
@@ -309,6 +352,7 @@ def renew_session_with_playwright(force_login=False, headless_mode=True):
 
             time.sleep(2)
 
+        upload_cookies_to_supabase(context)
         context.close()
 
         if not session_cookie:
