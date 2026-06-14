@@ -488,7 +488,7 @@ def main():
         if success and args.run_export:
             print("\n📊 Chạy export_tonkho_v2.py...")
             result = subprocess.run(
-                ['python3', str(BASE_DIR / 'export_tonkho_v2.py')],
+                [sys.executable, str(BASE_DIR / 'export_tonkho_v2.py')],
                 cwd=str(BASE_DIR)
             )
             if result.returncode != 0:
