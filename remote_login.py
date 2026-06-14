@@ -70,19 +70,15 @@ def main():
             page.goto("https://nhanh.ghn.vn/ktc-van-tai", wait_until="domcontentloaded")
             time.sleep(5)
             
-            # Kiểm tra URL hiện tại, nếu đang ở trang login thì tiến hành điền
-            if "sso.ghn.vn" in page.url or "login" in page.url:
-                try:
-                    # Chờ ô input xuất hiện
-                    page.wait_for_selector('input[type="text"], input[type="email"], input[placeholder*="email"], input[placeholder*="tài khoản"]', timeout=10000)
-                    page.fill('input[type="text"], input[type="email"], input[placeholder*="email"], input[placeholder*="tài khoản"]', username)
-                    page.fill('input[type="password"]', password)
-                    page.click('button:has-text("Đăng nhập"), button[type="submit"]')
-                except Exception as form_err:
-                    raise Exception(f"Không tìm thấy form đăng nhập (URL: {page.url}). Lỗi: {form_err}")
-            else:
+            try:
+                # Chờ ô input xuất hiện (chờ tối đa 20s cho việc chuyển hướng và tải trang)
+                page.wait_for_selector('input[type="text"], input[type="email"], input[placeholder*="email"], input[placeholder*="tài khoản"]', timeout=20000)
+                page.fill('input[type="text"], input[type="email"], input[placeholder*="email"], input[placeholder*="tài khoản"]', username)
+                page.fill('input[type="password"]', password)
+                page.click('button:has-text("Đăng nhập"), button[type="submit"]')
+            except Exception as form_err:
                 page.screenshot(path="redirect_fail.png")
-                send_telegram(f"⚠️ Hệ thống không chuyển hướng đến trang Đăng nhập. URL hiện tại: {page.url}", env)
+                send_telegram(f"⚠️ Không tìm thấy form đăng nhập. URL hiện tại: {page.url}", env)
                 bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
                 chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
                 if bot_token and chat_id:
