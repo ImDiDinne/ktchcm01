@@ -101,31 +101,41 @@ def main():
             
             time.sleep(3)
             
-            # Kiểm tra xem có bị hỏi 2FA không
+            # Kiểm tra xem có bị hỏi 2FA/OTP không
             body_text = page.inner_text('body').lower()
             
-            if "nhập mã số từ ứng dụng google authenticator" in body_text or "mã xác thực" in body_text:
-                send_telegram("🔐 Hệ thống yêu cầu mã 2FA. Vui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút để thực hiện)", env)
+            if "authenticator" in body_text or "xác thực" in body_text or "otp" in body_text:
+                # Chụp lại màn hình gửi qua cho chắc ăn
+                page.screenshot(path="2fa_screen.png")
+                bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+                chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+                if bot_token and chat_id:
+                    with open('2fa_screen.png', 'rb') as photo:
+                        requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": "🔐 Hệ thống đang đòi mã xác thực (2FA/OTP). Vui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút để nhập mã)"}, files={"photo": photo})
+                else:
+                    send_telegram("🔐 Hệ thống yêu cầu mã 2FA/OTP. Vui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút để thực hiện)", env)
+                    
                 code_2fa = poll_supabase('ghn_2fa_code', env)
                 if not code_2fa:
-                    send_telegram("❌ Quá thời gian chờ mã 2FA. Đăng nhập thất bại.", env)
+                    send_telegram("❌ Quá thời gian chờ mã. Đăng nhập thất bại.", env)
                     browser.close()
                     return
                 
                 # Điền mã 2FA
-                # GHN thường có 6 ô input rời rạc hoặc 1 ô
-                inputs = page.query_selector_all('input[type="tel"], input[type="text"]')
+                # Lấy tất cả các input hiển thị (loại trừ button, checkbox, radio)
+                inputs = page.query_selector_all('input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="checkbox"])')
                 if len(inputs) == 6:
                     for i, char in enumerate(code_2fa):
-                        inputs[i].fill(char)
-                else:
-                    page.fill('input[type="text"]', code_2fa)
+                        if i < len(inputs):
+                            inputs[i].fill(char)
+                elif len(inputs) > 0:
+                    inputs[0].fill(code_2fa)
                 
                 try:
-                    page.click('button:has-text("Xác nhận")', timeout=3000)
+                    page.click('button:has-text("Xác nhận"), button:has-text("Đăng nhập"), button[type="submit"]', timeout=3000)
                 except:
                     pass
-                time.sleep(3)
+                time.sleep(5)
             
             body_text = page.inner_text('body').lower()
             # 2. Kiểm tra nếu có hỏi OTP SMS
