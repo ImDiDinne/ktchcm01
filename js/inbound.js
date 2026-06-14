@@ -363,16 +363,21 @@
       }
     }
     
+    // Button Check log cho trạng thái đang nhập
+    let checkBtn = '';
+    if (isUnloading) {
+      checkBtn = `<button onclick="triggerScrape(this)" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text-muted); cursor: pointer; margin-left: 4px; padding: 2px 6px; font-size: 0.65rem; transition: all 0.2s;" title="Tự động dò tìm log kết thúc trên GHN" onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='var(--accent-light)';" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-muted)';">🔄 Dò Log</button>`;
+    }
+    
     // Status select dropdown for managers/operators if logged in
     if (window.currentUser && trip && trip.code) {
       const optionWaiting = `<option value="waiting" ${isWaiting ? 'selected' : ''} style="background: #1e293b; color: var(--yellow);">⏳ Đang Chờ</option>`;
       const optionUnloading = `<option value="unloading" ${isUnloading ? 'selected' : ''} style="background: #1e293b; color: var(--blue-light);">🚚 Đang Nhập</option>`;
       const optionReceived = `<option value="received" ${isReceived ? 'selected' : ''} style="background: #1e293b; color: var(--green);">✅ Đã Nhận</option>`;
       
-      // Inline event listener maps to window.handleStatusChange
       return `
+        <div style="display: inline-flex; align-items: center;">
         <select 
-          class="status-select" 
           data-trip-code="${escapeHTML(trip.code)}"
           onchange="window.inbound.handleStatusChange(this)"
           style="
@@ -396,11 +401,12 @@
           ${optionWaiting}
           ${optionUnloading}
           ${optionReceived}
-        </select>
+        </select>${checkBtn}
+        </div>
       `;
     }
     
-    return `<span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; background: ${bg}; color: ${fg}; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(text)}</span>`;
+    return `<div style="display: inline-flex; align-items: center;"><span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; background: ${bg}; color: ${fg}; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(text)}</span>${checkBtn}</div>`;
   }
 
   function populateInboundDates() {
@@ -903,3 +909,41 @@
   };
 
 })();
+
+// triggerScrape function
+window.triggerScrape = async function(btnElement) {
+  if (btnElement.disabled) return;
+  
+  // Disable button
+  const originalText = btnElement.innerHTML;
+  btnElement.disabled = true;
+  btnElement.innerHTML = '⏳ Đang dò...';
+  btnElement.style.opacity = '0.7';
+  
+  // Trigger Supabase Edge Function
+  try {
+    const supabaseUrl = 'https://baizmeqkxslajxuzyfnu.supabase.co';
+    const response = await fetch(`${supabaseUrl}/functions/v1/trigger-scrape`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      alert("✅ Đã gửi lệnh Dò Log thành công!\n\nHệ thống đang chạy ngầm trên máy chủ để kiểm tra tất cả các chuyến 'Đang Nhập'. Quá trình này sẽ mất khoảng 1-2 phút. Vui lòng kiểm tra lại sau ít phút.");
+    } else {
+      const data = await response.json();
+      alert("❌ Lỗi khi gọi hàm: " + (data.error || response.statusText));
+    }
+  } catch (err) {
+    alert("❌ Lỗi kết nối: " + err.message);
+  } finally {
+    // Reset button after 5 seconds to prevent spam
+    setTimeout(() => {
+      btnElement.innerHTML = originalText;
+      btnElement.disabled = false;
+      btnElement.style.opacity = '1';
+    }, 5000);
+  }
+}
