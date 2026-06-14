@@ -97,73 +97,118 @@ def main():
                 browser.close()
                 return
             
-            # Chờ hệ thống xử lý đăng nhập (có thể chuyển hướng hoặc load trang 2FA)
-            time.sleep(5)
-            try:
-                page.wait_for_load_state("networkidle", timeout=10000)
-            except:
-                pass
+def handle_2fa_if_needed(page, env, supabase_url, supabase_key, context_name):
+    time.sleep(5)
+    try:
+        page.wait_for_load_state("networkidle", timeout=10000)
+    except:
+        pass
+    
+    if "sso" in page.url or "login" in page.url:
+        page.screenshot(path="2fa_screen.png")
+        bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+        chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+        
+        # Xóa mã cũ để chờ mã mới (tránh dùng lại mã cũ)
+        headers = {"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}", "Content-Type": "application/json"}
+        requests.delete(f"{supabase_url}/rest/v1/system_secrets?key=eq.ghn_2fa_code", headers=headers)
+        
+        if bot_token and chat_id:
+            with open('2fa_screen.png', 'rb') as photo:
+                requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": f"🔐 {context_name} yêu cầu xác thực bổ sung.\n\nNếu có tin nhắn OTP, vui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút để nhập mã)"}, files={"photo": photo})
+        else:
+            send_telegram(f"🔐 {context_name} yêu cầu xác thực bổ sung. Vui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút để thực hiện)", env)
             
-            # Kiểm tra URL để biết trạng thái
-            if "sso" in page.url or "login" in page.url:
-                # Nếu vẫn còn ở trang SSO, tức là bị đòi 2FA/OTP hoặc sai mật khẩu
-                page.screenshot(path="2fa_screen.png")
+        code_2fa = poll_supabase('ghn_2fa_code', env)
+        if not code_2fa:
+            raise Exception(f"❌ Quá thời gian chờ mã cho {context_name}. Đăng nhập thất bại.")
+        
+        inputs = page.query_selector_all('input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="password"])')
+        if len(inputs) == 6:
+            for i, char in enumerate(code_2fa):
+                if i < len(inputs):
+                    inputs[i].fill(char)
+        elif len(inputs) > 0:
+            inputs[0].fill(code_2fa)
+        else:
+            page.fill('input[type="text"]', code_2fa)
+        
+        try:
+            page.click('button:has-text("Xác nhận"), button:has-text("Đăng nhập"), button[type="submit"]', timeout=3000)
+        except:
+            pass
+        
+        time.sleep(5)
+        try:
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except:
+            pass
+
+def main():
+    env = load_env()
+    supabase_url = env.get('SUPABASE_URL') or os.environ.get('SUPABASE_URL')
+    supabase_key = env.get('SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+    username = env.get('GHN_USERNAME') or os.environ.get('GHN_USERNAME')
+    password = env.get('GHN_PASSWORD') or os.environ.get('GHN_PASSWORD')
+    
+    if not supabase_url or not username or not password:
+        send_telegram("❌ Lỗi: Máy chủ GitHub thiếu cấu hình GHN_USERNAME hoặc GHN_PASSWORD.", env)
+        return
+
+    send_telegram("🔄 Đang mở trình duyệt ngầm để đăng nhập vào GHN...", env)
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context()
+        page = context.new_page()
+
+        try:
+            # 1. ĐĂNG NHẬP VÀ LẤY COOKIE CHO NHANH.GHN.VN
+            page.goto("https://nhanh.ghn.vn/ktc-van-tai", wait_until="domcontentloaded")
+            time.sleep(5)
+            
+            try:
+                page.wait_for_selector('input[type="password"]', timeout=20000)
+                visible_inputs = page.query_selector_all('input:not([type="hidden"])')
+                if len(visible_inputs) >= 2:
+                    visible_inputs[0].fill(username)
+                    visible_inputs[1].fill(password)
+                else:
+                    page.fill('input[type="text"]', username)
+                    page.fill('input[type="password"]', password)
+                    
+                page.click('button:has-text("Đăng nhập"), button[type="submit"], button.btn-login')
+            except Exception as form_err:
+                page.screenshot(path="redirect_fail.png")
+                send_telegram(f"⚠️ Không tìm thấy form đăng nhập. URL hiện tại: {page.url}", env)
                 bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
                 chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
                 if bot_token and chat_id:
-                    with open('2fa_screen.png', 'rb') as photo:
-                        requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": "🔐 Hệ thống yêu cầu mã xác thực (Hoặc có lỗi đăng nhập).\n\nNếu hệ thống đòi mã OTP, vui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút để nhập mã)"}, files={"photo": photo})
-                else:
-                    send_telegram("🔐 Hệ thống yêu cầu mã xác thực 2FA/OTP. Vui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút để thực hiện)", env)
-                    
-                code_2fa = poll_supabase('ghn_2fa_code', env)
-                if not code_2fa:
-                    send_telegram("❌ Quá thời gian chờ mã. Đăng nhập thất bại.", env)
-                    browser.close()
-                    return
-                
-                # Điền mã 2FA
-                # Lấy tất cả các input hiển thị (loại trừ button, checkbox, radio, password)
-                inputs = page.query_selector_all('input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="password"])')
-                if len(inputs) == 6:
-                    for i, char in enumerate(code_2fa):
-                        if i < len(inputs):
-                            inputs[i].fill(char)
-                elif len(inputs) > 0:
-                    inputs[0].fill(code_2fa)
-                else:
-                    page.fill('input[type="text"]', code_2fa)
-                
-                try:
-                    page.click('button:has-text("Xác nhận"), button:has-text("Đăng nhập"), button[type="submit"]', timeout=3000)
-                except:
-                    pass
-                
-                time.sleep(5)
-                try:
-                    page.wait_for_load_state("networkidle", timeout=10000)
-                except:
-                    pass
+                    with open('redirect_fail.png', 'rb') as photo:
+                        requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": "Ảnh màn hình hiện tại:"}, files={"photo": photo})
+                browser.close()
+                return
             
-            # Đợi load vào trang đích nhanh.ghn.vn
+            # Xử lý 2FA nếu có cho nhanh.ghn.vn
+            handle_2fa_if_needed(page, env, supabase_url, supabase_key, "Hệ thống (nhanh.ghn.vn)")
+            
             try:
                 page.wait_for_url("**nhanh.ghn.vn**", timeout=15000)
             except:
-                # Nếu vẫn không đúng URL, kiểm tra lại xem có lỗi không
                 if "sso" in page.url or "login" in page.url:
                     raise Exception("Vẫn kẹt ở trang đăng nhập, có thể mã OTP sai hoặc lỗi hệ thống.")
             
-            # Lấy cookies
             state_json = context.storage_state()
-            
-            # Lưu vào Supabase
             headers = {"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"}
             requests.post(f"{supabase_url}/rest/v1/system_secrets", headers=headers, json={"key": "ghn_browser_state", "value": json.dumps(state_json)})
             
-            # Lấy thêm cookie cho data-bi.ghn.vn (Metabase)
+            # 2. ĐĂNG NHẬP VÀ LẤY TOKEN CHO DATA-BI.GHN.VN
             try:
                 page.goto("https://data-bi.ghn.vn", wait_until="networkidle", timeout=15000)
-                time.sleep(3)
+                
+                # Xử lý 2FA nếu có cho data-bi.ghn.vn (đôi khi đòi OTP SMS phụ)
+                handle_2fa_if_needed(page, env, supabase_url, supabase_key, "Hệ thống Tồn kho (data-bi.ghn.vn)")
+                
                 for cookie in context.cookies():
                     if cookie['name'] == 'metabase.SESSION':
                         with open('.session_token', 'w') as f:
