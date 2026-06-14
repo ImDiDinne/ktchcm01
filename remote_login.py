@@ -81,7 +81,15 @@ def main():
                 except Exception as form_err:
                     raise Exception(f"Không tìm thấy form đăng nhập (URL: {page.url}). Lỗi: {form_err}")
             else:
-                send_telegram("⚠️ Có vẻ như hệ thống không chuyển hướng đến trang Đăng nhập.", env)
+                page.screenshot(path="redirect_fail.png")
+                send_telegram(f"⚠️ Hệ thống không chuyển hướng đến trang Đăng nhập. URL hiện tại: {page.url}", env)
+                bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
+                chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
+                if bot_token and chat_id:
+                    with open('redirect_fail.png', 'rb') as photo:
+                        requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": "Ảnh màn hình hiện tại:"}, files={"photo": photo})
+                browser.close()
+                return
             
 
             
