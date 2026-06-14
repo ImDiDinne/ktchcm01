@@ -1,0 +1,35 @@
+name: Remote Telegram Login
+
+on:
+  repository_dispatch:
+    types: [remote_login]
+  workflow_dispatch:
+
+jobs:
+  login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Run Remote Login Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GHN_USERNAME: ${{ secrets.GHN_USERNAME }}
+          GHN_PASSWORD: ${{ secrets.GHN_PASSWORD }}
+        run: |
+          python remote_login.py
