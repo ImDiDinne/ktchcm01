@@ -8,8 +8,7 @@
 
 .kpi-card {
   background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -89,8 +88,7 @@
 
 .chart-card {
   background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -225,8 +223,7 @@
 
 .dest-card {
   background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -317,8 +314,7 @@
   gap: 16px;
   margin-bottom: 20px;
   background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 12px 24px;
@@ -383,8 +379,7 @@
   align-items: center;
   justify-content: center;
   z-index: 99999;
-  backdrop-filter: blur(20px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(8px);
 }
 
 .login-card {
@@ -396,8 +391,7 @@
   padding: 30px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   text-align: center;
-  backdrop-filter: blur(16px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(8px);
   animation: scale-up 0.3s ease;
 }
 
@@ -563,8 +557,7 @@
   border-left: 1px solid var(--border);
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
   z-index: 10000;
-  backdrop-filter: blur(20px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(8px);
   transition: right 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -650,8 +643,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  backdrop-filter: blur(10px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(4px);
   transition: var(--transition);
 }
 
@@ -828,8 +820,7 @@ input[type="range"]::-moz-range-thumb:hover {
   width: fit-content;
   margin-bottom: 15px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-  backdrop-filter: blur(10px);
-  will-change: transform, backdrop-filter;
+  backdrop-filter: blur(4px);
   transition: var(--transition);
 }
 
