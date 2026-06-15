@@ -229,7 +229,7 @@ class MetabaseClient:
                 with open(tmp_path, 'wb') as f:
                     for chunk in resp.iter_content(chunk_size=8192):
                         f.write(chunk)
-                if tmp_path.exists() and tmp_path.stat().st_size > 1000000:
+                if tmp_path.exists() and tmp_path.stat().st_size > 5000:
                     if output_path.exists():
                         output_path.unlink()
                     tmp_path.rename(output_path)
@@ -279,7 +279,7 @@ class MetabaseClient:
                 with open(tmp_path, 'wb') as f:
                     for chunk in resp.iter_content(chunk_size=8192):
                         f.write(chunk)
-                if tmp_path.exists() and tmp_path.stat().st_size > 1000000:
+                if tmp_path.exists() and tmp_path.stat().st_size > 5000:
                     if output_path.exists():
                         output_path.unlink()
                     tmp_path.rename(output_path)

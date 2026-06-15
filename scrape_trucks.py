@@ -173,12 +173,13 @@ async def async_main():
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(storage_state='state.json')
         
-        sem = asyncio.Semaphore(10) # Process 10 trips concurrently
-        tasks = []
-        for trip in trips:
-            trip_code = trip['code']
-            tasks.append(scrape_trip(context, trip_code, sem))
+        # Tối đa 5 tab chạy đồng thời để tránh tràn RAM (OOM) trên Github Actions
+        sem = asyncio.Semaphore(5)
+        
+        async def bounded_scrape(trip_code):
+            return await scrape_trip(context, trip_code, sem)
             
+        tasks = [bounded_scrape(trip['code']) for trip in trips]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         expired = False

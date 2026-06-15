@@ -688,8 +688,10 @@ def upload_to_supabase(data, excel_path, df=None):
         # 1.5 Lưu lịch sử tồn kho (Trend)
         history_url = f"{supabase_url}/rest/v1/inventory_history"
         total_tonkho = data.get('all', {}).get('grand_total', 0)
+        from datetime import timezone, timedelta
+        vn_tz = timezone(timedelta(hours=7))
         history_payload = {
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(vn_tz).isoformat(),
             "total_inventory": int(total_tonkho)
         }
         # Nếu bảng chưa có thì thôi, không raise error để tránh làm hỏng luồng chính

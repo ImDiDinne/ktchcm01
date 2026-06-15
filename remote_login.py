@@ -200,7 +200,15 @@ def main():
             except:
                 send_telegram(f"❌ Lỗi: {e}", env)
 
-        browser.close()
+        finally:
+            browser.close()
+            # Dọn dẹp ảnh chụp màn hình để bảo mật
+            for png in ["2fa_screen.png", "redirect_fail.png", "success_screen.png", "error.png"]:
+                if os.path.exists(png):
+                    try:
+                        os.remove(png)
+                    except:
+                        pass
 
 if __name__ == '__main__':
     main()
