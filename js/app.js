@@ -752,6 +752,8 @@
     let lastTodayVal = null;
     let lastN1Val = null;
 
+    const currentHour = new Date().getHours();
+
     for (let i = 0; i < 24; i++) {
       const hStr = i < 10 ? '0' + i : '' + i;
       let todayVal = null;
@@ -764,15 +766,15 @@
         n1Val = currentActiveTab === 'all' ? (hist.n1[hStr].grand_total || 0) : ((hist.n1[hStr].routes && hist.n1[hStr].routes[currentActiveTab]) || 0);
       }
 
-      // Forward fill nếu dữ liệu bị khuyết
-      if (todayVal === null && lastTodayVal !== null) todayVal = lastTodayVal;
+      // Forward fill nếu dữ liệu bị khuyết, nhưng chỉ áp dụng cho giờ quá khứ/hiện tại
+      if (todayVal === null && lastTodayVal !== null && i <= currentHour) todayVal = lastTodayVal;
       if (n1Val === null && lastN1Val !== null) n1Val = lastN1Val;
 
-      // Nếu vẫn null gán tạm = 0
-      if (todayVal === null) todayVal = 0;
+      // Nếu vẫn null thì gán tạm = 0 (nếu là giờ tương lai thì giữ nguyên null để không vẽ cột)
+      if (todayVal === null && i <= currentHour) todayVal = 0;
       if (n1Val === null) n1Val = 0;
 
-      lastTodayVal = todayVal;
+      if (todayVal !== null) lastTodayVal = todayVal;
       lastN1Val = n1Val;
 
       currentData.push(todayVal);
