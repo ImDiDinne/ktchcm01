@@ -3,7 +3,7 @@
    Dark Mode · Glassmorphism · Premium
    ═══════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
 /* ── Tokens ─────────────────────────────────────── */
 :root {
@@ -40,7 +40,12 @@
   --purple-dim: rgba(167, 139, 250, 0.15);
   --cyan: #22d3ee;
 
+  --blue-light: #93c5fd;
+  --accent-alpha: rgba(251, 146, 60, 0.3);
+  --border-color: rgba(255, 255, 255, 0.08);
+
   --radius-sm: 8px;
+  --radius-md: 10px;
   --radius: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;

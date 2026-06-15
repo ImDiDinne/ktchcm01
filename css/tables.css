@@ -422,7 +422,7 @@
 
 .cap-config-row input[type="number"] {
   width: 80px;
-  background: #1e293b;
+  background: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border);
   padding: 6px 10px;
@@ -596,7 +596,7 @@
 #cap-paste-textarea {
   width: 100%;
   min-height: 200px;
-  background: #0f172a;
+  background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);

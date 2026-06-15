@@ -113,8 +113,8 @@
             <canvas id="compare24hChart"></canvas>
           </div>
           <!-- AI Insight Panel -->
-          <div id="ai-insight-panel" style="margin-top: 20px; padding: 16px 20px; background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6; border-radius: 8px; display: none;" class="animate-in delay-3">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #3b82f6; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase;">
+          <div id="ai-insight-panel" style="margin-top: 20px; padding: 16px 20px; background: rgba(59, 130, 246, 0.08); border-left: 4px solid var(--blue); border-radius: 8px; display: none;" class="animate-in delay-3">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--blue); font-weight: 600; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase;">
               ✨ Phân Tích Thông Minh
             </div>
             <div id="ai-insight-text" style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">Đang phân tích dữ liệu...</div>
@@ -258,7 +258,7 @@
         <div class="chart-card" style="flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;">
           <div class="card-title">Chọn Ngày Xem Báo Cáo Inbound</div>
           <div style="margin-top: 8px;">
-            <select id="inbound-date-select" style="width: 100%; background: #1e293b; color: var(--text-primary); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.9rem; cursor: pointer; outline: none;">
+            <select id="inbound-date-select" style="width: 100%; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.9rem; cursor: pointer; outline: none;">
               <!-- Dates will be dynamically populated -->
             </select>
           </div>
@@ -347,7 +347,7 @@
       <div class="table-card animate-in delay-4" style="margin-top: 16px;">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
           <div class="card-title">Danh Sách Chi Tiết Xe Tải Trong Ngày (TripScan)</div>
-          <button id="btn-scan-all" onclick="window.triggerScrape(this)" style="background: rgba(251, 146, 60, 0.2); border: 1px solid #fb923c; border-radius: 4px; color: #fb923c; cursor: pointer; padding: 6px 12px; font-weight: 600; font-size: 0.8rem; transition: all 0.2s;" title="Dò tự động tất cả các chuyến Đang Nhập" onmouseover="this.style.background='rgba(251, 146, 60, 0.3)';" onmouseout="this.style.background='rgba(251, 146, 60, 0.2)';">
+          <button id="btn-scan-all" class="filter-btn" onclick="window.triggerScrape(this)" style="background: rgba(251, 146, 60, 0.2); border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); cursor: pointer; padding: 6px 12px; font-weight: 600; font-size: 0.8rem; transition: all 0.2s;" title="Dò tự động tất cả các chuyến Đang Nhập">
             🔄 DÒ TẤT CẢ
           </button>
         </div>
@@ -501,7 +501,7 @@
       </div>
 
       <!-- KPI Cards -->
-      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <div class="kpi-card animate-in delay-1">
           <div class="kpi-label">FC Hôm Nay / Ngày Gần Nhất</div>
           <div class="kpi-value" id="cap-kpi-fc-today">—</div>
@@ -572,12 +572,12 @@
             <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
               <div style="flex:1;">
                 <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:4px;text-align:center;font-weight:600;">NVCT (Chính thức)</div>
-                <input type="number" id="cap-nvct-total" value="235" style="width:100%;background:#1e293b;color:var(--text-primary);border:1px solid var(--border);padding:10px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;">
+                <input type="number" id="cap-nvct-total" value="235" style="width:100%;background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border);padding:10px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;">
               </div>
               <div style="font-size:1.2rem;color:var(--text-muted);font-weight:700;padding-top:16px;">+</div>
               <div style="flex:1;">
                 <div style="font-size:0.62rem;color:var(--yellow);margin-bottom:4px;text-align:center;font-weight:600;">Freelancer</div>
-                <input type="number" id="cap-fl-total" value="95" style="width:100%;background:#1e293b;color:var(--yellow);border:1px solid rgba(251,191,36,0.3);padding:10px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;">
+                <input type="number" id="cap-fl-total" value="95" style="width:100%;background:var(--bg-secondary);color:var(--yellow);border:1px solid rgba(251,191,36,0.3);padding:10px 12px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;">
               </div>
             </div>
             <div style="font-size:0.68rem;color:var(--text-muted);text-align:center;font-family:'JetBrains Mono',monospace;">
@@ -683,13 +683,13 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Modular Scripts -->
-  <script src="js/auth.js?v=3.0"></script>
-  <script src="js/charts.js?v=3.0"></script>
-  <script src="js/inventory.js?v=3.0"></script>
-  <script src="js/inbound.js?v=3.0"></script>
-  <script src="js/prediction.js?v=3.0"></script>
-  <script src="js/capacity.js?v=3.0"></script>
-  <script src="js/app.js?v=3.0"></script>
+  <script src="js/auth.js?v=3.1"></script>
+  <script src="js/charts.js?v=3.1"></script>
+  <script src="js/inventory.js?v=3.1"></script>
+  <script src="js/inbound.js?v=3.1"></script>
+  <script src="js/prediction.js?v=3.1"></script>
+  <script src="js/capacity.js?v=3.1"></script>
+  <script src="js/app.js?v=3.1"></script>
 
   <!-- Login Overlay (Modal) -->
   <div id="login-overlay" class="login-overlay">
@@ -866,7 +866,6 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
 </body>
 </html>

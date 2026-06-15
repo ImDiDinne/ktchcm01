@@ -30,9 +30,9 @@
 
 .kpi-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), var(--accent-light)); }
 .kpi-card:nth-child(2)::before { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
-.kpi-card:nth-child(3)::before { background: linear-gradient(90deg, var(--green), #6ee7b7); }
-.kpi-card:nth-child(4)::before { background: linear-gradient(90deg, var(--purple), #c4b5fd); }
-.kpi-card:nth-child(5)::before { background: linear-gradient(90deg, var(--red), #fca5a5); }
+.kpi-card:nth-child(3)::before { background: linear-gradient(90deg, var(--green), var(--green)); }
+.kpi-card:nth-child(4)::before { background: linear-gradient(90deg, var(--purple), var(--purple)); }
+.kpi-card:nth-child(5)::before { background: linear-gradient(90deg, var(--red), var(--red)); }
 
 .kpi-card:hover {
   border-color: var(--border-hover);
@@ -307,6 +307,7 @@
 .delay-3 { animation-delay: 0.15s; }
 .delay-4 { animation-delay: 0.2s; }
 .delay-5 { animation-delay: 0.25s; }
+.delay-6 { animation-delay: 0.6s; }
 
 /* ── Filter Controls ────────────────────────────── */
 .filter-container {
@@ -363,7 +364,7 @@
 .filter-btn.active {
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   border-color: var(--accent);
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(251, 146, 60, 0.2);
 }
@@ -428,7 +429,7 @@
 .login-error-msg {
   background: rgba(248, 81, 73, 0.1);
   border: 1px solid rgba(248, 81, 73, 0.2);
-  color: #ff7b72;
+  color: var(--red);
   font-size: 0.75rem;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
@@ -472,7 +473,7 @@
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   border: none;
   border-radius: var(--radius-sm);
-  color: #fff;
+  color: var(--text-primary);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -547,7 +548,7 @@
 }
 
 .logout-btn:hover {
-  color: #ff7b72;
+  color: var(--red);
 }
 
 /* Edit Parameter Slide-Out Panel */
@@ -711,7 +712,7 @@
 }
 
 .mobile-card-value.highlight {
-  color: #ff7b72; /* Đỏ nhạt cảnh báo tồn lâu */
+  color: var(--red); /* Đỏ nhạt cảnh báo tồn lâu */
   text-shadow: 0 0 8px rgba(248, 81, 73, 0.2);
 }
 
@@ -855,5 +856,28 @@ input[type="range"]::-moz-range-thumb:hover {
   background: var(--yellow);
   box-shadow: 0 0 6px var(--yellow);
   animation: pulse-dot-yellow 2s infinite;
+}
+
+/* ── Missing Hover/Focus States ─── */
+.settings-close-btn:hover {
+  color: var(--red);
+  transform: scale(1.1);
+}
+
+select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 

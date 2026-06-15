@@ -11,3 +11,22 @@
   .dest-grid { grid-template-columns: 1fr; }
 }
 
+/* Tablet */
+@media (max-width: 1024px) {
+  .nav-main-tabs { gap: 4px; }
+  .nav-main-tabs .nav-main-tab { padding: 8px 12px; font-size: 0.75rem; }
+  .dock-config-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .nav-main-tabs { flex-wrap: wrap; gap: 4px; }
+  .nav-main-tabs .nav-main-tab { flex: 1 1 45%; padding: 8px; font-size: 0.72rem; text-align: center; }
+  .dock-config-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .header-right { flex-wrap: wrap; gap: 8px; }
+}
+
+@media (max-width: 480px) {
+  .nav-main-tabs .nav-main-tab { flex: 1 1 100%; }
+  .dock-config-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}

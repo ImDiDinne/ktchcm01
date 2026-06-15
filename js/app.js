@@ -373,65 +373,96 @@
     const tabContentPrediction = document.getElementById('tab-content-prediction');
     const tabContentCapacity = document.getElementById('tab-content-capacity');
     
+    // Apply transition styles to tab content containers
+    [tabContentInventory, tabContentDock, tabContentPrediction, tabContentCapacity].forEach(el => {
+      if (el) {
+        el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      }
+    });
+
     function deactivateAllTabs() {
-      if (tabBtnInventory) tabBtnInventory.classList.remove('active');
-      if (tabBtnDock) tabBtnDock.classList.remove('active');
-      if (tabBtnPrediction) tabBtnPrediction.classList.remove('active');
-      if (tabBtnCapacity) tabBtnCapacity.classList.remove('active');
-      
-      if (tabContentInventory) tabContentInventory.style.display = 'none';
-      if (tabContentDock) tabContentDock.style.display = 'none';
-      if (tabContentPrediction) tabContentPrediction.style.display = 'none';
-      if (tabContentCapacity) tabContentCapacity.style.display = 'none';
+      // Fade out all tab contents
+      [tabContentInventory, tabContentDock, tabContentPrediction, tabContentCapacity].forEach(el => {
+        if (el) {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(8px)';
+          // Hide after transition completes
+          setTimeout(() => {
+            if (el.style.opacity === '0') {
+              el.style.display = 'none';
+            }
+          }, 250);
+        }
+      });
+      // Deactivate all tab buttons
+      document.querySelectorAll('.nav-main-tab').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+    }
+
+    function activateTab(tabEl, btnEl) {
+      if (tabEl) {
+        tabEl.style.display = 'block';
+        // Force reflow for transition
+        tabEl.offsetHeight;
+        tabEl.style.opacity = '1';
+        tabEl.style.transform = 'translateY(0)';
+      }
+      if (btnEl) {
+        btnEl.classList.add('active');
+        btnEl.setAttribute('aria-selected', 'true');
+      }
     }
     
     if (tabBtnInventory && tabBtnDock && tabBtnPrediction && tabBtnCapacity && tabContentInventory && tabContentDock && tabContentPrediction && tabContentCapacity) {
       tabBtnInventory.addEventListener('click', () => {
         deactivateAllTabs();
-        tabBtnInventory.classList.add('active');
-        tabContentInventory.style.display = 'block';
+        setTimeout(() => {
+          activateTab(tabContentInventory, tabBtnInventory);
+        }, 260);
       });
       
       tabBtnDock.addEventListener('click', () => {
         deactivateAllTabs();
-        tabBtnDock.classList.add('active');
-        tabContentDock.style.display = 'block';
-        
-        if (window.tripScanData.length === 0) {
-          window.inbound.fetchTripScanData();
-        } else {
-          window.inbound.populateInboundDates();
-          window.inbound.runDockSimulation();
-        }
+        setTimeout(() => {
+          activateTab(tabContentDock, tabBtnDock);
+          if (window.tripScanData.length === 0) {
+            window.inbound.fetchTripScanData();
+          } else {
+            window.inbound.populateInboundDates();
+            window.inbound.runDockSimulation();
+          }
+        }, 260);
       });
 
       tabBtnPrediction.addEventListener('click', () => {
         deactivateAllTabs();
-        tabBtnPrediction.classList.add('active');
-        tabContentPrediction.style.display = 'block';
-        
-        if (window.tripScanData.length === 0) {
-          window.inbound.fetchTripScanData();
-        } else {
-          if (window.prediction && window.prediction.renderPredictionDashboard) {
-            window.prediction.renderPredictionDashboard();
+        setTimeout(() => {
+          activateTab(tabContentPrediction, tabBtnPrediction);
+          if (window.tripScanData.length === 0) {
+            window.inbound.fetchTripScanData();
+          } else {
+            if (window.prediction && window.prediction.renderPredictionDashboard) {
+              window.prediction.renderPredictionDashboard();
+            }
           }
-        }
+        }, 260);
       });
 
       let capacityInitialized = false;
       tabBtnCapacity.addEventListener('click', () => {
         deactivateAllTabs();
-        tabBtnCapacity.classList.add('active');
-        tabContentCapacity.style.display = 'block';
-        
-        if (window.capacity) {
-          if (!capacityInitialized) {
-            window.capacity.initCapacity();
-            capacityInitialized = true;
+        setTimeout(() => {
+          activateTab(tabContentCapacity, tabBtnCapacity);
+          if (window.capacity) {
+            if (!capacityInitialized) {
+              window.capacity.initCapacity();
+              capacityInitialized = true;
+            }
+            window.capacity.renderCapacityDashboard();
           }
-          window.capacity.renderCapacityDashboard();
-        }
+        }, 260);
       });
     }
 
