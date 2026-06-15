@@ -676,17 +676,64 @@
     updateHeartbeatTimers();
   });
 
-  // Setup periodic refreshes
-  // 1. Refresh inventory from Supabase every 10 minutes
-  setInterval(fetchAndRenderDashboard, 600000);
+  // ── Smart Polling: Tạm dừng khi tab ẩn, refresh ngay khi quay lại ──
+  let inventoryIntervalId = null;
+  let inboundIntervalId = null;
 
-  // 2. Refresh Inbound trips from Google Sheets every 30 seconds (if inbound tab is active)
-  setInterval(() => {
-    const dockTabBtn = document.getElementById('tab-btn-dock');
-    if (dockTabBtn && dockTabBtn.classList.contains('active')) {
-      window.inbound.fetchTripScanData();
+  function startPolling() {
+    // 1. Inventory refresh mỗi 10 phút
+    if (!inventoryIntervalId) {
+      inventoryIntervalId = setInterval(() => {
+        if (navigator.onLine) fetchAndRenderDashboard();
+      }, 600000);
     }
-  }, 30000);
+    // 2. Inbound trips refresh mỗi 30s (nếu tab Dock active)
+    if (!inboundIntervalId) {
+      inboundIntervalId = setInterval(() => {
+        if (!navigator.onLine) return;
+        const dockTabBtn = document.getElementById('tab-btn-dock');
+        if (dockTabBtn && dockTabBtn.classList.contains('active')) {
+          window.inbound.fetchTripScanData();
+        }
+      }, 30000);
+    }
+  }
+
+  function stopPolling() {
+    if (inventoryIntervalId) { clearInterval(inventoryIntervalId); inventoryIntervalId = null; }
+    if (inboundIntervalId) { clearInterval(inboundIntervalId); inboundIntervalId = null; }
+  }
+
+  // Khởi động polling
+  startPolling();
+
+  // Pause khi tab ẩn, resume + refresh ngay khi tab hiện lại
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopPolling();
+      console.log('⏸️ Tab ẩn — tạm dừng auto-refresh.');
+    } else {
+      console.log('▶️ Tab hiện — khởi động lại auto-refresh.');
+      startPolling();
+      // Refresh ngay khi quay lại tab
+      if (navigator.onLine) {
+        fetchAndRenderDashboard();
+        const dockTabBtn = document.getElementById('tab-btn-dock');
+        if (dockTabBtn && dockTabBtn.classList.contains('active')) {
+          window.inbound.fetchTripScanData();
+        }
+      }
+    }
+  });
+
+  // Xử lý khi mất/có mạng
+  window.addEventListener('online', () => {
+    console.log('🌐 Đã có mạng — refresh dữ liệu.');
+    fetchAndRenderDashboard();
+  });
+  window.addEventListener('offline', () => {
+    console.log('📡 Mất mạng — tạm dừng fetch.');
+  });
 
   // Expose global methods
   window.fetchAndRenderDashboard = fetchAndRenderDashboard;

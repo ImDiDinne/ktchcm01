@@ -1,10 +1,8 @@
 name: 🔄 Auto Sync Inbound Trips
 
 on:
-  push:
-    branches: [ main ]     # Tự động chạy mỗi khi push code lên main
   schedule:
-    - cron: '*/10 * * * *'  # Tự động chạy mỗi 10 phút (giới hạn tối thiểu của GitHub)
+    - cron: '*/10 * * * *'  # Tự động chạy mỗi 10 phút
   workflow_dispatch:       # Cho phép bấm nút kích hoạt chạy tay trên GitHub UI
 
 jobs:

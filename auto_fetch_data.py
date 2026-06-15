@@ -174,7 +174,7 @@ class MetabaseClient:
             'Content-Type': 'application/json'
         }
 
-    def download_card_xlsx(self, card_id, output_path, parameters=None):
+    def download_card_xlsx(self, card_id, output_path, parameters=None, max_retries=2):
         """Tải kết quả query của card dưới dạng XLSX (ưu tiên dùng Dashboard API để có lọc tránh bị truncate)."""
         print(f"📥 Đang tải dữ liệu từ Card #{card_id}...")
 
@@ -242,10 +242,17 @@ class MetabaseClient:
                         tmp_path.unlink()
                     return False
             elif resp.status_code == 401:
-                print("❌ Session hết hạn. Đang đăng nhập lại...")
-                if self.login():
-                    return self.download_card_xlsx(card_id, output_path, parameters)
-                return False
+                if max_retries > 0:
+                    print(f"❌ Session hết hạn. Đang đăng nhập lại... (còn {max_retries} lần thử)")
+                    if self.login():
+                        return self.download_card_xlsx(card_id, output_path, parameters, max_retries=max_retries - 1)
+                    return False
+                else:
+                    print("❌ Session hết hạn và đã hết số lần thử đăng nhập lại.")
+                    self.auth_failed = True
+                    with open('.auth_error', 'w') as f:
+                        f.write('1')
+                    return None
             elif resp.status_code == 202:
                 print("⏳ Query đang xử lý, chờ kết quả...")
                 return self._wait_and_download(query_url, output_path, body)

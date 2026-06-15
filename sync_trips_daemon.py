@@ -113,6 +113,36 @@ def sync_trips():
                 log(f"   ❌ Lỗi kết nối chèn Batch {i+1}: {ex}")
 
         log(f"✅ Đồng bộ hoàn tất! Thành công: {success_count}/{len(trips)} dòng.")
+
+        # Dọn dẹp dữ liệu cũ hơn 30 ngày
+        try:
+            from datetime import timedelta
+            cleanup_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+            cleanup_iso = (datetime.now() - timedelta(days=30)).isoformat()
+
+            cleanup_headers = {
+                "apikey": supabase_key,
+                "Authorization": f"Bearer {supabase_key}",
+            }
+
+            # Cleanup trips_cache
+            cleanup_url = f"{supabase_url}/rest/v1/trips_cache?date=lt.{cleanup_date}"
+            cleanup_resp = requests.delete(cleanup_url, headers=cleanup_headers, timeout=10)
+            if cleanup_resp.status_code in [200, 204]:
+                log(f"🧹 Đã dọn dẹp dữ liệu trips_cache cũ hơn {cleanup_date}.")
+            else:
+                log(f"⚠️ Cleanup trips_cache lỗi (HTTP {cleanup_resp.status_code})")
+
+            # Cleanup unloading_trips
+            cleanup_url2 = f"{supabase_url}/rest/v1/unloading_trips?started_at=lt.{cleanup_iso}"
+            cleanup_resp2 = requests.delete(cleanup_url2, headers=cleanup_headers, timeout=10)
+            if cleanup_resp2.status_code in [200, 204]:
+                log(f"🧹 Đã dọn dẹp dữ liệu unloading_trips cũ hơn {cleanup_date}.")
+            else:
+                log(f"⚠️ Cleanup unloading_trips lỗi (HTTP {cleanup_resp2.status_code})")
+        except Exception as ce:
+            log(f"⚠️ Lỗi dọn dẹp: {ce}")
+
         return True
 
     except Exception as e:

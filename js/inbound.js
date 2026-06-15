@@ -966,6 +966,64 @@
     }
   }
 
+  // ── Supabase Realtime: Cập nhật trạng thái xe TỨC THÌ ──
+  let realtimeChannel = null;
+
+  function subscribeRealtimeUnloadingTrips() {
+    if (realtimeChannel) return; // Đã subscribe rồi
+    if (!window.supabaseClient) {
+      setTimeout(subscribeRealtimeUnloadingTrips, 1000);
+      return;
+    }
+
+    try {
+      realtimeChannel = window.supabaseClient
+        .channel('unloading_trips_changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'unloading_trips' },
+          (payload) => {
+            const { eventType, new: newRow, old: oldRow } = payload;
+            console.log(`⚡ Realtime: ${eventType} trên unloading_trips`, newRow || oldRow);
+
+            if (eventType === 'INSERT' || eventType === 'UPDATE') {
+              if (newRow && newRow.code && newRow.started_at) {
+                window.unloadingTripsMap[newRow.code] = {
+                  started_at: newRow.started_at,
+                  unloaded_at: newRow.unloaded_at || null
+                };
+              }
+            } else if (eventType === 'DELETE') {
+              if (oldRow && oldRow.code) {
+                delete window.unloadingTripsMap[oldRow.code];
+              }
+            }
+
+            // Re-render ngay lập tức
+            runDockSimulation();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('✅ Realtime: Đã kết nối bảng unloading_trips — trạng thái xe cập nhật tức thì.');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('❌ Realtime: Lỗi kết nối. Sẽ thử lại sau 5s.');
+            realtimeChannel = null;
+            setTimeout(subscribeRealtimeUnloadingTrips, 5000);
+          } else if (status === 'TIMED_OUT') {
+            console.warn('⏳ Realtime: Timeout kết nối. Sẽ thử lại sau 10s.');
+            realtimeChannel = null;
+            setTimeout(subscribeRealtimeUnloadingTrips, 10000);
+          }
+        });
+    } catch (e) {
+      console.error('❌ Realtime subscription error:', e);
+      realtimeChannel = null;
+    }
+  }
+
+  // Khởi tạo Realtime subscription khi module load
+  subscribeRealtimeUnloadingTrips();
+
   // Expose global methods
   window.inbound = {
     fetchTripScanData,
@@ -976,7 +1034,8 @@
     saveDockStations,
     renderDockConfigGrid,
     handleStatusChange,
-    populateInboundDates
+    populateInboundDates,
+    subscribeRealtimeUnloadingTrips
   };
 
 })();
