@@ -183,7 +183,10 @@
   // Supabase Unloading Trips Map Fetcher
   async function fetchSupabaseUnloadingTrips() {
     window.unloadingTripsMap = {};
-    if (!window.supabaseClient) return;
+    if (!window.supabaseClient) {
+      setTimeout(fetchSupabaseUnloadingTrips, 500);
+      return;
+    }
     
     try {
       const dateLimit = new Date();
@@ -853,7 +856,8 @@
       await fetchSupabaseUnloadingTrips();
 
       if (!window.supabaseClient) {
-        throw new Error('Supabase client is not initialised.');
+        setTimeout(fetchTripScanData, 500);
+        return;
       }
 
       const { data, error } = await window.supabaseClient

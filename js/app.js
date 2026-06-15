@@ -693,7 +693,10 @@
 
   let historyChartInstance = null;
   async function fetchAndRenderHistoryChart() {
-    if (!window.supabaseClient) return;
+    if (!window.supabaseClient) {
+      setTimeout(fetchAndRenderHistoryChart, 500);
+      return;
+    }
     try {
       // Lấy data trong 24h qua (1 ngày = 96 mốc 15 phút)
       const { data, error } = await window.supabaseClient
