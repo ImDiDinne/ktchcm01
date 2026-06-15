@@ -119,7 +119,8 @@
     const tripSec = parts.length > 2 ? parseInt(parts[2], 10) : 0;
     
     if (isSameDay(targetDateStr, todayStr)) {
-      const isCompleted = trip.status === 'Đã nhận' || trip.status === 'Đã giao' || trip.status.toLowerCase() === 'received' || trip.status.toLowerCase() === 'completed';
+      const ss = (trip.status || '').toLowerCase();
+      const isCompleted = ss === 'đã nhận' || ss === 'đã giao' || ss === 'received' || ss === 'completed';
       if (isCompleted && trip.syncedAt) {
         return getDurationMinutes(trip.time, trip.syncedAt);
       }
@@ -274,7 +275,8 @@
     let totalMin = 0;
     let count = 0;
     trips.forEach(t => {
-      const isCompleted = t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed';
+      const s = (t.status || '').toLowerCase();
+      const isCompleted = s === 'đã nhận' || s === 'đã giao' || s === 'received' || s === 'completed';
       if (isCompleted && t.syncedAt) {
         totalMin += getDurationMinutes(t.time, t.syncedAt);
         count++;
