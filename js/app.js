@@ -698,14 +698,19 @@
       return;
     }
     try {
-      // Lấy data trong 24h qua (1 ngày = 96 mốc 15 phút)
-      const { data, error } = await window.supabaseClient
-        .from('inventory_history')
-        .select('timestamp, total_inventory')
-        .order('timestamp', { ascending: true })
-        .limit(96);
-      
-      if (error) throw error;
+      // Lấy data bằng raw fetch để ép dùng quyền anon (tránh lỗi RLS cho user đã đăng nhập)
+      const supUrl = 'https://baizmeqkxslajxuzyfnu.supabase.co';
+      const supKey = 'sb_publishable_VRLqjdMb3uIie89vbRXloA_xdak8hgy';
+      const url = `${supUrl}/rest/v1/inventory_history?select=timestamp,total_inventory&order=timestamp.asc&limit=96`;
+      const resp = await fetch(url, {
+        headers: {
+          'apikey': supKey,
+          'Authorization': `Bearer ${supKey}`
+        }
+      });
+      if (!resp.ok) throw new Error(`Fetch error: ${resp.status}`);
+      const data = await resp.json();
+
       if (!data || data.length === 0) return;
 
       const labels = data.map(r => {
