@@ -736,6 +736,7 @@
     }
 
     compare24hChartInstance = new Chart(ctx, {
+      type: 'bar',
       data: {
         labels: labels,
         datasets: [
