@@ -218,6 +218,58 @@
     }
   }
 
+  // ── Auto-Complete: Tự động chuyển trạng thái cho xe bị kẹt "Đang nhập" quá lâu ──
+  async function autoCompleteStuckTrips() {
+    if (!window.supabaseClient) return;
+    
+    const tAvg = getDockTAvg();
+    // Ngưỡng auto-complete = tAvg * 2, tối thiểu 60 phút
+    const thresholdMin = Math.max(tAvg * 2, 60);
+    const now = Date.now();
+    const stuckCodes = [];
+    
+    for (const [code, tripData] of Object.entries(window.unloadingTripsMap)) {
+      if (tripData.unloaded_at) continue; // Đã xong rồi, bỏ qua
+      
+      const startedAt = new Date(tripData.started_at).getTime();
+      const elapsedMin = (now - startedAt) / (1000 * 60);
+      
+      if (elapsedMin >= thresholdMin) {
+        stuckCodes.push(code);
+      }
+    }
+    
+    if (stuckCodes.length === 0) return;
+    
+    console.log(`🔄 Auto-Complete: Phát hiện ${stuckCodes.length} chuyến xe bị kẹt > ${thresholdMin} phút:`, stuckCodes);
+    
+    // Batch update Supabase
+    for (const code of stuckCodes) {
+      try {
+        const tripData = window.unloadingTripsMap[code];
+        // Tính unloaded_at = started_at + tAvg phút (ước lượng thời gian thực tế)
+        const estimatedEnd = new Date(new Date(tripData.started_at).getTime() + tAvg * 60 * 1000).toISOString();
+        
+        const { error } = await window.supabaseClient
+          .from('unloading_trips')
+          .update({ unloaded_at: estimatedEnd })
+          .eq('code', code)
+          .is('unloaded_at', null); // Chỉ update nếu chưa có unloaded_at (tránh race condition)
+        
+        if (error) {
+          console.error(`❌ Auto-Complete lỗi cho ${code}:`, error);
+        } else {
+          // Cập nhật local map ngay
+          window.unloadingTripsMap[code].unloaded_at = estimatedEnd;
+          window.unloadingTripsMap[code].autoCompleted = true;
+          console.log(`✅ Auto-Complete: ${code} → Đã nhận (tự động sau ${Math.round((now - new Date(tripData.started_at).getTime()) / 60000)} phút)`);
+        }
+      } catch (e) {
+        console.error(`❌ Auto-Complete exception cho ${code}:`, e);
+      }
+    }
+  }
+
   function calculateAverageProcessingTime(trips) {
     let totalMin = 0;
     let count = 0;
@@ -252,14 +304,27 @@
         if (tripData.unloaded_at) {
           // Đã xong
           t.status = 'Đã nhận';
+          if (tripData.autoCompleted) {
+            t.autoCompleted = true;
+          }
         } else {
-          // Đang nhập (Chưa có log kết thúc)
-          t.status = 'Đang nhập';
-          if (isViewingToday) {
-            const startedAt = new Date(tripData.started_at);
-            const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
-            // User requested to simulate 30 mins
-            t.remainingMinutes = 30 - elapsedMin;
+          // Kiểm tra có bị kẹt quá lâu không
+          const startedAt = new Date(tripData.started_at);
+          const elapsedMin = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60));
+          const tAvg = getDockTAvg();
+          const thresholdMin = Math.max(tAvg * 2, 60);
+          
+          if (elapsedMin >= thresholdMin) {
+            // Đã quá lâu → hiển thị là Đã nhận (tự động) trong khi chờ Supabase cập nhật
+            t.status = 'Đã nhận';
+            t.autoCompleted = true;
+          } else {
+            // Đang nhập (Chưa có log kết thúc)
+            t.status = 'Đang nhập';
+            if (isViewingToday) {
+              // User requested to simulate 30 mins
+              t.remainingMinutes = tAvg - elapsedMin;
+            }
           }
         }
       } else {
@@ -855,6 +920,7 @@
 
     try {
       await fetchSupabaseUnloadingTrips();
+      await autoCompleteStuckTrips();
 
       if (!window.supabaseClient) {
         setTimeout(fetchTripScanData, 500);

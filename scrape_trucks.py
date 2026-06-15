@@ -64,19 +64,36 @@ async def scrape_trip(context, trip_code, sem):
                         data = await response.json()
                         if data and data.get('data'):
                             for session in data['data']:
-                                if session.get('type') == 'DROPOFF' and session.get('status') == 'COMPLETED':
-                                    end_time = session.get('endTime')
+                                s_type = session.get('type', '').upper()
+                                s_status = session.get('status', '').upper()
+                                # Mở rộng: kiểm tra nhiều trạng thái kết thúc hơn
+                                if s_type in ('DROPOFF', 'UNLOADING', 'DELIVERY') and s_status in ('COMPLETED', 'DONE', 'FINISHED', 'CLOSED'):
+                                    end_time = session.get('endTime') or session.get('completedTime') or session.get('updatedAt')
                                     if end_time:
                                         session_completed_time = end_time
                     except:
                         pass
-                elif 'tms-history' in response.url:
+                elif 'tms-history' in response.url or 'history' in response.url:
                     try:
                         data = await response.json()
                         if data and data.get('data'):
+                            # Danh sách mở rộng các actionType biểu thị xe đã xong
+                            completion_actions = {
+                                'STOP_SCAN_WAITING_FOR_CONFIRMATION',
+                                'COMPLETED',
+                                'FINISH_UNLOADING',
+                                'CLOSE_SESSION',
+                                'STOP_SCAN',
+                                'DONE',
+                                'COMPLETE_DROPOFF',
+                                'END_TRIP',
+                                'CONFIRM_RECEIVED',
+                                'COMPLETED_UNLOADING',
+                            }
                             for item in data['data']:
-                                if item.get('actionType') == 'STOP_SCAN_WAITING_FOR_CONFIRMATION':
-                                    end_time = item.get('actionTime')
+                                action = (item.get('actionType') or '').upper()
+                                if action in completion_actions:
+                                    end_time = item.get('actionTime') or item.get('createdAt')
                                     if end_time and not session_completed_time:
                                         session_completed_time = end_time
                                     break
@@ -89,10 +106,10 @@ async def scrape_trip(context, trip_code, sem):
                                         from datetime import datetime, timezone
                                         last_dt = datetime.fromisoformat(last_time.replace('Z', '+00:00'))
                                         now_dt = datetime.now(timezone.utc)
-                                        # Nếu sự kiện cuối cùng đã xảy ra hơn 45 phút trước -> Xem như bỏ quên và đã xong
-                                        if (now_dt - last_dt).total_seconds() > 2700:
+                                        # Giảm từ 45 phút xuống 30 phút để phát hiện nhanh hơn
+                                        if (now_dt - last_dt).total_seconds() > 1800:
                                             session_completed_time = last_time
-                                            logger.info(f"Fallback completion triggered for {response.url}")
+                                            logger.info(f"Fallback completion triggered for {response.url} (idle > 30 min)")
                                     except Exception as e:
                                         logger.error(f"Fallback parsing error: {e}")
                     except:
@@ -117,6 +134,16 @@ async def scrape_trip(context, trip_code, sem):
                 with open('.auth_error', 'w') as f: f.write('1')
                 await page.close()
                 return "EXPIRED"
+            
+            # Fallback bổ sung: Kiểm tra text trên trang có chứa trạng thái hoàn thành không
+            if not session_completed_time:
+                body_lower = body_text.lower()
+                completion_keywords = ['đã giao', 'hoàn thành', 'completed', 'đã nhận hàng', 'đã dỡ xong']
+                if any(kw in body_lower for kw in completion_keywords):
+                    # Ước lượng thời gian hoàn thành = hiện tại
+                    from datetime import datetime, timezone
+                    session_completed_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+                    logger.info(f"Page-text fallback: {trip_code} detected as completed from page content.")
                 
         except Exception as e:
             logger.error(f"Error checking pending trip {trip_code}: {e}")
