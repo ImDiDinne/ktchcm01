@@ -691,116 +691,141 @@
   // Expose global methods
   window.fetchAndRenderDashboard = fetchAndRenderDashboard;
 
-  let compare24hChartInstance = null;
+  window.compare24hChartInstances = [];
   window.renderCompare24hChart = function() {
-    const ctx = document.getElementById('compare24hChart');
-    if (!ctx) return;
+    const container = document.getElementById('charts-container');
+    if (!container) return;
 
     if (!window.TONKHO_DATA || !window.TONKHO_DATA.history_24h) return;
     
     const hist = window.TONKHO_DATA.history_24h;
-    const filterEl = document.getElementById('chart-group-filter');
-    const filterVal = filterEl ? filterEl.value : 'all';
-
     const labels = hist.hours;
-    const currentData = [];
-    const n1Data = [];
 
-    for (let i = 0; i < 24; i++) {
-      const hStr = i < 10 ? '0' + i : '' + i;
-      let todayVal = 0;
-      let n1Val = 0;
+    // Các nhóm kho cần hiển thị
+    const groups = [
+      { id: 'all', title: 'Tất Cả Nhóm Kho' },
+      { id: 'Kho Trung Chuyển', title: 'Kho Trung Chuyển (KTC)' },
+      { id: 'Kho Chuyển Tiếp', title: 'Kho Chuyển Tiếp (KCT)' },
+      { id: 'Nội vùng', title: 'Nội Vùng' },
+      { id: 'Nội Thành', title: 'Nội Thành' },
+      { id: 'Kho Giao Hàng Nặng', title: 'Giao Hàng Nặng' }
+    ];
 
-      if (hist.today && hist.today[hStr]) {
-        if (filterVal === 'all') {
-          todayVal = hist.today[hStr].grand_total || 0;
-        } else {
-          todayVal = (hist.today[hStr].routes && hist.today[hStr].routes[filterVal]) || 0;
+    // Xóa các chart cũ
+    if (window.compare24hChartInstances) {
+      window.compare24hChartInstances.forEach(c => c.destroy());
+    }
+    window.compare24hChartInstances = [];
+    container.innerHTML = '';
+
+    groups.forEach(groupInfo => {
+      const group = groupInfo.id;
+      const currentData = [];
+      const n1Data = [];
+      let lastTodayVal = null;
+      let lastN1Val = null;
+
+      for (let i = 0; i < 24; i++) {
+        const hStr = i < 10 ? '0' + i : '' + i;
+        let todayVal = null;
+        let n1Val = null;
+
+        if (hist.today && hist.today[hStr]) {
+          todayVal = group === 'all' ? (hist.today[hStr].grand_total || 0) : ((hist.today[hStr].routes && hist.today[hStr].routes[group]) || 0);
         }
+        if (hist.n1 && hist.n1[hStr]) {
+          n1Val = group === 'all' ? (hist.n1[hStr].grand_total || 0) : ((hist.n1[hStr].routes && hist.n1[hStr].routes[group]) || 0);
+        }
+
+        // Forward fill nếu dữ liệu bị khuyết (Github Action không chạy)
+        if (todayVal === null && lastTodayVal !== null) todayVal = lastTodayVal;
+        if (n1Val === null && lastN1Val !== null) n1Val = lastN1Val;
+
+        // Nếu vẫn null (vd đầu ngày không có mốc nào), gán tạm = 0
+        if (todayVal === null) todayVal = 0;
+        if (n1Val === null) n1Val = 0;
+
+        lastTodayVal = todayVal;
+        lastN1Val = n1Val;
+
+        currentData.push(todayVal);
+        n1Data.push(n1Val);
       }
 
-      if (hist.n1 && hist.n1[hStr]) {
-        if (filterVal === 'all') {
-          n1Val = hist.n1[hStr].grand_total || 0;
-        } else {
-          n1Val = (hist.n1[hStr].routes && hist.n1[hStr].routes[filterVal]) || 0;
-        }
-      }
+      // Tạo thẻ div bọc chart
+      const card = document.createElement('div');
+      card.className = 'chart-card animate-in delay-2';
+      card.style.padding = '20px';
+      
+      const title = document.createElement('div');
+      title.className = 'card-title';
+      title.style.marginBottom = '16px';
+      title.textContent = `Tồn Kho 24 Giờ: ${groupInfo.title}`;
+      card.appendChild(title);
 
-      currentData.push(todayVal);
-      n1Data.push(n1Val);
-    }
+      const chartWrapper = document.createElement('div');
+      chartWrapper.style.height = '250px';
+      chartWrapper.style.width = '100%';
+      
+      const canvas = document.createElement('canvas');
+      chartWrapper.appendChild(canvas);
+      card.appendChild(chartWrapper);
+      
+      container.appendChild(card);
 
-    if (compare24hChartInstance) {
-      compare24hChartInstance.destroy();
-    }
-
-    compare24hChartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            type: 'bar',
-            label: 'Hôm nay',
-            data: currentData,
-            backgroundColor: 'rgba(251, 146, 60, 0.8)',
-            borderColor: '#fb923c',
-            borderWidth: 1,
-            borderRadius: 4
-          },
-          {
-            type: 'line',
-            label: 'Hôm qua (N-1)',
-            data: n1Data,
-            backgroundColor: 'transparent',
-            borderColor: '#94a3b8',
-            borderWidth: 2,
-            tension: 0.3,
-            pointRadius: 3,
-            pointBackgroundColor: '#1e293b',
-            borderDash: [5, 5]
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          mode: 'index',
-          intersect: false,
+      const chartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Hôm nay',
+              data: currentData,
+              backgroundColor: 'rgba(251, 146, 60, 0.8)',
+              borderColor: '#fb923c',
+              borderWidth: 1,
+              borderRadius: 4
+            },
+            {
+              type: 'line',
+              label: 'Hôm qua (N-1)',
+              data: n1Data,
+              backgroundColor: 'transparent',
+              borderColor: '#94a3b8',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 3,
+              pointBackgroundColor: '#1e293b',
+              borderDash: [5, 5]
+            }
+          ]
         },
-        plugins: {
-          legend: { position: 'top', labels: { color: '#94a3b8', font: { size: 12 } } },
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-            callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
-                if (label) {
-                  label += ': ';
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top', labels: { color: '#94a3b8', font: { size: 12 } } },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) label += ': ';
+                  if (context.parsed.y !== null) label += new Intl.NumberFormat('vi-VN').format(context.parsed.y);
+                  return label;
                 }
-                if (context.parsed.y !== null) {
-                  label += new Intl.NumberFormat('vi-VN').format(context.parsed.y);
-                }
-                return label;
               }
             }
-          }
-        },
-        scales: {
-          x: {
-            ticks: { color: '#94a3b8', font: { size: 11 } },
-            grid: { color: '#334155' }
           },
-          y: {
-            beginAtZero: true,
-            ticks: { color: '#94a3b8' },
-            grid: { color: '#334155' }
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' } },
+            y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
           }
         }
-      }
+      });
+      
+      window.compare24hChartInstances.push(chartInstance);
     });
   }
 
