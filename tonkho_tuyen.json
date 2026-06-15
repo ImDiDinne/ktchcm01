@@ -5305,5 +5305,17 @@
       "Kho Đến": "Tiền Giang",
       "Loại kho": "Nội vùng"
     }
-  ]
+  ],
+  "history_n1": {
+    "grand_total": 67495,
+    "routes": {
+      "Kho Chuyển Tiếp": 8253,
+      "Kho Giao Hàng Nặng": 820,
+      "Kho KHL": 804,
+      "Kho Trung Chuyển": 24911,
+      "Nội Thành": 6081,
+      "Nội vùng": 26255,
+      "Phú Quốc": 371
+    }
+  }
 }

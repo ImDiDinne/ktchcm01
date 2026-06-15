@@ -881,6 +881,32 @@ def main():
 
         # Xuất các file
         data = build_hierarchical_data(df, pivot, params)
+        
+        # Lấy dữ liệu N-1 từ Git trước khi xuất
+        import subprocess
+        def attach_n1_history(d):
+            try:
+                cmd = ["git", "log", "-1", "--before=24 hours ago", "--format=%H"]
+                result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(BASE))
+                commit_hash = result.stdout.strip()
+                if not commit_hash:
+                    return
+                cmd_show = ["git", "show", f"{commit_hash}:tonkho_tuyen.json"]
+                show_result = subprocess.run(cmd_show, capture_output=True, text=True, cwd=str(BASE))
+                if show_result.returncode != 0:
+                    return
+                old_data = json.loads(show_result.stdout)
+                if 'all' in old_data:
+                    d['history_n1'] = {
+                        'grand_total': old_data['all'].get('grand_total', 0),
+                        'routes': { r['name']: r['total'] for r in old_data['all'].get('routes', []) }
+                    }
+                    print("✅ Đã lấy thành công dữ liệu tồn kho N-1 từ lịch sử Git.")
+            except Exception as e:
+                print(f"⚠️ Lỗi khi lấy N-1: {e}")
+                
+        attach_n1_history(data)
+        
         inject_into_html(data)
         write_aux(data)
         export_pivot_xlsx(df, pivot)

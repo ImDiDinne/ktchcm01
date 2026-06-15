@@ -97,11 +97,22 @@
       <!-- KPI Cards -->
       <div class="kpi-grid" id="kpi-grid"></div>
 
-      <!-- History Chart -->
-      <div class="chart-card animate-in delay-2" style="margin-bottom: 24px; padding: 20px;">
-        <div class="card-title" style="margin-bottom: 16px;">Biểu Đồ Xu Hướng Tồn Kho (Lịch Sử)</div>
-        <div style="height: 250px; width: 100%;">
-          <canvas id="inventoryHistoryChart"></canvas>
+      <!-- Charts Row -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 24px;">
+        <!-- History Chart -->
+        <div class="chart-card animate-in delay-2" style="padding: 20px;">
+          <div class="card-title" style="margin-bottom: 16px;">Biểu Đồ Xu Hướng Tồn Kho (Lịch Sử)</div>
+          <div style="height: 250px; width: 100%;">
+            <canvas id="inventoryHistoryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Compare N-1 Chart -->
+        <div class="chart-card animate-in delay-2" style="padding: 20px;">
+          <div class="card-title" style="margin-bottom: 16px;">Tồn Kho Hiện Tại vs Cùng Kỳ N-1 (Các Tuyến)</div>
+          <div style="height: 250px; width: 100%;">
+            <canvas id="compareN1Chart"></canvas>
+          </div>
         </div>
       </div>
 

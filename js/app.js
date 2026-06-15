@@ -101,6 +101,7 @@
         
         // Fetch inventory history and render chart
         fetchAndRenderHistoryChart();
+        renderCompareN1Chart();
         
         // Trigger Inbound refresh if tab active
         const dockTabBtn = document.getElementById('tab-btn-dock');
@@ -768,6 +769,95 @@
     } catch (err) {
       console.error("Lỗi vẽ biểu đồ lịch sử:", err);
     }
+  }
+
+  let compareN1ChartInstance = null;
+  function renderCompareN1Chart() {
+    const ctx = document.getElementById('compareN1Chart');
+    if (!ctx) return;
+
+    if (!window.TONKHO_DATA || !window.TONKHO_DATA.all || !window.TONKHO_DATA.all.routes) return;
+    
+    // Lấy dữ liệu hiện tại
+    const currentRoutes = window.TONKHO_DATA.all.routes;
+    // Lấy dữ liệu N-1 (nếu có)
+    const n1RoutesObj = (window.TONKHO_DATA.history_n1 && window.TONKHO_DATA.history_n1.routes) || {};
+
+    const labels = [];
+    const currentData = [];
+    const n1Data = [];
+
+    // Chỉ lấy các tuyến chính (như Kho Trung Chuyển, Nội Vùng...)
+    currentRoutes.forEach(r => {
+      const name = r.name;
+      labels.push(name);
+      currentData.push(r.total || 0);
+      n1Data.push(n1RoutesObj[name] || 0);
+    });
+
+    if (compareN1ChartInstance) {
+      compareN1ChartInstance.destroy();
+    }
+
+    compareN1ChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Tồn Kho Hiện Tại',
+            data: currentData,
+            backgroundColor: 'rgba(251, 146, 60, 0.8)', // Cam
+            borderColor: '#fb923c',
+            borderWidth: 1
+          },
+          {
+            label: 'Tồn Kho N-1',
+            data: n1Data,
+            backgroundColor: 'rgba(148, 163, 184, 0.8)', // Xám
+            borderColor: '#94a3b8',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: '#94a3b8' }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += new Intl.NumberFormat('vi-VN').format(context.parsed.y);
+                }
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#94a3b8', font: { size: 11 } },
+            grid: { color: '#334155' }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#94a3b8' },
+            grid: { color: '#334155' }
+          }
+        }
+      }
+    });
   }
 
 })();
