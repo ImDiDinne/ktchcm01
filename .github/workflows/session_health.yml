@@ -1,0 +1,54 @@
+name: 🔑 Proactive Session Health Check
+
+on:
+  schedule:
+    # Kiểm tra session mỗi 4 giờ (6 lần/ngày)
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-sessions:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📂 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Install dependencies
+      run: |
+        pip install requests playwright
+        python -m playwright install --with-deps chromium
+
+    - name: 🔍 Check Sessions & Auto-Renew
+      env:
+        METABASE_SESSION: ${{ secrets.METABASE_SESSION }}
+        METABASE_USERNAME: ${{ secrets.METABASE_USERNAME }}
+        METABASE_PASSWORD: ${{ secrets.METABASE_PASSWORD }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        GHN_USERNAME: ${{ secrets.GHN_USERNAME }}
+        GHN_PASSWORD: ${{ secrets.GHN_PASSWORD }}
+      run: |
+        python proactive_session_check.py
+
+    - name: 🔑 Update GitHub Secrets (nếu có token mới)
+      if: always()
+      env:
+        GH_TOKEN: ${{ secrets.GH_PAT }}
+      run: |
+        if [ -f ".session_token" ]; then
+          NEW_TOKEN=$(cat .session_token)
+          echo "🔑 Token mới: ${NEW_TOKEN:0:8}..."
+          if [ -n "$GH_TOKEN" ]; then
+            echo "$NEW_TOKEN" | gh secret set METABASE_SESSION --repo ${{ github.repository }}
+            echo "✅ Đã cập nhật METABASE_SESSION!"
+          fi
+          rm -f .session_token
+        fi
