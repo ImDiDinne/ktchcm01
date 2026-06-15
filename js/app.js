@@ -212,6 +212,23 @@
   window.sendTelegramAlert = sendTelegramAlert;
 
   // ⏱️ Dynamic Data Sync Heartbeat Timers
+  // Cache heartbeat DOM elements (tránh query mỗi giây)
+  let _hbCache = null;
+  function getHeartbeatEls() {
+    if (!_hbCache) {
+      _hbCache = {
+        invSpan: document.querySelector('#inventory-heartbeat span:last-child'),
+        invDot: document.querySelector('#inventory-heartbeat .pulse-dot'),
+        inSpan: document.querySelector('#inbound-heartbeat span:last-child'),
+        inDot: document.querySelector('#inbound-heartbeat .pulse-dot'),
+        predSpan: document.querySelector('#prediction-heartbeat span:last-child'),
+        predDot: document.querySelector('#prediction-heartbeat .pulse-dot'),
+      };
+    }
+    return _hbCache;
+  }
+
+  let _lastHbText = {};
   function updateHeartbeatTimers() {
     const fmtElapsed = (ms) => {
       if (ms == null || isNaN(ms) || ms < 0) return 'Đang cập nhật...';
@@ -222,52 +239,60 @@
       return `${min} phút ${remSec} giây trước`;
     };
 
+    const els = getHeartbeatEls();
+
     // 1. Inventory Heartbeat
-    const invHeartbeat = document.getElementById('inventory-heartbeat');
-    if (invHeartbeat && window.TONKHO_DATA && window.TONKHO_DATA.updated) {
+    if (els.invSpan && window.TONKHO_DATA && window.TONKHO_DATA.updated) {
       const invDate = parseDate(window.TONKHO_DATA.updated);
       if (invDate) {
         const diff = Date.now() - invDate.getTime();
-        const spanText = invHeartbeat.querySelector('span:last-child');
-        const dot = invHeartbeat.querySelector('.pulse-dot');
-        if (spanText) {
-          spanText.innerHTML = `Đồng bộ tồn kho: <strong>${fmtElapsed(diff)}</strong>`;
+        const txt = `Đồng bộ tồn kho: ${fmtElapsed(diff)}`;
+        if (_lastHbText.inv !== txt) {
+          els.invSpan.textContent = txt;
+          _lastHbText.inv = txt;
         }
-        if (dot) {
-          dot.className = 'pulse-dot ' + (diff > 1800000 ? 'yellow' : 'green');
+        if (els.invDot) {
+          const cls = 'pulse-dot ' + (diff > 1800000 ? 'yellow' : 'green');
+          if (els.invDot.className !== cls) els.invDot.className = cls;
         }
       }
     }
 
     // 2. Inbound Heartbeat
-    const inHeartbeat = document.getElementById('inbound-heartbeat');
-    if (inHeartbeat) {
-      const spanText = inHeartbeat.querySelector('span:last-child');
-      const dot = inHeartbeat.querySelector('.pulse-dot');
-      if (spanText) {
-        if (window.inboundLastFetched) {
-          const diff = Date.now() - window.inboundLastFetched;
-          spanText.innerHTML = `Đồng bộ TripScan: <strong>${fmtElapsed(diff)}</strong>`;
-          if (dot) dot.className = 'pulse-dot ' + (diff > 120000 ? 'yellow' : 'green');
-        } else {
-          spanText.textContent = 'TripScan: Đang đồng bộ...';
+    if (els.inSpan) {
+      if (window.inboundLastFetched) {
+        const diff = Date.now() - window.inboundLastFetched;
+        const txt = `Đồng bộ TripScan: ${fmtElapsed(diff)}`;
+        if (_lastHbText.inb !== txt) {
+          els.inSpan.textContent = txt;
+          _lastHbText.inb = txt;
         }
+        if (els.inDot) {
+          const cls = 'pulse-dot ' + (diff > 120000 ? 'yellow' : 'green');
+          if (els.inDot.className !== cls) els.inDot.className = cls;
+        }
+      } else if (!_lastHbText.inb) {
+        els.inSpan.textContent = 'TripScan: Đang đồng bộ...';
+        _lastHbText.inb = 'init';
       }
     }
 
     // 3. Prediction Heartbeat
-    const predHeartbeat = document.getElementById('prediction-heartbeat');
-    if (predHeartbeat) {
-      const spanText = predHeartbeat.querySelector('span:last-child');
-      const dot = predHeartbeat.querySelector('.pulse-dot');
-      if (spanText) {
-        if (window.inboundLastFetched) {
-          const diff = Date.now() - window.inboundLastFetched;
-          spanText.innerHTML = `Bản tin dự báo: <strong>Đã đồng bộ (${fmtElapsed(diff)})</strong>`;
-          if (dot) dot.className = 'pulse-dot ' + (diff > 120000 ? 'yellow' : 'green');
-        } else {
-          spanText.textContent = 'Dự báo: Sẵn sàng';
+    if (els.predSpan) {
+      if (window.inboundLastFetched) {
+        const diff = Date.now() - window.inboundLastFetched;
+        const txt = `Bản tin dự báo: Đã đồng bộ (${fmtElapsed(diff)})`;
+        if (_lastHbText.pred !== txt) {
+          els.predSpan.textContent = txt;
+          _lastHbText.pred = txt;
         }
+        if (els.predDot) {
+          const cls = 'pulse-dot ' + (diff > 120000 ? 'yellow' : 'green');
+          if (els.predDot.className !== cls) els.predDot.className = cls;
+        }
+      } else if (!_lastHbText.pred) {
+        els.predSpan.textContent = 'Dự báo: Sẵn sàng';
+        _lastHbText.pred = 'init';
       }
     }
   }
@@ -688,7 +713,7 @@
     }
 
     // Start Heartbeat loop
-    setInterval(updateHeartbeatTimers, 1000);
+    setInterval(updateHeartbeatTimers, 5000);
     updateHeartbeatTimers();
   });
 
