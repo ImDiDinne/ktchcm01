@@ -303,9 +303,9 @@
       { "Chỉ Số Vận Hành": "Tồn Nội Thành", "Giá Trị": D.destinations?.by_vung?.["Nội thành"] || 0 },
       { "Chỉ Số Vận Hành": "Hàng Tồn Trễ SLA (>24h)", "Giá Trị": totalGT24 },
       { "Chỉ Số Vận Hành": "Tổng Số Chuyến Xe Inbound Hôm Nay", "Giá Trị": trips.length },
-      { "Chỉ Số Vận Hành": "Số Xe Đã Nhận (Đã Dỡ)", "Giá Trị": trips.filter(t => t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed').length },
-      { "Chỉ Số Vận Hành": "Số Xe Đang Nhập", "Giá Trị": trips.filter(t => t.status === 'Đang nhập' || t.status === 'Đang xử lý' || t.status.toLowerCase() === 'unloading' || t.status.toLowerCase() === 'processing').length },
-      { "Chỉ Số Vận Hành": "Số Xe Đang Chờ (Seal)", "Giá Trị": trips.filter(t => t.status === 'Đang chờ' || t.status === 'Đang Chờ' || t.status.toLowerCase() === 'waiting').length }
+      { "Chỉ Số Vận Hành": "Số Xe Đã Nhận (Đã Dỡ)", "Giá Trị": trips.filter(t => { const s = (t.status || '').toLowerCase(); return s === 'đã nhận' || s === 'đã giao' || s === 'received' || s === 'completed'; }).length },
+      { "Chỉ Số Vận Hành": "Số Xe Đang Nhập", "Giá Trị": trips.filter(t => { const s = (t.status || '').toLowerCase(); return s === 'đang nhập' || s === 'đang xử lý' || s === 'unloading' || s === 'processing'; }).length },
+      { "Chỉ Số Vận Hành": "Số Xe Đang Chờ (Seal)", "Giá Trị": trips.filter(t => { const s = (t.status || '').toLowerCase(); return s === 'đang chờ' || s === 'đăng chờ' || s === 'chờ dỡ' || s === 'waiting'; }).length }
     ];
     
     const wb = XLSX.book_new();

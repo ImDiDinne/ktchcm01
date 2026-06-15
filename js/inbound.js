@@ -550,10 +550,22 @@
     const titleLabel = isToday ? "Hôm Nay" : targetDateStr;
 
     const totalTrips = todayTrips.length;
-    const waitingCount = todayTrips.filter(t => t.status === 'Đang Chờ' || t.status === 'Đang chờ' || t.status.toLowerCase() === 'waiting').length;
-    const enteringCount = todayTrips.filter(t => t.status === 'Đang nhập' || t.status === 'Đang xử lý' || t.status.toLowerCase() === 'unloading' || t.status.toLowerCase() === 'processing').length;
-    const receivedCount = todayTrips.filter(t => t.status === 'Đã nhận' || t.status === 'Đã giao' || t.status.toLowerCase() === 'received' || t.status.toLowerCase() === 'completed').length;
-    const overdueTripsCount = todayTrips.filter(t => getWaitTimeMinutes(t) > 30).length;
+    const waitingCount = todayTrips.filter(t => {
+      const s = (t.status || '').toLowerCase();
+      return s === 'đang chờ' || s === 'đăng chờ' || s === 'chờ dỡ' || s === 'waiting';
+    }).length;
+    const enteringCount = todayTrips.filter(t => {
+      const s = (t.status || '').toLowerCase();
+      return s === 'đang nhập' || s === 'đang xử lý' || s === 'unloading' || s === 'processing';
+    }).length;
+    const receivedCount = todayTrips.filter(t => {
+      const s = (t.status || '').toLowerCase();
+      return s === 'đã nhận' || s === 'đã giao' || s === 'received' || s === 'completed';
+    }).length;
+    const overdueTripsCount = todayTrips.filter(t => {
+      const wt = getWaitTimeMinutes(t);
+      return wt > 30 && wt < 9999; // Bỏ qua giá trị bất thường
+    }).length;
 
     const kpiCards = document.querySelectorAll('#tab-content-dock .kpi-card');
     if (kpiCards.length >= 5) {
@@ -801,7 +813,7 @@
     let updatedAlerts = false;
     todayTrips.forEach(t => {
       const s = t.status ? t.status.toLowerCase() : '';
-      const isWaiting = s === 'đăng chờ' || s === 'đang chờ' || s === 'waiting';
+      const isWaiting = s === 'đăng chờ' || s === 'đang chờ' || s === 'chờ dỡ' || s === 'waiting';
       const waitTime = getWaitTimeMinutes(t);
       
       if (isWaiting && waitTime > 45 && t.code) {
