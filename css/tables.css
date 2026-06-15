@@ -1,7 +1,6 @@
 /* ── Pivot Table ────────────────────────────────── */
 .table-card {
   background: var(--bg-card);
-  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -44,7 +43,6 @@
 
 .pivot-table th {
   background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(8px);
   padding: 10px 12px;
   text-align: right;
   font-weight: 600;
@@ -204,7 +202,6 @@
 
 .action-insights-card {
   background: var(--bg-card);
-  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;

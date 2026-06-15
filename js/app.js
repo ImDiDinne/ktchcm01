@@ -915,6 +915,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { position: 'top', labels: { color: '#94a3b8', font: { size: 12 } } },
