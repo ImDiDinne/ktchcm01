@@ -114,6 +114,7 @@ async def scrape_trip(context, trip_code, sem):
             body_text = await page.inner_text('body')
             if "mật khẩu" in body_text.lower() and "đăng nhập" in body_text.lower():
                 logger.error(f"⚠️ Cookies expired! Redirected to login page for {trip_code}.")
+                with open('.auth_error', 'w') as f: f.write('1')
                 await page.close()
                 return "EXPIRED"
                 

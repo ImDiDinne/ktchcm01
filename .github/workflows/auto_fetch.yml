@@ -55,14 +55,14 @@ jobs:
             echo "Không có dữ liệu mới để commit."
           fi
 
-      - name: Trigger Remote Login on Failure
+      - name: Trigger Remote Login on Auth Error
         if: failure()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'remote_login.yml',
-              ref: 'main'
-            })
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -f ".auth_error" ]; then
+            echo "Auth error detected. Triggering remote login..."
+            gh workflow run remote_login.yml --ref main
+          else
+            echo "Failure was not due to authentication. Skipping remote login to prevent spam."
+          fi

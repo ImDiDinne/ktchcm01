@@ -80,6 +80,7 @@ class MetabaseClient:
                         return self._login_with_credentials()
                     print("❌ Hãy lấy lại session token mới (xem hướng dẫn bên dưới).")
                     self.auth_failed = True
+                    with open('.auth_error', 'w') as f: f.write('1')
                     return False
             except requests.exceptions.RequestException as re_err:
                 print(f"❌ Không thể kết nối tới {self.base_url} để kiểm tra session: {re_err}")
@@ -97,6 +98,7 @@ class MetabaseClient:
         if not self.username or not self.password:
             print("❌ Thiếu thông tin đăng nhập.")
             self.auth_failed = True
+            with open('.auth_error', 'w') as f: f.write('1')
             return False
 
         print(f"🔑 Đăng nhập Metabase ({self.base_url})...")
@@ -130,6 +132,7 @@ class MetabaseClient:
             print("   → Dùng METABASE_SESSION trong .env (xem hướng dẫn)")
             self._notify_telegram_auth_failed()
             self.auth_failed = True
+            with open('.auth_error', 'w') as f: f.write('1')
             return False
         except requests.exceptions.ConnectionError:
             print(f"❌ Không thể kết nối tới {self.base_url}. Kiểm tra mạng.")
