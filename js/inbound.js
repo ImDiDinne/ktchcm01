@@ -935,7 +935,7 @@ window.triggerScrape = async function(btnElement) {
     });
     
     if (response.ok) {
-      alert("✅ Đã gửi lệnh Dò Log thành công!\n\nHệ thống đang chạy ngầm trên máy chủ để kiểm tra tất cả các chuyến 'Đang Nhập'. Quá trình này sẽ mất khoảng 1-2 phút. Vui lòng kiểm tra lại sau ít phút.");
+      console.log("Đã gửi lệnh Dò Log thành công!");
     } else {
       const data = await response.json();
       alert("❌ Lỗi khi gọi hàm: " + (data.error || response.statusText));
