@@ -376,25 +376,19 @@
     // Apply transition styles to tab content containers
     [tabContentInventory, tabContentDock, tabContentPrediction, tabContentCapacity].forEach(el => {
       if (el) {
-        el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        el.style.transition = 'opacity 0.2s ease';
       }
     });
 
     function deactivateAllTabs() {
-      // Fade out all tab contents
+      // Ẩn tất cả tab ngay lập tức (không delay)
       [tabContentInventory, tabContentDock, tabContentPrediction, tabContentCapacity].forEach(el => {
         if (el) {
           el.style.opacity = '0';
-          el.style.transform = 'translateY(8px)';
-          // Hide after transition completes
-          setTimeout(() => {
-            if (el.style.opacity === '0') {
-              el.style.display = 'none';
-            }
-          }, 250);
+          el.style.display = 'none';
         }
       });
-      // Deactivate all tab buttons
+      // Deactivate tab buttons
       document.querySelectorAll('.nav-main-tab').forEach(btn => {
         btn.classList.remove('active');
         btn.setAttribute('aria-selected', 'false');
@@ -404,10 +398,9 @@
     function activateTab(tabEl, btnEl) {
       if (tabEl) {
         tabEl.style.display = 'block';
-        // Force reflow for transition
-        tabEl.offsetHeight;
+        // Force reflow rồi fade-in
+        void tabEl.offsetHeight;
         tabEl.style.opacity = '1';
-        tabEl.style.transform = 'translateY(0)';
       }
       if (btnEl) {
         btnEl.classList.add('active');
@@ -418,51 +411,43 @@
     if (tabBtnInventory && tabBtnDock && tabBtnPrediction && tabBtnCapacity && tabContentInventory && tabContentDock && tabContentPrediction && tabContentCapacity) {
       tabBtnInventory.addEventListener('click', () => {
         deactivateAllTabs();
-        setTimeout(() => {
-          activateTab(tabContentInventory, tabBtnInventory);
-        }, 260);
+        activateTab(tabContentInventory, tabBtnInventory);
       });
       
       tabBtnDock.addEventListener('click', () => {
         deactivateAllTabs();
-        setTimeout(() => {
-          activateTab(tabContentDock, tabBtnDock);
-          if (window.tripScanData.length === 0) {
-            window.inbound.fetchTripScanData();
-          } else {
-            window.inbound.populateInboundDates();
-            window.inbound.runDockSimulation();
-          }
-        }, 260);
+        activateTab(tabContentDock, tabBtnDock);
+        if (window.tripScanData.length === 0) {
+          window.inbound.fetchTripScanData();
+        } else {
+          window.inbound.populateInboundDates();
+          window.inbound.runDockSimulation();
+        }
       });
 
       tabBtnPrediction.addEventListener('click', () => {
         deactivateAllTabs();
-        setTimeout(() => {
-          activateTab(tabContentPrediction, tabBtnPrediction);
-          if (window.tripScanData.length === 0) {
-            window.inbound.fetchTripScanData();
-          } else {
-            if (window.prediction && window.prediction.renderPredictionDashboard) {
-              window.prediction.renderPredictionDashboard();
-            }
+        activateTab(tabContentPrediction, tabBtnPrediction);
+        if (window.tripScanData.length === 0) {
+          window.inbound.fetchTripScanData();
+        } else {
+          if (window.prediction && window.prediction.renderPredictionDashboard) {
+            window.prediction.renderPredictionDashboard();
           }
-        }, 260);
+        }
       });
 
       let capacityInitialized = false;
       tabBtnCapacity.addEventListener('click', () => {
         deactivateAllTabs();
-        setTimeout(() => {
-          activateTab(tabContentCapacity, tabBtnCapacity);
-          if (window.capacity) {
-            if (!capacityInitialized) {
-              window.capacity.initCapacity();
-              capacityInitialized = true;
-            }
-            window.capacity.renderCapacityDashboard();
+        activateTab(tabContentCapacity, tabBtnCapacity);
+        if (window.capacity) {
+          if (!capacityInitialized) {
+            window.capacity.initCapacity();
+            capacityInitialized = true;
           }
-        }, 260);
+          window.capacity.renderCapacityDashboard();
+        }
       });
     }
 
