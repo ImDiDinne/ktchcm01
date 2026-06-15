@@ -2,9 +2,12 @@ name: 🔄 Auto Update Inventory Data
 
 on:
   schedule:
-    # Tự động cập nhật mỗi 10 phút
-    - cron: '*/10 * * * *'
-  workflow_dispatch: # Cho phép nhấn nút "Run workflow" để chạy cập nhật chủ động bất cứ lúc nào
+    # Backup cron (mỗi 2 giờ) — phòng khi external cron service ngừng
+    - cron: '0 */2 * * *'
+  repository_dispatch:
+    # External cron service (cron-job.org) gọi API này mỗi 15 phút
+    types: [update_data]
+  workflow_dispatch: # Nhấn nút "Run workflow" trên GitHub UI
 
 permissions:
   contents: write

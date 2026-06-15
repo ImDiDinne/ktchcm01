@@ -2,8 +2,10 @@ name: 🔄 Auto Sync Inbound Trips
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # Tự động chạy mỗi 10 phút
-  workflow_dispatch:       # Cho phép bấm nút kích hoạt chạy tay trên GitHub UI
+    - cron: '0 */2 * * *'  # Backup mỗi 2 giờ
+  repository_dispatch:
+    types: [sync_trips]    # External cron gọi mỗi 15 phút
+  workflow_dispatch:
 
 jobs:
   sync-trips:

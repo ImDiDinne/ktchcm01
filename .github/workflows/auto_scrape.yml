@@ -2,7 +2,7 @@ name: Auto Scrape Unloading Times
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '0 */2 * * *'  # Backup mỗi 2 giờ
   workflow_dispatch:
   repository_dispatch:
     types: [trigger_auto_scrape, manual_scrape]
