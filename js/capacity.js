@@ -653,9 +653,36 @@
   }
 
   // ─── Core Calculations ────────────────────────────
-  function getNVCTForDate(dateStr, defaultNVCT) {
-    // Luôn ưu tiên dùng NVCT do user nhập từ UI
-    return defaultNVCT || 0;
+  function getNVCTForDate(dateStr, config) {
+    if (config.nvctOverrides && config.nvctOverrides[dateStr] !== undefined) {
+      return config.nvctOverrides[dateStr];
+    }
+    
+    const d = parseDate(dateStr);
+    if (!d) return config.nvct || 0;
+    
+    const prevDate = new Date(d.getTime() - 24 * 60 * 60 * 1000);
+    const prevDateStr = `${String(prevDate.getDate()).padStart(2, '0')}/${String(prevDate.getMonth() + 1).padStart(2, '0')}/${prevDate.getFullYear()}`;
+    
+    const prevActual = actualHistory.find(x => x.date === prevDateStr);
+    if (prevActual && prevActual.nvct > 0) {
+      return prevActual.nvct;
+    }
+    
+    const validActuals = actualHistory.filter(x => x.nvct > 0);
+    if (validActuals.length > 0) {
+      const sorted = [...validActuals].sort((a, b) => parseDate(b.date) - parseDate(a.date));
+      return sorted[0].nvct;
+    }
+    
+    return config.nvct || 0;
+  }
+
+  function getFLForDate(dateStr, config) {
+    if (config.flOverrides && config.flOverrides[dateStr] !== undefined) {
+      return config.flOverrides[dateStr];
+    }
+    return config.freelancer || 0;
   }
 
   function findClosestActualDay(fcTotal) {
@@ -677,8 +704,8 @@
   function calculateCapacity(dayData, config) {
     if (!dayData || !config) return null;
 
-    const nvct = getNVCTForDate(dayData.date, config.nvct || 0);
-    const fl   = config.freelancer || 0;
+    const nvct = getNVCTForDate(dayData.date, config);
+    const fl   = getFLForDate(dayData.date, config);
     const currentTotal = nvct + fl;
 
     // Find the closest volume day in actual history to today's FC total
@@ -850,8 +877,16 @@
       const el = document.getElementById(id);
       if (el) el.value = value;
     };
-    setInput('cap-nvct-total',  config.nvct);
-    setInput('cap-fl-total',    config.freelancer);
+    
+    let displayNvct = config.nvct;
+    let displayFl = config.freelancer;
+    if (typeof selectedDate !== 'undefined' && selectedDate) {
+      displayNvct = getNVCTForDate(selectedDate, config);
+      displayFl   = getFLForDate(selectedDate, config);
+    }
+    
+    setInput('cap-nvct-total',  displayNvct);
+    setInput('cap-fl-total',    displayFl);
   }
 
   // ─── Render: KPIs ────────────────────────────
@@ -1520,7 +1555,12 @@
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
-        cfg.nvct = val;
+        if (typeof selectedDate !== 'undefined' && selectedDate) {
+          cfg.nvctOverrides = cfg.nvctOverrides || {};
+          cfg.nvctOverrides[selectedDate] = val;
+        } else {
+          cfg.nvct = val;
+        }
         saveConfig(cfg);
         renderCapacityDashboard();
       });
@@ -1533,7 +1573,12 @@
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
-        cfg.freelancer = val;
+        if (typeof selectedDate !== 'undefined' && selectedDate) {
+          cfg.flOverrides = cfg.flOverrides || {};
+          cfg.flOverrides[selectedDate] = val;
+        } else {
+          cfg.freelancer = val;
+        }
         saveConfig(cfg);
         renderCapacityDashboard();
       });

@@ -26,8 +26,68 @@ Deno.serve(async (req) => {
       })
     }
 
+    const text = message.text.trim();
+    
+    // Kết nối Supabase (dùng biến môi trường tự động của Edge Function)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // Xử lý lệnh đăng nhập ngầm
+    if (text.startsWith('/login')) {
+      const githubToken = Deno.env.get('GITHUB_PAT');
+      if (!githubToken) {
+        await fetch(`https://api.telegram.org/bot${Deno.env.get('TELEGRAM_BOT_TOKEN')}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: '❌ Thiếu GITHUB_PAT trong Supabase Edge Secrets. Không thể kích hoạt tự động.' })
+        });
+        return new Response('Missing GITHUB_PAT', { status: 200 });
+      }
+
+      await fetch('https://api.github.com/repos/ImDiDinne/ktchcm01/dispatches', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Authorization': `token ${githubToken}`
+        },
+        body: JSON.stringify({ event_type: 'remote_login' })
+      });
+
+      await fetch(`https://api.telegram.org/bot${Deno.env.get('TELEGRAM_BOT_TOKEN')}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: '🚀 Đã ra lệnh máy chủ GitHub khởi động trình duyệt ngầm. Quá trình đăng nhập sẽ mất khoảng 1 phút, vui lòng chờ...' })
+      });
+      return new Response('OK', { status: 200 });
+    }
+
+    // Xử lý mã 2FA
+    if (text.startsWith('/2fa ')) {
+      const code = text.replace('/2fa', '').trim();
+      await supabase.from('system_secrets').upsert({ key: 'ghn_2fa_code', value: code });
+      await fetch(`https://api.telegram.org/bot${Deno.env.get('TELEGRAM_BOT_TOKEN')}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: `✅ Đã lưu mã 2FA: ${code}. Hệ thống đang tự động nhập...` })
+      });
+      return new Response('OK', { status: 200 });
+    }
+
+    // Xử lý mã OTP
+    if (text.startsWith('/otp ')) {
+      const code = text.replace('/otp', '').trim();
+      await supabase.from('system_secrets').upsert({ key: 'ghn_otp_code', value: code });
+      await fetch(`https://api.telegram.org/bot${Deno.env.get('TELEGRAM_BOT_TOKEN')}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: `✅ Đã lưu mã OTP: ${code}. Hệ thống đang tự động nhập...` })
+      });
+      return new Response('OK', { status: 200 });
+    }
+
     // Tìm mã chuyến đi
-    const match = message.text.match(TRIP_REGEX)
+    const match = text.match(TRIP_REGEX)
     if (!match) {
       return new Response(JSON.stringify({ ok: true, action: 'no_trip_code' }), {
         headers: { 'Content-Type': 'application/json' }
@@ -35,11 +95,6 @@ Deno.serve(async (req) => {
     }
 
     const tripCode = match[1]
-
-    // Kết nối Supabase (dùng biến môi trường tự động của Edge Function)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Upsert vào bảng unloading_trips
     const { error } = await supabase
