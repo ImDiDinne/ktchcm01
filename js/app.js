@@ -835,7 +835,65 @@
           y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
         }
       }
+      }
     });
+
+    // ----------------------------------------------------
+    // AI Analyst Generation
+    // ----------------------------------------------------
+    const insightPanel = document.getElementById('ai-insight-panel');
+    const insightText = document.getElementById('ai-insight-text');
+    if (insightPanel && insightText) {
+      try {
+        let insight = "";
+        const currentHour = new Date().getHours();
+        
+        let currentTdn = currentData[currentHour] || 0;
+        let n1Tdn = n1Data[currentHour] || 0;
+        let trendText = "tương đương";
+        
+        if (currentTdn > n1Tdn * 1.05) {
+            let pct = Math.round((currentTdn - n1Tdn) / n1Tdn * 100);
+            trendText = `<span style="color:#ef4444;font-weight:600;">cao hơn ${pct}%</span> so với cùng kỳ hôm qua`;
+        } else if (currentTdn < n1Tdn * 0.95) {
+            let pct = Math.round((n1Tdn - currentTdn) / n1Tdn * 100);
+            trendText = `<span style="color:#10b981;font-weight:600;">thấp hơn ${pct}%</span> so với cùng kỳ hôm qua (tín hiệu tốt)`;
+        } else {
+            trendText = "ở mức ổn định, tương đương hôm qua";
+        }
+        
+        insight += `📌 <b>Hiện tại:</b> Tồn kho lúc này đang <b>${trendText}</b>. `;
+
+        let maxVal = -1;
+        let maxHour = -1;
+        for(let i=0; i<=currentHour; i++) {
+            if (currentData[i] !== null && currentData[i] > maxVal) {
+                maxVal = currentData[i];
+                maxHour = i;
+            }
+        }
+        if (maxHour !== -1 && maxVal > 0) {
+            let hStr = maxHour < 10 ? '0'+maxHour+':00' : maxHour+':00';
+            insight += `Đỉnh tồn kho ghi nhận là <b>${new Intl.NumberFormat('vi-VN').format(maxVal)}</b> đơn (vào lúc ${hStr}). `;
+        }
+
+        if (currentHour < 22 && n1Data[currentHour+2] !== null) {
+            let diffN1 = n1Data[currentHour+2] - n1Tdn; 
+            if (diffN1 > n1Tdn * 0.05) {
+                 insight += `<br/><br/>🚀 <b>Dự báo AI:</b> Cảnh báo lượng tồn có dấu hiệu sẽ <b>tăng tiếp</b> trong 2 giờ tới (theo chu kỳ dữ liệu hôm qua). Yêu cầu ưu tiên đẩy mạnh Outbound!`;
+            } else if (diffN1 < -n1Tdn * 0.05) {
+                 insight += `<br/><br/>📉 <b>Dự báo AI:</b> Tồn kho dự kiến sẽ <b>hạ nhiệt</b> và giảm dần trong 2 giờ tới, các tuyến sẽ dần được giải tỏa.`;
+            } else {
+                 insight += `<br/><br/>➡️ <b>Dự báo AI:</b> Tồn kho dự kiến sẽ duy trì nhịp độ đi ngang trong 2 giờ tiếp theo.`;
+            }
+        }
+
+        insightText.innerHTML = insight;
+        insightPanel.style.display = 'block';
+      } catch (e) {
+        console.error("Lỗi khi tạo AI Insight:", e);
+      }
+    }
   }
 
 })();
