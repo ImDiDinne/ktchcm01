@@ -886,8 +886,11 @@ def main():
         def attach_24h_history(d):
             try:
                 import subprocess, dateutil.parser
-                from datetime import datetime, timedelta
+                from datetime import datetime, timedelta, timezone
                 
+                # VN timezone: GMT+7
+                vn_tz = timezone(timedelta(hours=7))
+
                 cmd = ["git", "log", "--since=48 hours ago", "--format=%H %cI"]
                 commits = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
 
@@ -897,7 +900,7 @@ def main():
                     parts = line.split()
                     if len(parts) == 2:
                         h, t = parts[0], parts[1]
-                        dt = dateutil.parser.isoparse(t).astimezone() # local time
+                        dt = dateutil.parser.isoparse(t).astimezone(vn_tz) # VN time
                         date_str = dt.strftime('%Y-%m-%d')
                         hour_str = dt.strftime('%H')
                         
@@ -906,8 +909,9 @@ def main():
                         if hour_str not in hourly_commits[date_str]:
                             hourly_commits[date_str][hour_str] = h
 
-                today_str = datetime.now().strftime('%Y-%m-%d')
-                yesterday_str = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+                now_vn = datetime.now(vn_tz)
+                today_str = now_vn.strftime('%Y-%m-%d')
+                yesterday_str = (now_vn - timedelta(days=1)).strftime('%Y-%m-%d')
 
                 history_data = {
                     'hours': [f"{h:02d}:00" for h in range(24)],
