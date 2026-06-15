@@ -318,7 +318,7 @@ def renew_session_with_playwright(force_login=False, headless_mode=True):
             page.goto(METABASE_URL, wait_until='load', timeout=60000)
             # Mở thêm tab cho nhanh.ghn.vn
             page2 = context.new_page()
-            page2.goto("https://nhanh.ghn.vn", wait_until='load', timeout=60000)
+            page2.goto("https://nhanh.ghn.vn/ktc-van-tai", wait_until='load', timeout=60000)
         except Exception as goto_err:
             print(f"⚠️ Page.goto load error in GUI browser: {goto_err}")
 

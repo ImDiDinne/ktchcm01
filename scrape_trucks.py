@@ -80,6 +80,21 @@ async def scrape_trip(context, trip_code, sem):
                                     if end_time and not session_completed_time:
                                         session_completed_time = end_time
                                     break
+                            
+                            # Fallback: Nếu không có sự kiện kết thúc rõ ràng, lấy sự kiện mới nhất
+                            if not session_completed_time and len(data['data']) > 0:
+                                last_time = data['data'][0].get('actionTime')
+                                if last_time:
+                                    try:
+                                        from datetime import datetime, timezone
+                                        last_dt = datetime.fromisoformat(last_time.replace('Z', '+00:00'))
+                                        now_dt = datetime.now(timezone.utc)
+                                        # Nếu sự kiện cuối cùng đã xảy ra hơn 45 phút trước -> Xem như bỏ quên và đã xong
+                                        if (now_dt - last_dt).total_seconds() > 2700:
+                                            session_completed_time = last_time
+                                            logger.info(f"Fallback completion triggered for {response.url}")
+                                    except Exception as e:
+                                        logger.error(f"Fallback parsing error: {e}")
                     except:
                         pass
         
