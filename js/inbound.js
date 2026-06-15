@@ -310,18 +310,19 @@
           .eq('code', code);
         if (error) throw error;
       } else {
-        // UPSERT record into Supabase
-        let startedAt;
+        let payload = { code: code };
         if (val === 'unloading') {
-          startedAt = new Date().toISOString();
+          payload.started_at = new Date().toISOString();
+          payload.unloaded_at = null;
         } else {
           const tAvg = getDockTAvg();
-          startedAt = new Date(Date.now() - (tAvg + 5) * 60 * 1000).toISOString();
+          payload.started_at = new Date(Date.now() - (tAvg + 5) * 60 * 1000).toISOString();
+          payload.unloaded_at = new Date().toISOString();
         }
         
         const { error } = await window.supabaseClient
           .from('unloading_trips')
-          .upsert({ code: code, started_at: startedAt });
+          .upsert(payload);
         if (error) throw error;
       }
       
