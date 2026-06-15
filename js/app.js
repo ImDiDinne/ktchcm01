@@ -777,6 +777,13 @@
       if (todayVal !== null) lastTodayVal = todayVal;
       lastN1Val = n1Val;
 
+      // Ghi đè dữ liệu realtime cho khung giờ hiện tại thay vì dùng lịch sử Git (thường bị chậm 1 nhịp)
+      if (i === currentHour && window.tonkhoData && window.tonkhoData.all) {
+          todayVal = currentActiveTab === 'all' 
+              ? (window.tonkhoData.all.grand_total || 0) 
+              : ((window.tonkhoData.all.routes && window.tonkhoData.all.routes[currentActiveTab]) || 0);
+      }
+
       currentData.push(todayVal);
       n1Data.push(n1Val);
     }
