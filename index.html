@@ -98,8 +98,21 @@
       <div class="kpi-grid" id="kpi-grid"></div>
 
       <!-- Charts Row -->
-      <div id="charts-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 24px; margin-bottom: 24px;">
-        <!-- Dynamic charts will be injected here by app.js -->
+      <div style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px;">
+        <div class="chart-card animate-in delay-2" style="padding: 20px;">
+          <div class="card-title" style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Biểu Đồ Xu Hướng Tồn Kho 24 Giờ (Hiện Tại vs N-1)</span>
+            </div>
+            <!-- Tabs -->
+            <div id="chart-tabs" style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <!-- Tabs injected by app.js -->
+            </div>
+          </div>
+          <div style="height: 350px; width: 100%;">
+            <canvas id="compare24hChart"></canvas>
+          </div>
+        </div>
       </div>
 
       <!-- Action Insights / Top Risks Panel -->

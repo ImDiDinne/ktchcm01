@@ -691,10 +691,12 @@
   // Expose global methods
   window.fetchAndRenderDashboard = fetchAndRenderDashboard;
 
-  window.compare24hChartInstances = [];
+  let compare24hChartInstance = null;
+  let currentActiveTab = 'all';
+
   window.renderCompare24hChart = function() {
-    const container = document.getElementById('charts-container');
-    if (!container) return;
+    const canvas = document.getElementById('compare24hChart');
+    if (!canvas) return;
 
     if (!window.TONKHO_DATA || !window.TONKHO_DATA.history_24h) return;
     
@@ -711,121 +713,126 @@
       { id: 'Kho Giao Hàng Nặng', title: 'Giao Hàng Nặng' }
     ];
 
-    // Xóa các chart cũ
-    if (window.compare24hChartInstances) {
-      window.compare24hChartInstances.forEach(c => c.destroy());
+    // Render Tabs
+    const tabsContainer = document.getElementById('chart-tabs');
+    if (tabsContainer) {
+      tabsContainer.innerHTML = '';
+      groups.forEach(groupInfo => {
+        const btn = document.createElement('button');
+        btn.textContent = groupInfo.title;
+        btn.style.padding = '6px 14px';
+        btn.style.fontSize = '13px';
+        btn.style.fontWeight = '500';
+        btn.style.border = '1px solid var(--border-color)';
+        btn.style.borderRadius = '20px';
+        btn.style.cursor = 'pointer';
+        btn.style.transition = 'all 0.2s';
+        
+        if (groupInfo.id === currentActiveTab) {
+          btn.style.background = 'var(--accent)';
+          btn.style.color = '#fff';
+          btn.style.borderColor = 'var(--accent)';
+        } else {
+          btn.style.background = 'transparent';
+          btn.style.color = 'var(--text-secondary)';
+        }
+
+        btn.onclick = () => {
+          currentActiveTab = groupInfo.id;
+          window.renderCompare24hChart(); // Re-render to update chart and tabs
+        };
+
+        tabsContainer.appendChild(btn);
+      });
     }
-    window.compare24hChartInstances = [];
-    container.innerHTML = '';
 
-    groups.forEach(groupInfo => {
-      const group = groupInfo.id;
-      const currentData = [];
-      const n1Data = [];
-      let lastTodayVal = null;
-      let lastN1Val = null;
+    // Prepare data for currentActiveTab
+    const currentData = [];
+    const n1Data = [];
+    let lastTodayVal = null;
+    let lastN1Val = null;
 
-      for (let i = 0; i < 24; i++) {
-        const hStr = i < 10 ? '0' + i : '' + i;
-        let todayVal = null;
-        let n1Val = null;
+    for (let i = 0; i < 24; i++) {
+      const hStr = i < 10 ? '0' + i : '' + i;
+      let todayVal = null;
+      let n1Val = null;
 
-        if (hist.today && hist.today[hStr]) {
-          todayVal = group === 'all' ? (hist.today[hStr].grand_total || 0) : ((hist.today[hStr].routes && hist.today[hStr].routes[group]) || 0);
-        }
-        if (hist.n1 && hist.n1[hStr]) {
-          n1Val = group === 'all' ? (hist.n1[hStr].grand_total || 0) : ((hist.n1[hStr].routes && hist.n1[hStr].routes[group]) || 0);
-        }
-
-        // Forward fill nếu dữ liệu bị khuyết (Github Action không chạy)
-        if (todayVal === null && lastTodayVal !== null) todayVal = lastTodayVal;
-        if (n1Val === null && lastN1Val !== null) n1Val = lastN1Val;
-
-        // Nếu vẫn null (vd đầu ngày không có mốc nào), gán tạm = 0
-        if (todayVal === null) todayVal = 0;
-        if (n1Val === null) n1Val = 0;
-
-        lastTodayVal = todayVal;
-        lastN1Val = n1Val;
-
-        currentData.push(todayVal);
-        n1Data.push(n1Val);
+      if (hist.today && hist.today[hStr]) {
+        todayVal = currentActiveTab === 'all' ? (hist.today[hStr].grand_total || 0) : ((hist.today[hStr].routes && hist.today[hStr].routes[currentActiveTab]) || 0);
+      }
+      if (hist.n1 && hist.n1[hStr]) {
+        n1Val = currentActiveTab === 'all' ? (hist.n1[hStr].grand_total || 0) : ((hist.n1[hStr].routes && hist.n1[hStr].routes[currentActiveTab]) || 0);
       }
 
-      // Tạo thẻ div bọc chart
-      const card = document.createElement('div');
-      card.className = 'chart-card animate-in delay-2';
-      card.style.padding = '20px';
-      
-      const title = document.createElement('div');
-      title.className = 'card-title';
-      title.style.marginBottom = '16px';
-      title.textContent = `Tồn Kho 24 Giờ: ${groupInfo.title}`;
-      card.appendChild(title);
+      // Forward fill nếu dữ liệu bị khuyết
+      if (todayVal === null && lastTodayVal !== null) todayVal = lastTodayVal;
+      if (n1Val === null && lastN1Val !== null) n1Val = lastN1Val;
 
-      const chartWrapper = document.createElement('div');
-      chartWrapper.style.height = '250px';
-      chartWrapper.style.width = '100%';
-      
-      const canvas = document.createElement('canvas');
-      chartWrapper.appendChild(canvas);
-      card.appendChild(chartWrapper);
-      
-      container.appendChild(card);
+      // Nếu vẫn null gán tạm = 0
+      if (todayVal === null) todayVal = 0;
+      if (n1Val === null) n1Val = 0;
 
-      const chartInstance = new Chart(canvas, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'Hôm nay',
-              data: currentData,
-              backgroundColor: 'rgba(251, 146, 60, 0.8)',
-              borderColor: '#fb923c',
-              borderWidth: 1,
-              borderRadius: 4
-            },
-            {
-              type: 'line',
-              label: 'Hôm qua (N-1)',
-              data: n1Data,
-              backgroundColor: 'transparent',
-              borderColor: '#94a3b8',
-              borderWidth: 2,
-              tension: 0.3,
-              pointRadius: 3,
-              pointBackgroundColor: '#1e293b',
-              borderDash: [5, 5]
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { position: 'top', labels: { color: '#94a3b8', font: { size: 12 } } },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  let label = context.dataset.label || '';
-                  if (label) label += ': ';
-                  if (context.parsed.y !== null) label += new Intl.NumberFormat('vi-VN').format(context.parsed.y);
-                  return label;
-                }
+      lastTodayVal = todayVal;
+      lastN1Val = n1Val;
+
+      currentData.push(todayVal);
+      n1Data.push(n1Val);
+    }
+
+    if (compare24hChartInstance) {
+      compare24hChartInstance.destroy();
+    }
+
+    compare24hChartInstance = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            type: 'bar',
+            label: 'Hôm nay',
+            data: currentData,
+            backgroundColor: 'rgba(251, 146, 60, 0.8)',
+            borderColor: '#fb923c',
+            borderWidth: 1,
+            borderRadius: 4
+          },
+          {
+            type: 'line',
+            label: 'Hôm qua (N-1)',
+            data: n1Data,
+            backgroundColor: 'transparent',
+            borderColor: '#94a3b8',
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 3,
+            pointBackgroundColor: '#1e293b',
+            borderDash: [5, 5]
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', labels: { color: '#94a3b8', font: { size: 12 } } },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) label += ': ';
+                if (context.parsed.y !== null) label += new Intl.NumberFormat('vi-VN').format(context.parsed.y);
+                return label;
               }
             }
-          },
-          scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' } },
-            y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
           }
+        },
+        scales: {
+          x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' } },
+          y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
         }
-      });
-      
-      window.compare24hChartInstances.push(chartInstance);
+      }
     });
   }
 
