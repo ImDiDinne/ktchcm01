@@ -98,20 +98,22 @@
       <div class="kpi-grid" id="kpi-grid"></div>
 
       <!-- Charts Row -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 24px;">
-        <!-- History Chart -->
+      <div style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px;">
+        <!-- 24h Comparison Chart -->
         <div class="chart-card animate-in delay-2" style="padding: 20px;">
-          <div class="card-title" style="margin-bottom: 16px;">Biểu Đồ Xu Hướng Tồn Kho (Lịch Sử)</div>
-          <div style="height: 250px; width: 100%;">
-            <canvas id="inventoryHistoryChart"></canvas>
+          <div class="card-title" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Biểu Đồ Xu Hướng Tồn Kho 24 Giờ (Hiện Tại vs N-1)</span>
+            <select id="chart-group-filter" style="padding: 6px 12px; background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; outline: none; font-size: 14px; cursor: pointer;">
+              <option value="all">Tất cả nhóm kho</option>
+              <option value="Kho Chuyển Tiếp">Kho Chuyển Tiếp (KCT)</option>
+              <option value="Kho Trung Chuyển">Kho Trung Chuyển (KTC)</option>
+              <option value="Kho Giao Hàng Nặng">Kho Giao Hàng Nặng</option>
+              <option value="Nội Thành">Nội Thành</option>
+              <option value="Nội vùng">Nội vùng</option>
+            </select>
           </div>
-        </div>
-
-        <!-- Compare N-1 Chart -->
-        <div class="chart-card animate-in delay-2" style="padding: 20px;">
-          <div class="card-title" style="margin-bottom: 16px;">Tồn Kho Hiện Tại vs Cùng Kỳ N-1 (Các Tuyến)</div>
-          <div style="height: 250px; width: 100%;">
-            <canvas id="compareN1Chart"></canvas>
+          <div style="height: 350px; width: 100%;">
+            <canvas id="compare24hChart"></canvas>
           </div>
         </div>
       </div>

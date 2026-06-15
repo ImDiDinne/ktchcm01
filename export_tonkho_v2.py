@@ -882,30 +882,70 @@ def main():
         # Xuất các file
         data = build_hierarchical_data(df, pivot, params)
         
-        # Lấy dữ liệu N-1 từ Git trước khi xuất
-        import subprocess
-        def attach_n1_history(d):
+        # Lấy dữ liệu 24h lịch sử (Hôm nay & Hôm qua) từ Git
+        def attach_24h_history(d):
             try:
-                cmd = ["git", "log", "-1", "--before=24 hours ago", "--format=%H"]
-                result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(BASE))
-                commit_hash = result.stdout.strip()
-                if not commit_hash:
-                    return
-                cmd_show = ["git", "show", f"{commit_hash}:tonkho_tuyen.json"]
-                show_result = subprocess.run(cmd_show, capture_output=True, text=True, cwd=str(BASE))
-                if show_result.returncode != 0:
-                    return
-                old_data = json.loads(show_result.stdout)
-                if 'all' in old_data:
-                    d['history_n1'] = {
-                        'grand_total': old_data['all'].get('grand_total', 0),
-                        'routes': { r['name']: r['total'] for r in old_data['all'].get('routes', []) }
-                    }
-                    print("✅ Đã lấy thành công dữ liệu tồn kho N-1 từ lịch sử Git.")
-            except Exception as e:
-                print(f"⚠️ Lỗi khi lấy N-1: {e}")
+                import subprocess, dateutil.parser
+                from datetime import datetime, timedelta
                 
-        attach_n1_history(data)
+                cmd = ["git", "log", "--since=48 hours ago", "--format=%H %cI"]
+                commits = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
+
+                # Dictionary: date_string -> { hour_string -> commit_hash }
+                hourly_commits = {}
+                for line in commits:
+                    parts = line.split()
+                    if len(parts) == 2:
+                        h, t = parts[0], parts[1]
+                        dt = dateutil.parser.isoparse(t).astimezone() # local time
+                        date_str = dt.strftime('%Y-%m-%d')
+                        hour_str = dt.strftime('%H')
+                        
+                        if date_str not in hourly_commits:
+                            hourly_commits[date_str] = {}
+                        if hour_str not in hourly_commits[date_str]:
+                            hourly_commits[date_str][hour_str] = h
+
+                today_str = datetime.now().strftime('%Y-%m-%d')
+                yesterday_str = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+
+                history_data = {
+                    'hours': [f"{h:02d}:00" for h in range(24)],
+                    'today': {},
+                    'n1': {}
+                }
+
+                def fetch_data(date_key, target_dict):
+                    if date_key not in hourly_commits:
+                        return
+                    for hour_int in range(24):
+                        h_str = f"{hour_int:02d}"
+                        if h_str in hourly_commits[date_key]:
+                            commit_hash = hourly_commits[date_key][h_str]
+                            try:
+                                show = subprocess.run(["git", "show", f"{commit_hash}:tonkho_tuyen.json"], capture_output=True, text=True)
+                                if show.returncode == 0:
+                                    old_data = json.loads(show.stdout)
+                                    routes_data = {}
+                                    for route in old_data.get('all', {}).get('routes', []):
+                                        routes_data[route['name']] = route['total']
+                                    
+                                    target_dict[h_str] = {
+                                        'grand_total': old_data.get('all', {}).get('grand_total', 0),
+                                        'routes': routes_data
+                                    }
+                            except Exception:
+                                pass
+
+                fetch_data(today_str, history_data['today'])
+                fetch_data(yesterday_str, history_data['n1'])
+                
+                d['history_24h'] = history_data
+                print("✅ Đã lấy thành công dữ liệu tồn kho 24h từ lịch sử Git.")
+            except Exception as e:
+                print(f"⚠️ Lỗi khi lấy 24h history: {e}")
+                
+        attach_24h_history(data)
         
         inject_into_html(data)
         write_aux(data)

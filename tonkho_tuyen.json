@@ -3442,7 +3442,7 @@
   },
   "title": "BÁO CÁO TỒN KHO KTC HCM 01",
   "grand_total": 95944,
-  "updated": "15/06/2026 22:54:40",
+  "updated": "16/06/2026 00:56:07",
   "session_expired": false,
   "mapping_params": [
     {
@@ -5306,16 +5306,228 @@
       "Loại kho": "Nội vùng"
     }
   ],
-  "history_n1": {
-    "grand_total": 67495,
-    "routes": {
-      "Kho Chuyển Tiếp": 8253,
-      "Kho Giao Hàng Nặng": 820,
-      "Kho KHL": 804,
-      "Kho Trung Chuyển": 24911,
-      "Nội Thành": 6081,
-      "Nội vùng": 26255,
-      "Phú Quốc": 371
+  "history_24h": {
+    "hours": [
+      "00:00",
+      "01:00",
+      "02:00",
+      "03:00",
+      "04:00",
+      "05:00",
+      "06:00",
+      "07:00",
+      "08:00",
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+      "18:00",
+      "19:00",
+      "20:00",
+      "21:00",
+      "22:00",
+      "23:00"
+    ],
+    "today": {
+      "00": {
+        "grand_total": 95944,
+        "routes": {
+          "Kho Chuyển Tiếp": 13405,
+          "Kho Giao Hàng Nặng": 1972,
+          "Kho KHL": 564,
+          "Kho Trung Chuyển": 38013,
+          "Nội Thành": 7453,
+          "Nội vùng": 34089,
+          "Phú Quốc": 448
+        }
+      }
+    },
+    "n1": {
+      "00": {
+        "grand_total": 68570,
+        "routes": {
+          "Kho Chuyển Tiếp": 7821,
+          "Kho Giao Hàng Nặng": 1033,
+          "Kho KHL": 492,
+          "Kho Trung Chuyển": 21631,
+          "Nội Thành": 6700,
+          "Nội vùng": 30416,
+          "Phú Quốc": 477
+        }
+      },
+      "01": {
+        "grand_total": 69928,
+        "routes": {
+          "Kho Chuyển Tiếp": 7765,
+          "Kho Giao Hàng Nặng": 1137,
+          "Kho KHL": 767,
+          "Kho Trung Chuyển": 17983,
+          "Nội Thành": 5806,
+          "Nội vùng": 35867,
+          "Phú Quốc": 603
+        }
+      },
+      "02": {
+        "grand_total": 71149,
+        "routes": {
+          "Kho Chuyển Tiếp": 7674,
+          "Kho Giao Hàng Nặng": 981,
+          "Kho KHL": 836,
+          "Kho Trung Chuyển": 21182,
+          "Nội Thành": 2774,
+          "Nội vùng": 37058,
+          "Phú Quốc": 644
+        }
+      },
+      "03": {
+        "grand_total": 77844,
+        "routes": {
+          "Kho Chuyển Tiếp": 6612,
+          "Kho Giao Hàng Nặng": 1055,
+          "Kho KHL": 1074,
+          "Kho Trung Chuyển": 23780,
+          "Nội Thành": 2017,
+          "Nội vùng": 42520,
+          "Phú Quốc": 786
+        }
+      },
+      "04": {
+        "grand_total": 56365,
+        "routes": {
+          "Kho Chuyển Tiếp": 6774,
+          "Kho Giao Hàng Nặng": 541,
+          "Kho KHL": 1236,
+          "Kho Trung Chuyển": 22490,
+          "Nội Thành": 2758,
+          "Nội vùng": 21556,
+          "Phú Quốc": 1010
+        }
+      },
+      "05": {
+        "grand_total": 42421,
+        "routes": {
+          "Kho Chuyển Tiếp": 7424,
+          "Kho Giao Hàng Nặng": 374,
+          "Kho KHL": 224,
+          "Kho Trung Chuyển": 16255,
+          "Nội Thành": 3594,
+          "Nội vùng": 13399,
+          "Phú Quốc": 1151
+        }
+      },
+      "06": {
+        "grand_total": 29967,
+        "routes": {
+          "Kho Chuyển Tiếp": 4044,
+          "Kho Giao Hàng Nặng": 411,
+          "Kho KHL": 121,
+          "Kho Trung Chuyển": 7326,
+          "Nội Thành": 3793,
+          "Nội vùng": 13069,
+          "Phú Quốc": 1203
+        }
+      },
+      "07": {
+        "grand_total": 27285,
+        "routes": {
+          "Kho Chuyển Tiếp": 1308,
+          "Kho Giao Hàng Nặng": 434,
+          "Kho KHL": 134,
+          "Kho Trung Chuyển": 7207,
+          "Nội Thành": 3840,
+          "Nội vùng": 13146,
+          "Phú Quốc": 1216
+        }
+      },
+      "09": {
+        "grand_total": 39074,
+        "routes": {
+          "Kho Chuyển Tiếp": 1952,
+          "Kho Giao Hàng Nặng": 600,
+          "Kho KHL": 339,
+          "Kho Trung Chuyển": 9869,
+          "Nội Thành": 1381,
+          "Nội vùng": 23429,
+          "Phú Quốc": 1504
+        }
+      },
+      "12": {
+        "grand_total": 28009,
+        "routes": {
+          "Kho Chuyển Tiếp": 4458,
+          "Kho Giao Hàng Nặng": 726,
+          "Kho KHL": 232,
+          "Kho Trung Chuyển": 9717,
+          "Nội Thành": 2649,
+          "Nội vùng": 8513,
+          "Phú Quốc": 1714
+        }
+      },
+      "14": {
+        "grand_total": 46245,
+        "routes": {
+          "Kho Chuyển Tiếp": 6743,
+          "Kho Giao Hàng Nặng": 712,
+          "Kho KHL": 375,
+          "Kho Trung Chuyển": 20346,
+          "Nội Thành": 3154,
+          "Nội vùng": 12961,
+          "Phú Quốc": 1954
+        }
+      },
+      "18": {
+        "grand_total": 36140,
+        "routes": {
+          "Kho Chuyển Tiếp": 6314,
+          "Kho Giao Hàng Nặng": 687,
+          "Kho KHL": 146,
+          "Kho Trung Chuyển": 18473,
+          "Nội Thành": 4155,
+          "Nội vùng": 6110,
+          "Phú Quốc": 255
+        }
+      },
+      "20": {
+        "grand_total": 47420,
+        "routes": {
+          "Kho Chuyển Tiếp": 7976,
+          "Kho Giao Hàng Nặng": 911,
+          "Kho KHL": 359,
+          "Kho Trung Chuyển": 19161,
+          "Nội Thành": 5506,
+          "Nội vùng": 12986,
+          "Phú Quốc": 521
+        }
+      },
+      "22": {
+        "grand_total": 95944,
+        "routes": {
+          "Kho Chuyển Tiếp": 13405,
+          "Kho Giao Hàng Nặng": 1972,
+          "Kho KHL": 564,
+          "Kho Trung Chuyển": 38013,
+          "Nội Thành": 7453,
+          "Nội vùng": 34089,
+          "Phú Quốc": 448
+        }
+      },
+      "23": {
+        "grand_total": 95944,
+        "routes": {
+          "Kho Chuyển Tiếp": 13405,
+          "Kho Giao Hàng Nặng": 1972,
+          "Kho KHL": 564,
+          "Kho Trung Chuyển": 38013,
+          "Nội Thành": 7453,
+          "Nội vùng": 34089,
+          "Phú Quốc": 448
+        }
+      }
     }
   }
 }

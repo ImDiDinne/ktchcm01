@@ -100,8 +100,7 @@
         window.renderDashboard(currentFilter);
         
         // Fetch inventory history and render chart
-        fetchAndRenderHistoryChart();
-        renderCompareN1Chart();
+        window.renderCompare24hChart();
         
         // Trigger Inbound refresh if tab active
         const dockTabBtn = document.getElementById('tab-btn-dock');
@@ -692,142 +691,86 @@
   // Expose global methods
   window.fetchAndRenderDashboard = fetchAndRenderDashboard;
 
-  let historyChartInstance = null;
-  async function fetchAndRenderHistoryChart() {
-    if (!window.supabaseClient) {
-      setTimeout(fetchAndRenderHistoryChart, 500);
-      return;
-    }
-    try {
-      // Lấy data bằng raw fetch để ép dùng quyền anon (tránh lỗi RLS cho user đã đăng nhập)
-      const supUrl = 'https://baizmeqkxslajxuzyfnu.supabase.co';
-      const supKey = 'sb_publishable_VRLqjdMb3uIie89vbRXloA_xdak8hgy';
-      const url = `${supUrl}/rest/v1/inventory_history?select=timestamp,total_inventory&order=timestamp.asc&limit=96`;
-      const resp = await fetch(url, {
-        headers: {
-          'apikey': supKey,
-          'Authorization': `Bearer ${supKey}`
-        }
-      });
-      if (!resp.ok) throw new Error(`Fetch error: ${resp.status}`);
-      const data = await resp.json();
-
-      if (!data || data.length === 0) return;
-
-      const labels = data.map(r => {
-        const d = new Date(r.timestamp);
-        return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-      });
-      const values = data.map(r => r.total_inventory);
-
-      const ctx = document.getElementById('inventoryHistoryChart');
-      if (!ctx) return;
-
-      if (historyChartInstance) {
-        historyChartInstance.destroy();
-      }
-
-      historyChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Tổng Tồn Kho',
-            data: values,
-            borderColor: '#fb923c',
-            backgroundColor: 'rgba(251, 146, 60, 0.1)',
-            borderWidth: 2,
-            tension: 0.3,
-            fill: true,
-            pointRadius: 2,
-            pointBackgroundColor: '#fb923c'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              mode: 'index',
-              intersect: false,
-            }
-          },
-          scales: {
-            x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8', maxTicksLimit: 12 }
-            },
-            y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8' },
-              beginAtZero: false
-            }
-          }
-        }
-      });
-    } catch (err) {
-      console.error("Lỗi vẽ biểu đồ lịch sử:", err);
-    }
-  }
-
-  let compareN1ChartInstance = null;
-  function renderCompareN1Chart() {
-    const ctx = document.getElementById('compareN1Chart');
+  let compare24hChartInstance = null;
+  window.renderCompare24hChart = function() {
+    const ctx = document.getElementById('compare24hChart');
     if (!ctx) return;
 
-    if (!window.TONKHO_DATA || !window.TONKHO_DATA.all || !window.TONKHO_DATA.all.routes) return;
+    if (!window.TONKHO_DATA || !window.TONKHO_DATA.history_24h) return;
     
-    // Lấy dữ liệu hiện tại
-    const currentRoutes = window.TONKHO_DATA.all.routes;
-    // Lấy dữ liệu N-1 (nếu có)
-    const n1RoutesObj = (window.TONKHO_DATA.history_n1 && window.TONKHO_DATA.history_n1.routes) || {};
+    const hist = window.TONKHO_DATA.history_24h;
+    const filterEl = document.getElementById('chart-group-filter');
+    const filterVal = filterEl ? filterEl.value : 'all';
 
-    const labels = [];
+    const labels = hist.hours;
     const currentData = [];
     const n1Data = [];
 
-    // Chỉ lấy các tuyến chính (như Kho Trung Chuyển, Nội Vùng...)
-    currentRoutes.forEach(r => {
-      const name = r.name;
-      labels.push(name);
-      currentData.push(r.total || 0);
-      n1Data.push(n1RoutesObj[name] || 0);
-    });
+    for (let i = 0; i < 24; i++) {
+      const hStr = i < 10 ? '0' + i : '' + i;
+      let todayVal = 0;
+      let n1Val = 0;
 
-    if (compareN1ChartInstance) {
-      compareN1ChartInstance.destroy();
+      if (hist.today && hist.today[hStr]) {
+        if (filterVal === 'all') {
+          todayVal = hist.today[hStr].grand_total || 0;
+        } else {
+          todayVal = (hist.today[hStr].routes && hist.today[hStr].routes[filterVal]) || 0;
+        }
+      }
+
+      if (hist.n1 && hist.n1[hStr]) {
+        if (filterVal === 'all') {
+          n1Val = hist.n1[hStr].grand_total || 0;
+        } else {
+          n1Val = (hist.n1[hStr].routes && hist.n1[hStr].routes[filterVal]) || 0;
+        }
+      }
+
+      currentData.push(todayVal);
+      n1Data.push(n1Val);
     }
 
-    compareN1ChartInstance = new Chart(ctx, {
-      type: 'bar',
+    if (compare24hChartInstance) {
+      compare24hChartInstance.destroy();
+    }
+
+    compare24hChartInstance = new Chart(ctx, {
       data: {
         labels: labels,
         datasets: [
           {
-            label: 'Tồn Kho Hiện Tại',
+            type: 'bar',
+            label: 'Hôm nay',
             data: currentData,
-            backgroundColor: 'rgba(251, 146, 60, 0.8)', // Cam
+            backgroundColor: 'rgba(251, 146, 60, 0.8)',
             borderColor: '#fb923c',
-            borderWidth: 1
+            borderWidth: 1,
+            borderRadius: 4
           },
           {
-            label: 'Tồn Kho N-1',
+            type: 'line',
+            label: 'Hôm qua (N-1)',
             data: n1Data,
-            backgroundColor: 'rgba(148, 163, 184, 0.8)', // Xám
+            backgroundColor: 'transparent',
             borderColor: '#94a3b8',
-            borderWidth: 1
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 3,
+            pointBackgroundColor: '#1e293b',
+            borderDash: [5, 5]
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         plugins: {
-          legend: {
-            position: 'top',
-            labels: { color: '#94a3b8' }
-          },
+          legend: { position: 'top', labels: { color: '#94a3b8', font: { size: 12 } } },
           tooltip: {
             mode: 'index',
             intersect: false,
