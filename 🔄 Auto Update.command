@@ -26,7 +26,7 @@ fi
 
 echo ""
 echo "[3/3] Đang push dữ liệu mới lên GitHub..."
-git add mapping_params.csv index.html style.css export_tonkho_v2.py auto_fetch_data.py api/metabase_proxy.js js/*.js
+git add mapping_params.csv index.html style.css export_tonkho_v2.py auto_fetch_data.py api/metabase_proxy.js js/*.js tonkho_data.js tonkho_tuyen.json Datatonkho.xlsx BaoCao_TonKho.xlsx
 
 TIMESTAMP=$(date "+%d/%m/%Y %H:%M")
 git commit -m "chore(data): auto-update inventory data: $TIMESTAMP"
