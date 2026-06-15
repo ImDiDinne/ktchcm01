@@ -339,8 +339,11 @@
 
       <!-- Dock Detail Trip Table -->
       <div class="table-card animate-in delay-4" style="margin-top: 16px;">
-        <div class="card-header">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
           <div class="card-title">Danh Sách Chi Tiết Xe Tải Trong Ngày (TripScan)</div>
+          <button id="btn-scan-all" onclick="window.triggerScrape(this)" style="background: rgba(251, 146, 60, 0.2); border: 1px solid #fb923c; border-radius: 4px; color: #fb923c; cursor: pointer; padding: 6px 12px; font-weight: 600; font-size: 0.8rem; transition: all 0.2s;" title="Dò tự động tất cả các chuyến Đang Nhập" onmouseover="this.style.background='rgba(251, 146, 60, 0.3)';" onmouseout="this.style.background='rgba(251, 146, 60, 0.2)';">
+            🔄 DÒ TẤT CẢ
+          </button>
         </div>
         <div class="table-wrapper" style="max-height: 380px; overflow-y: auto; overflow-x: hidden;">
           <table class="pivot-table" id="dock-trips-table" style="width: 100%; table-layout: fixed; font-size: 0.72rem;">
