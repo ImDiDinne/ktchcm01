@@ -654,26 +654,8 @@
 
   // ─── Core Calculations ────────────────────────────
   function getNVCTForDate(dateStr, defaultNVCT) {
-    const d = parseDate(dateStr);
-    if (!d) return defaultNVCT;
-    
-    // Get N-1 date string (DD/MM/YYYY)
-    const prevDate = new Date(d.getTime() - 24 * 60 * 60 * 1000);
-    const prevDateStr = `${String(prevDate.getDate()).padStart(2, '0')}/${String(prevDate.getMonth() + 1).padStart(2, '0')}/${prevDate.getFullYear()}`;
-    
-    const prevActual = actualHistory.find(x => x.date === prevDateStr);
-    if (prevActual && prevActual.nvct > 0) {
-      return prevActual.nvct;
-    }
-    
-    // Fallback to the latest actual day with NVCT > 0 in actualHistory
-    const validActuals = actualHistory.filter(x => x.nvct > 0);
-    if (validActuals.length > 0) {
-      const sorted = [...validActuals].sort((a, b) => parseDate(b.date) - parseDate(a.date));
-      return sorted[0].nvct;
-    }
-    
-    return defaultNVCT;
+    // Luôn ưu tiên dùng NVCT do user nhập từ UI
+    return defaultNVCT || 0;
   }
 
   function findClosestActualDay(fcTotal) {
