@@ -778,10 +778,14 @@
       lastN1Val = n1Val;
 
       // Ghi đè dữ liệu realtime cho khung giờ hiện tại thay vì dùng lịch sử Git (thường bị chậm 1 nhịp)
-      if (i === currentHour && window.TONKHO_DATA && window.TONKHO_DATA.all) {
-          todayVal = currentActiveTab === 'all' 
-              ? (window.TONKHO_DATA.all.grand_total || 0) 
-              : ((window.TONKHO_DATA.all.routes && window.TONKHO_DATA.all.routes[currentActiveTab]) || 0);
+      if (i === currentHour && window.TONKHO_DATA) {
+          if (currentActiveTab === 'all') {
+              todayVal = window.TONKHO_DATA.grand_total || 0;
+          } else {
+              // Tìm tổng của nhóm kho cụ thể từ routes array
+              const route = (window.TONKHO_DATA.routes || []).find(r => r.name === currentActiveTab);
+              if (route) todayVal = route.total || 0;
+          }
       }
 
       currentData.push(todayVal);
