@@ -330,27 +330,54 @@
           }
         }
       } else {
-        // KHÔNG có trong Telegram bot -> Chờ dỡ
-        t.status = 'Chờ dỡ';
-        if (isViewingToday && t.time) {
-          const parts = t.time.split(':');
-          if (parts.length >= 2) {
-            const now = new Date();
-            const tzOffset = 7 * 60;
-            const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
-            
-            const arrivalDate = new Date(localTime);
-            arrivalDate.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parts.length > 2 ? parseInt(parts[2], 10) : 0, 0);
-            
-            const diffMs = localTime - arrivalDate;
-            if (diffMs > 0) {
-              t.remainingMinutes = Math.floor(diffMs / (1000 * 60));
-            } else {
-              t.remainingMinutes = 0;
+        // KHÔNG có trong Telegram bot → kiểm tra status từ TripScan (trips_cache)
+        const cachedStatus = (t.status || '').toLowerCase();
+        const isAlreadyUnloading = cachedStatus === 'đang nhập' || cachedStatus === 'đang xử lý' || cachedStatus === 'đang nhận';
+        const isAlreadyReceived = cachedStatus === 'đã nhận' || cachedStatus === 'đã giao';
+        
+        if (isAlreadyReceived) {
+          t.status = 'Đã nhận';
+        } else if (isAlreadyUnloading) {
+          // TripScan ghi "Đang Nhập" nhưng Telegram bot không bắt được → fallback
+          t.status = 'Đang nhập';
+          if (isViewingToday && t.time) {
+            const parts = t.time.split(':');
+            if (parts.length >= 2) {
+              const now = new Date();
+              const tzOffset = 7 * 60;
+              const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
+              const arrivalDate = new Date(localTime);
+              arrivalDate.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parts.length > 2 ? parseInt(parts[2], 10) : 0, 0);
+              const diffMs = localTime - arrivalDate;
+              if (diffMs > 0) {
+                const tAvg = getDockTAvg();
+                const elapsed = Math.floor(diffMs / (1000 * 60));
+                t.remainingMinutes = tAvg - elapsed;
+              }
+            }
+          }
+        } else {
+          // Thực sự chưa có thông tin → Chờ dỡ
+          t.status = 'Chờ dỡ';
+          if (isViewingToday && t.time) {
+            const parts = t.time.split(':');
+            if (parts.length >= 2) {
+              const now = new Date();
+              const tzOffset = 7 * 60;
+              const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + tzOffset) * 60 * 1000);
+              
+              const arrivalDate = new Date(localTime);
+              arrivalDate.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parts.length > 2 ? parseInt(parts[2], 10) : 0, 0);
+              
+              const diffMs = localTime - arrivalDate;
+              if (diffMs > 0) {
+                t.remainingMinutes = Math.floor(diffMs / (1000 * 60));
+              } else {
+                t.remainingMinutes = 0;
+              }
             }
           }
         }
-      }
     });
     
     return trips;
