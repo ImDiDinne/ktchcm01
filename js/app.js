@@ -96,6 +96,10 @@
           updateTimeEl.textContent = 'Cập nhật: ' + window.TONKHO_DATA.updated;
         }
         
+        if (window.updateHeartbeatTimers) {
+          window.updateHeartbeatTimers();
+        }
+        
         checkSessionExpiryAndFreshness();
         window.renderDashboard(currentFilter);
         
@@ -229,7 +233,7 @@
   }
 
   let _lastHbText = {};
-  function updateHeartbeatTimers() {
+  window.updateHeartbeatTimers = function() {
     const fmtElapsed = (ms) => {
       if (ms == null || isNaN(ms) || ms < 0) return 'Đang cập nhật...';
       const sec = Math.floor(ms / 1000);
@@ -713,8 +717,8 @@
     }
 
     // Start Heartbeat loop
-    setInterval(updateHeartbeatTimers, 5000);
-    updateHeartbeatTimers();
+    setInterval(window.updateHeartbeatTimers, 1000);
+    window.updateHeartbeatTimers();
   });
 
   // ── Smart Polling: Tạm dừng khi tab ẩn, refresh ngay khi quay lại ──
