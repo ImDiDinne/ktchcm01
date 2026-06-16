@@ -527,8 +527,15 @@ def main():
             print("\n📊 Chạy export_tonkho_v2.py...")
             result = subprocess.run(
                 [sys.executable, str(BASE_DIR / 'export_tonkho_v2.py')],
-                cwd=str(BASE_DIR)
+                cwd=str(BASE_DIR),
+                capture_output=True,
+                text=True
             )
+            if result.stdout:
+                print(result.stdout)
+            if result.stderr:
+                print(f"⚠️ export_tonkho_v2.py stderr: {result.stderr}")
+            
             if result.returncode != 0:
                 print(f"❌ export_tonkho_v2.py thất bại (exit code: {result.returncode})")
                 return False
