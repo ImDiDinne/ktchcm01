@@ -17,15 +17,27 @@
   window.supabaseClient = null;
 
   // Initialise Supabase Client (Cloud custom or default)
+  let _initRetries = 0;
   function initSupabase() {
+    if (window.supabaseClient) return; // Already initialised
     if (!window.supabase) {
-      console.warn("Supabase library not loaded yet.");
+      if (_initRetries < 20) { // Retry up to 10 seconds
+        _initRetries++;
+        console.warn(`Supabase library not loaded yet. Retry ${_initRetries}/20...`);
+        setTimeout(initSupabase, 500);
+      } else {
+        console.error("❌ Supabase library failed to load after 10s. Check CDN or network.");
+      }
       return;
     }
     const config = DEFAULT_SUPABASE;
     if (config.url && config.key) {
       window.supabaseClient = window.supabase.createClient(config.url, config.key);
       console.log("Supabase Client initialised.");
+      // Trigger pending fetches that were waiting for client
+      if (window.inbound && window.inbound.fetchTripScanData) {
+        window.inbound.fetchTripScanData();
+      }
     }
   }
 
