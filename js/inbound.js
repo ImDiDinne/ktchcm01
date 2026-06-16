@@ -34,7 +34,8 @@
 
   function parseDateDDMMYYYY(str) {
     if (!str) return null;
-    const parts = str.split('/');
+    const safeStr = String(str);
+    const parts = safeStr.split('/');
     if (parts.length === 3) {
       return {
         day: parseInt(parts[0], 10),
@@ -49,13 +50,13 @@
     if (!date1Str || !date2Str) return false;
     const d1 = parseDateDDMMYYYY(date1Str);
     const d2 = parseDateDDMMYYYY(date2Str);
-    if (!d1 || !d2) return date1Str.trim() === date2Str.trim();
+    if (!d1 || !d2) return String(date1Str).trim() === String(date2Str).trim();
     return d1.day === d2.day && d1.month === d2.month && d1.year === d2.year;
   }
 
   function getTripHour(trip) {
-    if (trip.time && typeof trip.time === 'string') {
-      const parts = trip.time.split(':');
+    if (trip.time) {
+      const parts = String(trip.time).split(':');
       if (parts.length > 0) {
         const hour = parseInt(parts[0], 10);
         if (!isNaN(hour) && hour >= 0 && hour <= 23) return hour;
@@ -74,15 +75,15 @@
   function getDurationMinutes(arrivalTimeStr, syncedAtStr) {
     if (!arrivalTimeStr || !syncedAtStr) return 0;
     try {
-      const arrParts = arrivalTimeStr.split(':');
+      const arrParts = String(arrivalTimeStr).split(':');
       if (arrParts.length < 2) return 0;
       const arrH = parseInt(arrParts[0], 10);
       const arrM = parseInt(arrParts[1], 10);
       const arrS = arrParts.length > 2 ? parseInt(arrParts[2], 10) : 0;
       
-      const spaceParts = syncedAtStr.split(' ');
+      const spaceParts = String(syncedAtStr).split(' ');
       const syncTimeStr = spaceParts[0];
-      const syncParts = syncTimeStr.split(':');
+      const syncParts = String(syncTimeStr).split(':');
       if (syncParts.length < 2) return 0;
       const syncH = parseInt(syncParts[0], 10);
       const syncM = parseInt(syncParts[1], 10);
@@ -111,7 +112,7 @@
     
     if (!isSameDay(trip.date, targetDateStr)) return 0;
     
-    const parts = trip.time.split(':');
+    const parts = String(trip.time).split(':');
     if (parts.length < 2) return 0;
     
     const tripHour = parseInt(parts[0], 10);
@@ -378,6 +379,7 @@
             }
           }
         }
+      }
     });
     
     return trips;
@@ -514,9 +516,11 @@
     const uniqueDates = [...new Set(window.tripScanData.map(t => t.date))].filter(Boolean);
     
     uniqueDates.sort((a, b) => {
-      const d1 = parseDateDDMMYYYY(a);
-      const d2 = parseDateDDMMYYYY(b);
-      if (!d1 || !d2) return b.localeCompare(a);
+      const strA = String(a);
+      const strB = String(b);
+      const d1 = parseDateDDMMYYYY(strA);
+      const d2 = parseDateDDMMYYYY(strB);
+      if (!d1 || !d2) return strB.localeCompare(strA);
       const t1 = new Date(d1.year, d1.month, d1.day).getTime();
       const t2 = new Date(d2.year, d2.month, d2.day).getTime();
       return t2 - t1;
