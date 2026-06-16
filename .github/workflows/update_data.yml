@@ -2,8 +2,8 @@ name: 🔄 Auto Update Inventory Data
 
 on:
   schedule:
-    # Backup cron (mỗi 2 giờ) — phòng khi external cron service ngừng
-    - cron: '0 */2 * * *'
+    # Chạy mỗi 30 phút — đảm bảo dữ liệu không delay quá 30p kể cả khi Mac tắt
+    - cron: '*/30 * * * *'
   repository_dispatch:
     # External cron service (cron-job.org) gọi API này mỗi 15 phút
     types: [update_data]
