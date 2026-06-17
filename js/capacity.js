@@ -1599,121 +1599,25 @@
       });
     }
 
-    // ── Paste button → shows modal ──
-    const btnPaste = document.getElementById('cap-btn-paste');
-    if (btnPaste) {
-      btnPaste.addEventListener('click', () => {
-        const modal = document.getElementById('cap-paste-modal');
-        if (modal) modal.style.display = 'flex';
-      });
-    }
-
-    // ── Apply paste ──
-    const btnApplyPaste = document.getElementById('cap-btn-apply-paste');
-    if (btnApplyPaste) {
-      btnApplyPaste.addEventListener('click', () => {
-        const textarea = document.getElementById('cap-paste-textarea');
-        if (!textarea) return;
-
-        const parsed = parsePasteData(textarea.value);
-        if (parsed.length > 0) {
-          fcData = parsed;
-          actualData = [];
-          saveFCData();
-          updateHeartbeat('connected');
-          renderCapacityDashboard();
-
-          // Close modal
-          const modal = document.getElementById('cap-paste-modal');
-          if (modal) modal.style.display = 'none';
-          textarea.value = '';
-        } else {
-          alert('Không thể phân tích dữ liệu. Vui lòng kiểm tra định dạng:\nDate\\tNormal\\tBulky\\tFreight');
-        }
-      });
-    }
-
-    // ── Close paste modal ──
-    const btnCloseModal = document.getElementById('cap-btn-close-paste');
-    if (btnCloseModal) {
-      btnCloseModal.addEventListener('click', () => {
-        const modal = document.getElementById('cap-paste-modal');
-        if (modal) modal.style.display = 'none';
-      });
-    }
-
-    // Also close with cancel button
-    const btnCancelPaste = document.getElementById('cap-btn-cancel-paste');
-    if (btnCancelPaste) {
-      btnCancelPaste.addEventListener('click', () => {
-        const modal = document.getElementById('cap-paste-modal');
-        if (modal) modal.style.display = 'none';
-      });
-    }
-
-    // ── Actual Data paste button → shows actual modal ──
-    const btnPasteActual = document.getElementById('cap-btn-paste-actual');
-    if (btnPasteActual) {
-      btnPasteActual.addEventListener('click', () => {
-        const modal = document.getElementById('cap-actual-modal');
-        if (modal) modal.style.display = 'flex';
-      });
-    }
-
-    // ── Apply actual paste ──
-    const btnApplyActual = document.getElementById('cap-btn-apply-actual');
-    if (btnApplyActual) {
-      btnApplyActual.addEventListener('click', () => {
-        const textarea = document.getElementById('cap-actual-textarea');
-        if (!textarea) return;
-
-        const parsed = parseActualPaste(textarea.value);
-        if (parsed.length > 0) {
-          actualHistory = parsed;
-          calculateDerivedProductivity();
-          saveActualHistory();
-          updateHeartbeat('connected');
-          renderCapacityDashboard();
-
-          // Close modal
-          const modal = document.getElementById('cap-actual-modal');
-          if (modal) modal.style.display = 'none';
-          textarea.value = '';
-
-          // Show feedback
-          alert(`✅ Đã nhập ${parsed.length} ngày Actual!\n\nNăng suất tự động:\n` +
-            `• Normal: ${derivedProductivity?.normal ? formatNumber(derivedProductivity.normal) : '—'} đơn/người/ngày\n` +
-            `• Bulky: ${derivedProductivity?.bulky ? formatNumber(derivedProductivity.bulky) : '—'} đơn/người/ngày\n` +
-            `• Freight: ${derivedProductivity?.freight ? formatNumber(derivedProductivity.freight) : '—'} đơn/người/ngày\n\n` +
-            `Bấm "⚡ Áp Dụng" trên panel để cập nhật vào cấu hình.`);
-        } else {
-          alert('Không thể phân tích dữ liệu Actual.\n\nĐịnh dạng cần:\nNgày\tVol_Normal\tVol_Bulky\tVol_Freight\tNS_Normal\tNS_Bulky\tNS_Freight\n01/06/2026\t280715\t48033\t56861\t200\t45\t28');
-        }
-      });
-    }
-
-    // ── Close actual modal ──
-    const btnCancelActual = document.getElementById('cap-btn-cancel-actual');
-    if (btnCancelActual) {
-      btnCancelActual.addEventListener('click', () => {
-        const modal = document.getElementById('cap-actual-modal');
-        if (modal) modal.style.display = 'none';
-      });
-    }
-
     // ── Refresh button ──
     const btnRefresh = document.getElementById('cap-btn-refresh');
     if (btnRefresh) {
       btnRefresh.addEventListener('click', async () => {
         btnRefresh.disabled = true;
-        btnRefresh.textContent = 'Đang tải...';
-        const success = await fetchFromSheet();
+        btnRefresh.textContent = '⏳ Đang đồng bộ...';
+        
+        // Cập nhật cả FC và Actual
+        const successFC = await fetchFromSheet();
+        const successActual = await fetchActualFromSheet();
+        
         btnRefresh.disabled = false;
-        btnRefresh.textContent = 'Tải Lại FC';
-        if (success) {
+        btnRefresh.textContent = '🔄 Đồng Bộ Data Từ Google Sheets';
+        
+        if (successFC || successActual) {
           renderCapacityDashboard();
+          alert('Đồng bộ dữ liệu thành công!');
         } else {
-          alert('Không thể tải dữ liệu từ Google Sheets. Vui lòng thử lại hoặc dán dữ liệu thủ công.');
+          alert('Không thể tải dữ liệu từ Google Sheets. Vui lòng thử lại sau.');
         }
       });
     }

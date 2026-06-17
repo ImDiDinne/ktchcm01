@@ -4,6 +4,13 @@
 (function() {
   'use strict';
 
+  // 🧹 SECURITY CLEANUP: Xoá các token cũ khỏi bộ nhớ trình duyệt nếu còn sót lại
+  try {
+    localStorage.removeItem('ktc_github_pat');
+    sessionStorage.removeItem('github_pat');
+    localStorage.removeItem('alert_telegram_token');
+  } catch(e) {}
+
   window.TONKHO_DATA = null;
 
   function parseDate(str) {
@@ -72,7 +79,15 @@
 
     const tbody = document.getElementById('pivot-body');
     if (tbody) {
-      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-secondary);"><span class="loading-spinner">⏳</span> Đang tải dữ liệu từ Supabase...</td></tr>';
+      let skeletonRows = '';
+      for (let i = 0; i < 5; i++) {
+        skeletonRows += `<tr class="skeleton-row">`;
+        for (let j = 0; j < 11; j++) {
+          skeletonRows += `<td><div class="skeleton skeleton-cell"></div></td>`;
+        }
+        skeletonRows += `</tr>`;
+      }
+      tbody.innerHTML = skeletonRows;
     }
 
     if (!window.supabaseClient) {
@@ -190,26 +205,23 @@
     });
   }
 
-  // 🤖 Telegram Alert Dispatcher
+  // 🤖 Telegram Alert Dispatcher (via Supabase Edge Function)
   async function sendTelegramAlert(message) {
-    const token = localStorage.getItem('alert_telegram_token') || '8919718466:AAHoeb3TtrcaZJr98-pC_oeXNNGWnGP-01U';
+    // Không còn lấy token từ trình duyệt để bảo mật
     const chatIdsStr = localStorage.getItem('alert_telegram_chat_ids') || '-1001681377844,-1001374377435';
     const chatIds = chatIdsStr.split(',').map(id => id.trim()).filter(Boolean);
     
     for (const chatId of chatIds) {
-      const url = `https://api.telegram.org/bot${token}/sendMessage`;
       try {
-        await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        await window.supabaseClient.functions.invoke('telegram-proxy', {
+          body: {
             chat_id: chatId,
             text: message,
             parse_mode: 'HTML'
-          })
+          }
         });
       } catch (e) {
-        console.error(`Error sending Telegram alert to ${chatId}:`, e);
+        console.error(`Error sending Telegram alert to ${chatId} via Edge Function:`, e);
       }
     }
   }
@@ -564,11 +576,9 @@
       openSettingsBtn.addEventListener('click', () => {
         document.getElementById('settings-panel').classList.add('open');
         renderParamsList();
-        const pat = sessionStorage.getItem('github_pat') || localStorage.getItem('ktc_github_pat') || '';
-        document.getElementById('github-pat').value = pat;
+        // GitHub PAT handled securely via Edge Function
         
         // Load Telegram settings
-        document.getElementById('telegram-token').value = localStorage.getItem('alert_telegram_token') || '8919718466:AAHoeb3TtrcaZJr98-pC_oeXNNGWnGP-01U';
         document.getElementById('telegram-chatids').value = localStorage.getItem('alert_telegram_chat_ids') || '-1001681377844,-1001374377435';
         
         if (window.loadPendingUsers) {
@@ -605,24 +615,12 @@
     if (saveParamsBtn) {
       saveParamsBtn.addEventListener('click', async () => {
         // Save Telegram configurations first
-        const teleToken = document.getElementById('telegram-token').value.trim();
         const teleChatIds = document.getElementById('telegram-chatids').value.trim();
-        localStorage.setItem('alert_telegram_token', teleToken);
         localStorage.setItem('alert_telegram_chat_ids', teleChatIds);
-
-        const pat = document.getElementById('github-pat').value.trim();
-        if (!pat) {
-          alert('Đã lưu cấu hình Alert Telegram cục bộ! Để cập nhật tham số Mapping lên Cloud, vui lòng điền GitHub PAT.');
-          document.getElementById('settings-panel').classList.remove('open');
-          return;
-        }
 
         const btn = document.getElementById('save-params-btn');
         btn.textContent = '⏳ Đang lưu...';
         btn.disabled = true;
-
-        localStorage.setItem('ktc_github_pat', pat);
-        sessionStorage.setItem('github_pat', pat);
 
         try {
           const listBody = document.getElementById('params-list-body');
@@ -657,35 +655,33 @@
           const filePath = 'mapping_params.csv';
           const url = `https://api.github.com/repos/${repo}/contents/${filePath}`;
           
-          const getResp = await fetch(url, {
-            headers: { 'Authorization': `Bearer ${pat}` }
+          // Use Supabase Edge Function as proxy
+          let sha = '';
+          const { data: getRespData, error: getErr } = await window.supabaseClient.functions.invoke('github-proxy', {
+            body: { url, method: 'GET' }
           });
           
-          let sha = '';
-          if (getResp.ok) {
-            const fileData = await getResp.json();
-            sha = fileData.sha;
+          if (!getErr && getRespData && getRespData.sha) {
+            sha = getRespData.sha;
           }
 
           const base64Content = btoa(unescape(encodeURIComponent(csvContent)));
           
-          const putResp = await fetch(url, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${pat}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: 'chore(config): update mapping parameters via dashboard Settings UI',
-              content: base64Content,
-              sha: sha,
-              branch: 'main'
-            })
+          const { error: putErr } = await window.supabaseClient.functions.invoke('github-proxy', {
+            body: {
+              url,
+              method: 'PUT',
+              body: {
+                message: 'chore(config): update mapping parameters via dashboard Settings UI',
+                content: base64Content,
+                sha: sha,
+                branch: 'main'
+              }
+            }
           });
           
-          if (!putResp.ok) {
-            const errData = await putResp.json();
-            throw new Error(errData.message || 'Lỗi đẩy file lên GitHub.');
+          if (putErr) {
+            throw new Error(putErr.message || 'Lỗi đẩy file lên GitHub qua Edge Function.');
           }
           
           alert('Lưu thành công! Tiến trình cập nhật trên GitHub Cloud sẽ kích hoạt sau vài giây để đồng bộ báo cáo.');

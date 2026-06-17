@@ -354,7 +354,7 @@
     }
     
     section.style.display = 'block';
-    listContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 10px 0;">⏳ Đang tải danh sách...</p>';
+    listContainer.innerHTML = '<div style="padding: 10px 0;"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text short"></div></div>';
     
     if (!window.supabaseClient) {
       listContainer.innerHTML = '<p style="color: var(--red); text-align: center; padding: 10px 0;">❌ Lỗi: Chưa kết nối Supabase.</p>';
@@ -449,7 +449,7 @@
     }
     
     section.style.display = 'block';
-    listContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 10px 0;">⏳ Đang tải danh sách...</p>';
+    listContainer.innerHTML = '<div style="padding: 10px 0;"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text short"></div></div>';
     
     if (!window.supabaseClient) {
       listContainer.innerHTML = '<p style="color: var(--red); text-align: center; padding: 10px 0;">❌ Lỗi: Chưa kết nối Supabase.</p>';

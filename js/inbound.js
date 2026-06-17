@@ -880,12 +880,7 @@
   }
 
   async function checkAndTriggerCloudSync() {
-    const pat = localStorage.getItem('ktc_github_pat') || sessionStorage.getItem('github_pat');
-    if (!pat) {
-      console.log("No GitHub PAT found, skipping auto cloud sync trigger.");
-      return;
-    }
-
+    // Không cần check GitHub PAT ở client nữa vì đã xử lý qua Edge Function
     // Tìm timestamp cập nhật mới nhất từ dữ liệu cache
     let latestUpdate = 0;
     window.tripScanData.forEach(t => {
@@ -912,19 +907,15 @@
 
         try {
           const repo = 'ImDiDinne/ktchcm01';
-          const response = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/sync_trips.yml/dispatches`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${pat}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              ref: 'main'
-            })
+          const { error: invokeErr } = await window.supabaseClient.functions.invoke('github-proxy', {
+            body: {
+              url: `https://api.github.com/repos/${repo}/actions/workflows/sync_trips.yml/dispatches`,
+              method: 'POST',
+              body: { ref: 'main' }
+            }
           });
 
-          if (response.ok) {
+          if (!invokeErr) {
             console.log("Successfully triggered GitHub Actions sync workflow!");
             // Đợi 15 giây rồi tự động tải lại dữ liệu mới từ Supabase
             setTimeout(async () => {

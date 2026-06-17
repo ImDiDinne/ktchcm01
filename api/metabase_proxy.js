@@ -80,7 +80,7 @@ module.exports = async (req, res) => {
     const queryUrl = `${metabaseUrl}/api/dashboard/${dashboardId}/dashcard/${dashcardId}/card/${cardId}/query/xlsx`;
     console.log(`📥 Đang gửi yêu cầu tải dữ liệu (có lọc Kho HCM 01) tới Metabase...`);
 
-    const response = await fetch(queryUrl, {
+    let response = await fetch(queryUrl, {
       method: 'POST',
       headers: {
         'X-Metabase-Session': sessionToken,
@@ -96,6 +96,51 @@ module.exports = async (req, res) => {
         ]
       })
     });
+
+    // Nếu token hết hạn (401), tự động đăng nhập lại
+    if (response.status === 401 && username && password) {
+      console.log('🔄 Session hết hạn (401). Đang đăng nhập lại Metabase để lấy token mới...');
+      let loginResp = await fetch(`${metabaseUrl}/api/session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!loginResp.ok) {
+        // Thử đăng nhập LDAP
+        loginResp = await fetch(`${metabaseUrl}/api/session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, ldap: true })
+        });
+      }
+
+      if (loginResp.ok) {
+        const data = await loginResp.json();
+        sessionToken = data.id;
+        console.log('✅ Đã lấy lại session token mới. Đang thử lại request...');
+        
+        // Thử lại request cũ
+        response = await fetch(queryUrl, {
+          method: 'POST',
+          headers: {
+            'X-Metabase-Session': sessionToken,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            parameters: [
+              {
+                type: 'string/=',
+                value: [warehouseName],
+                id: parameterId
+              }
+            ]
+          })
+        });
+      } else {
+        console.log('❌ Tự động đăng nhập lại thất bại.');
+      }
+    }
 
     if (!response.ok) {
       const errorText = await response.text();

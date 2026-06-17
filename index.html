@@ -594,9 +594,7 @@
               <span class="cap-config-val" id="cap-buffer-val">10%</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
-              <button class="filter-btn" id="cap-btn-paste-actual" style="border-color: var(--yellow); color: var(--yellow); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📊 Dán Actual Data</button>
-              <button class="filter-btn" id="cap-btn-paste" style="border-color: var(--green); color: var(--green); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">📋 Dán Dữ Liệu FC</button>
-              <button class="filter-btn" id="cap-btn-refresh" style="border-color: var(--accent); color: var(--accent-light); font-weight: 600; cursor: pointer; width: 100%; text-align: center;">🔄 Tải FC Từ Sheet</button>
+              <button class="filter-btn" id="cap-btn-refresh" style="border-color: var(--accent); background: rgba(59, 130, 246, 0.1); color: var(--accent-light); font-weight: 600; cursor: pointer; width: 100%; text-align: center; padding: 10px;">🔄 Đồng Bộ Data Từ Google Sheets</button>
             </div>
           </div>
 
@@ -641,39 +639,7 @@
       
     </div>
 
-    <!-- Paste FC Data Modal -->
-    <div id="cap-paste-modal" class="login-overlay" style="display: none;">
-      <div class="login-card" style="max-width: 650px;">
-        <div class="login-logo">📋</div>
-        <h2>Dán Dữ Liệu Forecast</h2>
-        <p class="login-subtitle">Copy từ Google Sheets: chọn 4 cột <strong>Ngày, Hàng &lt;5kg, Hàng vừa (5-15kg), Hàng to (&gt;15kg)</strong> rồi dán vào đây.</p>
-        <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;background:rgba(96,165,250,0.06);padding:8px 12px;border-radius:6px;border:1px solid rgba(96,165,250,0.15);">
-          📌 Từ sheet &quot;Tính FC&quot; → dòng HCM01 → Hàng &lt;5kg | Hàng vừa (5-15kg) | Hàng to (&gt;15kg)
-        </div>
-        <textarea id="cap-paste-textarea" rows="10" placeholder="Ngày&#9;Hàng <5kg&#9;Hàng vừa (5-15kg)&#9;Hàng to (>15kg)&#10;12/06/2026&#9;871846&#9;103185&#9;59924&#10;13/06/2026&#9;744017&#9;88056&#9;51138&#10;..." style="width:100%;min-height:180px;background:#0f172a;color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.5;resize:vertical;"></textarea>
-        <div class="cap-btn-row">
-          <button class="login-btn" id="cap-btn-apply-paste">Áp Dụng</button>
-          <button class="login-btn" id="cap-btn-cancel-paste" style="background: #475569;">Đóng</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Paste Actual Data Modal -->
-    <div id="cap-actual-modal" class="login-overlay" style="display: none;">
-      <div class="login-card" style="max-width: 700px;">
-        <div class="login-logo">📊</div>
-        <h2>Dán Dữ Liệu Actual (Lịch Sử Xử Lý)</h2>
-        <p class="login-subtitle">Copy từ Google Sheets: <strong>3 cột</strong> (Ngày, Volume Tổng, NS Tổng).<br>Hệ thống tự tính năng suất trung bình (tấn/người/ca).</p>
-        <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;background:rgba(251,191,36,0.06);padding:8px 12px;border-radius:6px;border:1px solid rgba(251,191,36,0.15);">
-          📌 Actual sẽ tự động lấy từ sheet khi load trang. Chỉ dán nếu muốn nhập thủ công.
-        </div>
-        <textarea id="cap-actual-textarea" rows="12" placeholder="Ngày&#9;Volume Tổng&#9;NS Tổng&#10;01/05/2026&#9;898343&#9;825&#10;02/05/2026&#9;934357&#9;768&#10;03/05/2026&#9;1045729&#9;821&#10;..." style="width:100%;min-height:200px;background:#0f172a;color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.5;resize:vertical;"></textarea>
-        <div class="cap-btn-row">
-          <button class="login-btn" id="cap-btn-apply-actual">⚡ Phân Tích &amp; Áp Dụng</button>
-          <button class="login-btn" id="cap-btn-cancel-actual" style="background: #475569;">Đóng</button>
-        </div>
-      </div>
-    </div>
+    <!-- Paste Modals Removed -->
 
   </div>
 
@@ -746,21 +712,11 @@
     </div>
     <div class="settings-body">
       <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">
-        Nhập thông tin GitHub Token để cập nhật trực tiếp tham số mapping tỉnh/kho về repository GitHub Pages:
+        Hệ thống sử dụng kiến trúc bảo mật qua Supabase Edge Functions. GitHub PAT và Telegram Bot Token đã được lưu trữ an toàn trên Serverless Backend.
       </p>
       
-      <div class="form-group">
-        <label for="github-pat">GitHub Personal Access Token (PAT)</label>
-        <input type="password" id="github-pat" placeholder="ghp_xxxx..." style="font-size: 0.8rem;">
-      </div>
-      
       <div class="form-group" style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
-        <label style="color: var(--accent-light); font-weight: 600;">🤖 Cấu Hình Alert Telegram (Tự Động)</label>
-      </div>
-      
-      <div class="form-group">
-        <label for="telegram-token">Telegram Bot Token</label>
-        <input type="password" id="telegram-token" placeholder="8919718466:AAHo..." style="font-size: 0.8rem;">
+        <label style="color: var(--accent-light); font-weight: 600;">🤖 Cấu Hình Alert Telegram</label>
       </div>
       
       <div class="form-group">
@@ -821,8 +777,12 @@
         <button id="close-drilldown-btn" class="close-btn">&times;</button>
       </div>
       <div class="settings-body" style="flex: 1; overflow-y: auto; padding: 20px;">
-        <div id="drilldown-loading" style="text-align: center; padding: 40px; color: var(--text-secondary);">
-          <span class="loading-spinner">⏳</span> Đang tải dữ liệu thô từ Supabase...
+        <div id="drilldown-loading" style="padding: 20px;">
+          <div class="skeleton skeleton-text" style="width: 30%; height: 24px; margin-bottom: 20px;"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text short"></div>
         </div>
         <div class="table-wrapper" id="drilldown-table-wrapper" style="display: none; max-height: 500px;">
           <table class="pivot-table" id="drilldown-table" style="width: 100%; text-align: left;">

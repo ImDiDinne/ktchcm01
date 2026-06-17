@@ -58,6 +58,11 @@
   text-align: left;
   padding-left: 20px;
   min-width: 240px;
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
 }
 
 .pivot-table th:last-child {
@@ -78,6 +83,11 @@
   text-align: left;
   font-family: 'Inter', sans-serif;
   padding-left: 20px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg-card);
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
 }
 
 .pivot-table td:last-child {
@@ -104,9 +114,14 @@
 
 .pivot-table tr.group-parent td:first-child {
   font-weight: 700;
+  background: var(--bg-glass);
 }
 
 .pivot-table tr.group-parent:hover td {
+  background: var(--bg-glass-hover);
+}
+
+.pivot-table tr.group-parent:hover td:first-child {
   background: var(--bg-glass-hover);
 }
 
@@ -133,6 +148,10 @@
 
 .pivot-table tr.group-child:hover td {
   background: rgba(255, 255, 255, 0.02);
+}
+
+.pivot-table tr.group-child:hover td:first-child {
+  background: #1e293b; /* Fallback for var(--bg-card) mixed with 0.02 white, approximately */
 }
 
 /* Grand total */
@@ -165,6 +184,16 @@
 #dock-trips-table td:first-child {
   min-width: 0;
   padding-left: 10px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg-card);
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+}
+
+#dock-trips-table th:first-child {
+  z-index: 3;
+  background: rgba(15, 23, 42, 0.95);
 }
 #dock-trips-table th,
 #dock-trips-table td {
