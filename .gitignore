@@ -1,6 +1,5 @@
 .DS_Store
 *.xlsx
-!BaoCao_TonKho.xlsx
 *.xls
 *.xlsm
 *.xlsb
@@ -26,6 +25,8 @@ transport_detail.json
 debug_history_24h.json
 history_data.json
 history_debug.json
+tonkho_data.js
+tonkho_tuyen.json
 env_token.sh
 chart_debug.png
 test_*.py
