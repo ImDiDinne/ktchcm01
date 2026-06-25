@@ -1332,11 +1332,29 @@
               <div style="font-weight: 600; font-size: 0.74rem; color: var(--text-primary);">💡 Nhận Xét & Đối Chiếu AI</div>
               <div style="font-size: 0.68rem; color: var(--text-secondary); line-height: 1.45; display: flex; flex-direction: column; gap: 6px;">
                 <div>Để đáp ứng forecast ngày <strong>${todayCalc.date}</strong> với <strong>${formatNumber(todayCalc.fc.total)} đơn</strong>, kho cần <strong>${todayCalc.requiredTotal} nhân sự</strong> (gồm <strong>${config.bufferPercent}% buffer</strong>). Cần thêm <strong>${todayCalc.flNeeded} Freelancer</strong> so với NVCT N-1.</div>
-                ${todayCalc.closestActual ? `
+                ${(() => {
+                  if (todayCalc.requiredTotal > 1000) {
+                    return \`<div style="margin-top: 2px; font-size: 0.65rem; color: #fca5a5; background: rgba(239, 68, 68, 0.15); padding: 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3); line-height: 1.4;">
+                      🚨 <strong>CẢNH BÁO QUÁ TẢI (MAX 1000):</strong> Tổng nhân sự yêu cầu (<strong>\${todayCalc.requiredTotal}</strong>) vượt sức chứa tối đa của kho.<br>
+                      <strong>🔍 Phân tích & Giải pháp:</strong><br>
+                      • Kho không đủ không gian vận hành cho \${todayCalc.requiredTotal} người cùng lúc.<br>
+                      • <em>Đề xuất:</em> Mở thêm Hub vệ tinh, phân luồng hàng sang kho lân cận, hoặc thương lượng tăng ca (Overtime) với NVCT thay vì thuê thêm FL.
+                    </div>\`;
+                  } else if (todayCalc.requiredTotal < 650) {
+                    return \`<div style="margin-top: 2px; font-size: 0.65rem; color: #fcd34d; background: rgba(251, 191, 36, 0.15); padding: 8px; border-radius: 6px; border: 1px solid rgba(251, 191, 36, 0.3); line-height: 1.4;">
+                      ⚠️ <strong>CẢNH BÁO THIẾU HỤT (MIN 650):</strong> Tổng nhân sự tính toán (<strong>\${todayCalc.requiredTotal}</strong>) thấp hơn mức định biên layout chuẩn (650).<br>
+                      <strong>🔍 Phân tích & Giải pháp:</strong><br>
+                      • Để duy trì các vị trí lõi, kho bắt buộc phải giữ tối thiểu 650 nhân sự.<br>
+                      • <em>Đề xuất:</em> Chấp nhận rớt năng suất để giữ form layout, hoặc tận dụng NS dư thừa để làm các công việc 5S, đào tạo.
+                    </div>\`;
+                  }
+                  return '';
+                })()}
+                ${todayCalc.closestActual ? \`
                 <div style="font-size: 0.62rem; color: var(--text-muted); background: rgba(255, 255, 255, 0.02); padding: 5px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04); line-height: 1.3;">
-                  📌 <strong>So khớp Actual:</strong> Ngày <strong>${todayCalc.closestActual.date}</strong> (Vol: <strong>${formatNumber(todayCalc.closestActual.volTotal)} đơn</strong>, NS: <strong>${todayCalc.closestActual.staffTotal} người</strong>).
+                  📌 <strong>So khớp Actual:</strong> Ngày <strong>\${todayCalc.closestActual.date}</strong> (Vol: <strong>\${formatNumber(todayCalc.closestActual.volTotal)} đơn</strong>, NS: <strong>\${todayCalc.closestActual.staffTotal} người</strong>).
                 </div>
-                ` : ''}
+                \` : ''}
               </div>
             </div>
           </div>
