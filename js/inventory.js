@@ -203,22 +203,7 @@
       return s + (a['4. 24-36']||0) + (a['5. 36-48']||0) + (a['6. 48-72']||0) + (a['7. 72-96']||0) + (a['8. 96-120']||0) + (a['9. 120+']||0);
     }, 0) : 0;
 
-    // Trigger Telegram Auto Alert for Overdue Inventory (> 1000 orders)
-    if (totalGT24 > 1000) {
-      const now = Date.now();
-      const lastAlert = localStorage.getItem('last_alert_time_inventory') || 0;
-      const cooldown = 30 * 60 * 1000; // 30 mins cooldown
-      if (now - lastAlert > cooldown) {
-        localStorage.setItem('last_alert_time_inventory', now);
-        if (window.sendTelegramAlert) {
-          const msg = `🚨 <b>CẢNH BÁO TỒN KHO QUÁ HẠN (KTC HCM 01)</b>\n` +
-                      `• Lượng hàng tồn trễ SLA (> 24h) hiện tại: <b>${totalGT24.toLocaleString('vi-VN')} đơn</b> (vượt ngưỡng an toàn 1,000 đơn).\n` +
-                      `• Phân loại đang lọc: <b>${filterType.toUpperCase()}</b>\n` +
-                      `• Khuyến nghị: Đội ngũ vận hành ưu tiên bố trí nhân sự giải phóng hàng tồn đọng gấp!`;
-          window.sendTelegramAlert(msg);
-        }
-      }
-    }
+    // Removed Telegram Auto Alert logic per user request
 
     const kpis = [
       { label: 'Tổng Đơn Tồn', value: fmt(D.grand_total), sub: (D.routes ? D.routes.length : 0) + ' nhóm kho', colorClass: 'primary' },
