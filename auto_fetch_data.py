@@ -207,7 +207,7 @@ class MetabaseClient:
                 query_url,
                 headers=self._headers(),
                 json=body,
-                timeout=300,
+                timeout=600,
                 stream=True
             )
 
@@ -220,7 +220,7 @@ class MetabaseClient:
                     query_url,
                     headers=self._headers(),
                     json=body,
-                    timeout=300,
+                    timeout=600,
                     stream=True
                 )
 
@@ -277,7 +277,7 @@ class MetabaseClient:
                 query_url,
                 headers=self._headers(),
                 json=body,
-                timeout=300,
+                timeout=600,
                 stream=True
             )
 

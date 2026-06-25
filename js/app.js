@@ -1045,8 +1045,20 @@
             }
         }
 
-        insightText.innerHTML = insight;
-        insightPanel.style.display = 'block';
+        // Fetch AI Report from system_secrets
+        window.supabase.from('system_secrets').select('value').eq('key', 'latest_ai_report').single()
+        .then(({ data, error }) => {
+            if (data && data.value) {
+                let aiReportHTML = data.value.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                insight += `<br/><br/><div style="padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 12px; color: var(--green);"><b>Bê "Não AI" Lên Web Dashboard (AI Insights on Web)</b><br/>${aiReportHTML}</div>`;
+            }
+            insightText.innerHTML = insight;
+            insightPanel.style.display = 'block';
+        })
+        .catch(e => {
+            insightText.innerHTML = insight;
+            insightPanel.style.display = 'block';
+        });
       } catch (e) {
         console.error("Lỗi khi tạo AI Insight:", e);
       }

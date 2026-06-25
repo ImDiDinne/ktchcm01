@@ -94,6 +94,12 @@ def main():
                 if allowed_chat_ids and chat_id not in allowed_chat_ids:
                     continue
 
+                # Xử lý lệnh /start
+                if text == '/start':
+                    reply_url = f"{api_url}/sendMessage"
+                    requests.post(reply_url, json={"chat_id": chat_id, "text": "🤖 Xin chào Ní! Bot PAT đã kết nối thành công và sẵn sàng báo cáo!"})
+                    continue
+
                 # Tìm mã chuyến đi trong tin nhắn
                 match = trip_regex.search(text)
                 if match:
