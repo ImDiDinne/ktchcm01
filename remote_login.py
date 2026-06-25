@@ -73,7 +73,14 @@ def handle_2fa_if_needed(page, env, supabase_url, supabase_key, context_name):
         if bot_token and chat_id:
             with open('2fa_screen.png', 'rb') as photo:
                 step_text = "tiếp theo" if step > 0 else "bảo mật"
-                requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": f"🔐 {context_name} yêu cầu xác thực {step_text}.\n\nVui lòng gõ lệnh:\n`/2fa [mã số]`\n(Bạn có 3 phút)"}, files={"photo": photo})
+                caption = (
+                    f"🔐 {context_name} yêu cầu xác thực {step_text}.\n\n"
+                    "⚠️ LƯU Ý: Máy chủ Cloud có địa chỉ IP khác máy của bạn, nên GHN bắt buộc xác thực lại.\n\n"
+                    "Vui lòng gõ lệnh sau vào nhóm chat:\n"
+                    "`/2fa [mã số]`\n"
+                    "(Ví dụ: /2fa 123456. Bạn có 3 phút)"
+                )
+                requests.post(f"https://api.telegram.org/bot{bot_token}/sendPhoto", data={"chat_id": chat_id, "caption": caption}, files={"photo": photo})
         
         code_2fa = poll_supabase('ghn_2fa_code', env)
         if not code_2fa:
@@ -160,26 +167,11 @@ def main():
             headers = {"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"}
             requests.post(f"{supabase_url}/rest/v1/system_secrets", headers=headers, json={"key": "ghn_browser_state", "value": json.dumps(state_json)})
             
-            # 2. DATA-BI.GHN.VN
-            try:
-                page.goto("https://data-bi.ghn.vn", wait_until="networkidle", timeout=15000)
-                # Handle SMS OTP if they require step-up auth
-                handle_2fa_if_needed(page, env, supabase_url, supabase_key, "Hệ thống Tồn Kho (data-bi.ghn.vn)")
-                
-                time.sleep(3)
-                for cookie in context.cookies():
-                    if cookie['name'] == 'metabase.SESSION':
-                        with open('.session_token', 'w') as f:
-                            f.write(cookie['value'])
-                        break
-            except Exception as bi_e:
-                print(f"Lỗi Metabase: {bi_e}")
-                
-            # Take a success screenshot
+            # Take a success screenshot for TripScan
             page.screenshot(path="success_screen.png")
             bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
             chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
-            success_msg = "✅ ĐĂNG NHẬP THÀNH CÔNG! Chìa khoá đã được tự động cấp mới. Bạn hãy nhấn F5 làm mới lại trang báo cáo nhé!"
+            success_msg = "✅ ĐĂNG NHẬP TRIPSCAN THÀNH CÔNG! Chìa khoá xe tải đã được tự động cấp mới."
             if bot_token and chat_id:
                 try:
                     with open('success_screen.png', 'rb') as photo:
@@ -188,6 +180,18 @@ def main():
                     send_telegram(f"{success_msg}\n(Không thể gửi ảnh: {pic_err})", env)
             else:
                 send_telegram(success_msg, env)
+            
+            # 2. DATA-BI.GHN.VN (Thử lấy cookies nếu có sẵn, không hiện screenshot)
+            try:
+                page.goto("https://data-bi.ghn.vn", wait_until="networkidle", timeout=15000)
+                time.sleep(3)
+                for cookie in context.cookies():
+                    if cookie['name'] == 'metabase.SESSION':
+                        with open('.session_token', 'w') as f:
+                            f.write(cookie['value'])
+                        break
+            except Exception as bi_e:
+                print(f"Lỗi Metabase: {bi_e}")
 
         except Exception as e:
             try:

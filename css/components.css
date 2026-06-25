@@ -8,6 +8,8 @@
 
 .kpi-card {
   background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -87,6 +89,8 @@
 
 .chart-card {
   background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -221,6 +225,8 @@
 
 .dest-card {
   background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -898,6 +904,121 @@ select:focus, textarea:focus {
   border-radius: 4px;
 }
 
+/* ── Action Insights (AI Recommendations) ───────── */
+.action-insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.action-insights-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.action-insights-card.success {
+  border-left: 4px solid var(--green);
+}
+
+.insights-title {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.insights-title h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+}
+
+.badge.success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5, 150, 105, 0.3); }
+.badge.danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.3); }
+.badge.info { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(37, 99, 235, 0.3); }
+
+.rec-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rec-item {
+  display: flex;
+  gap: 12px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  transition: var(--transition);
+}
+
+.rec-item:hover {
+  transform: translateY(-2px);
+  background: var(--bg-glass-hover);
+  border-color: var(--border-hover);
+}
+
+.rec-item.priority-high {
+  border-left: 4px solid var(--red);
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.05), transparent);
+}
+
+.rec-item.priority-med {
+  border-left: 4px solid var(--yellow);
+  background: linear-gradient(90deg, rgba(217, 119, 6, 0.05), transparent);
+}
+
+.rec-item.priority-low {
+  border-left: 4px solid var(--blue);
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.05), transparent);
+}
+
+.rec-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.rec-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rec-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.rec-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.text-danger {
+  color: var(--red);
+  font-weight: 600;
+}
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

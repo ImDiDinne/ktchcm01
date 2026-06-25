@@ -878,12 +878,9 @@
       if (el) el.value = value;
     };
     
-    let displayNvct = config.nvct;
-    let displayFl = config.freelancer;
-    if (typeof selectedDate !== 'undefined' && selectedDate) {
-      displayNvct = getNVCTForDate(selectedDate, config);
-      displayFl   = getFLForDate(selectedDate, config);
-    }
+    const activeDate = selectedDate || getTodayString();
+    let displayNvct = getNVCTForDate(activeDate, config);
+    let displayFl   = getFLForDate(activeDate, config);
     
     setInput('cap-nvct-total',  displayNvct);
     setInput('cap-fl-total',    displayFl);
@@ -1555,12 +1552,9 @@
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
-        if (typeof selectedDate !== 'undefined' && selectedDate) {
-          cfg.nvctOverrides = cfg.nvctOverrides || {};
-          cfg.nvctOverrides[selectedDate] = val;
-        } else {
-          cfg.nvct = val;
-        }
+        const activeDate = selectedDate || getTodayString();
+        cfg.nvctOverrides = cfg.nvctOverrides || {};
+        cfg.nvctOverrides[activeDate] = val;
         saveConfig(cfg);
         renderCapacityDashboard();
       });
@@ -1573,12 +1567,9 @@
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
-        if (typeof selectedDate !== 'undefined' && selectedDate) {
-          cfg.flOverrides = cfg.flOverrides || {};
-          cfg.flOverrides[selectedDate] = val;
-        } else {
-          cfg.freelancer = val;
-        }
+        const activeDate = selectedDate || getTodayString();
+        cfg.flOverrides = cfg.flOverrides || {};
+        cfg.flOverrides[activeDate] = val;
         saveConfig(cfg);
         renderCapacityDashboard();
       });

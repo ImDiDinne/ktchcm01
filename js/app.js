@@ -135,6 +135,36 @@
     }
   }
 
+  // ── Supabase Realtime cho Dữ Liệu Tồn Kho ──
+  let inventoryRealtimeChannel = null;
+  function subscribeRealtimeInventoryData() {
+    if (inventoryRealtimeChannel) return;
+    if (!window.supabaseClient) {
+      setTimeout(subscribeRealtimeInventoryData, 1000);
+      return;
+    }
+
+    try {
+      inventoryRealtimeChannel = window.supabaseClient
+        .channel('inventory_data_changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'inventory_data', filter: 'id=eq.1' },
+          (payload) => {
+            console.log(`⚡ Realtime: Tồn kho đã được cập nhật từ hệ thống. Đang tải lại...`);
+            fetchAndRenderDashboard();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('✅ Realtime: Đã kết nối bảng inventory_data — dữ liệu tồn kho tự động làm mới.');
+          }
+        });
+    } catch (e) {
+      console.error('❌ Realtime inventory subscription error:', e);
+      inventoryRealtimeChannel = null;
+    }
+  }
+
   // Download BaoCao_TonKho.xlsx from Supabase Storage using signed url
   async function downloadExcelReport(e) {
     e.preventDefault();
@@ -402,6 +432,8 @@
     if (window.checkAuth) {
       window.checkAuth();
     }
+    
+    subscribeRealtimeInventoryData();
 
     // 1. Tab switches
     const tabBtnInventory = document.getElementById('tab-btn-inventory');
@@ -413,6 +445,32 @@
     const tabContentDock = document.getElementById('tab-content-dock');
     const tabContentPrediction = document.getElementById('tab-content-prediction');
     const tabContentCapacity = document.getElementById('tab-content-capacity');
+    
+    // Theme Toggle Logic
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    if (currentTheme === 'light') {
+      document.body.classList.add('light-mode');
+    }
+    if (themeBtn) {
+      themeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.body.classList.toggle('light-mode');
+        const isLight = document.body.classList.contains('light-mode');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        
+        // Update Chart.js defaults if needed and re-render charts
+        if (window.Chart) {
+          window.Chart.defaults.color = isLight ? '#475569' : '#94a3b8';
+          window.Chart.defaults.borderColor = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.06)';
+          
+          // Re-render main chart if function exists
+          if (window.inventory && typeof window.inventory.renderCompareChart === 'function') {
+            window.inventory.renderCompareChart(window.lastSelectedRouteName || 'Tất Cả Kho');
+          }
+        }
+      });
+    }
     
     // Apply transition styles to tab content containers
     [tabContentInventory, tabContentDock, tabContentPrediction, tabContentCapacity].forEach(el => {

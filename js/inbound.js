@@ -545,8 +545,10 @@
       selectEl.value = previousValue;
       window.selectedInboundDate = previousValue;
     } else {
-      selectEl.value = todayStr;
-      window.selectedInboundDate = todayStr;
+      const datesWithData = uniqueDates.filter(d => window.tripScanData.some(t => isSameDay(t.date, d)));
+      const defaultDate = datesWithData.length > 0 ? datesWithData[0] : todayStr;
+      selectEl.value = defaultDate;
+      window.selectedInboundDate = defaultDate;
     }
   }
 
@@ -925,7 +927,7 @@
                   .from('trips_cache')
                   .select('*')
                   .order('id', { ascending: false })
-                  .limit(3000);
+                  .limit(30000);
                 if (!freshErr && Array.isArray(freshData)) {
                   window.tripScanData = freshData;
                   window.inboundLastFetched = Date.now();
@@ -967,7 +969,7 @@
         .from('trips_cache')
         .select('*')
         .order('id', { ascending: false })
-        .limit(3000);
+        .limit(30000);
 
       if (error) throw error;
       

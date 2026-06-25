@@ -235,7 +235,7 @@ async def async_main():
             bot_token = env.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN')
             chat_id = env.get('TELEGRAM_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID')
             if bot_token and chat_id:
-                msg = "⚠️ *CẢNH BÁO: CHÌA KHOÁ GHN ĐÃ HẾT HẠN!*\n\nCỗ máy cào dữ liệu xe tải trên Cloud vừa bị văng ra ngoài. Vui lòng gõ lệnh `/login` cho bot này để bắt đầu quá trình đăng nhập lại tự động qua Telegram."
+                msg = "⚠️ *CẢNH BÁO: CHÌA KHOÁ GHN ĐÃ HẾT HẠN!*\n\nCỗ máy cào dữ liệu xe tải trên Cloud vừa bị văng ra ngoài (có thể do hết hạn session hoặc khác IP). Hệ thống đang tự động kích hoạt trình duyệt ngầm để đăng nhập lại, vui lòng chờ trong giây lát..."
                 requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", json={
                     "chat_id": chat_id,
                     "text": msg,
