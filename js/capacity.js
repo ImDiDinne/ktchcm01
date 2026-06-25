@@ -1548,13 +1548,17 @@
     // ── NVCT total input ──
     const nvctInput = document.getElementById('cap-nvct-total');
     if (nvctInput) {
-      nvctInput.addEventListener('change', (e) => {
+      nvctInput.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
         const activeDate = selectedDate || getTodayString();
         cfg.nvctOverrides = cfg.nvctOverrides || {};
         cfg.nvctOverrides[activeDate] = val;
+        
+        // Also update the global base value so future days that don't have overrides might use it if no history
+        cfg.nvct = val; 
+        
         saveConfig(cfg);
         renderCapacityDashboard();
       });
@@ -1563,13 +1567,17 @@
     // ── Freelancer total input ──
     const flInput = document.getElementById('cap-fl-total');
     if (flInput) {
-      flInput.addEventListener('change', (e) => {
+      flInput.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
         const activeDate = selectedDate || getTodayString();
         cfg.flOverrides = cfg.flOverrides || {};
         cfg.flOverrides[activeDate] = val;
+        
+        // Also update the global base value
+        cfg.fl = val;
+        
         saveConfig(cfg);
         renderCapacityDashboard();
       });
