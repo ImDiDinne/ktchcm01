@@ -1599,16 +1599,21 @@
     // ── NVCT total input ──
     const nvctInput = document.getElementById('cap-nvct-total');
     if (nvctInput) {
-      nvctInput.addEventListener('input', (e) => {
+      nvctInput.addEventListener('change', (e) => {
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
         const activeDate = selectedDate || getTodayString();
-        cfg.nvctOverrides = cfg.nvctOverrides || {};
-        cfg.nvctOverrides[activeDate] = val;
         
-        // Also update the global base value so future days that don't have overrides might use it if no history
-        cfg.nvct = val; 
+        const applyToAll = confirm(`Bạn muốn áp dụng NVCT = ${val} cho TOÀN BỘ các ngày không?\n\n- Nhấn OK: Áp dụng cho Toàn Bộ (xoá các tuỳ chỉnh cũ)\n- Nhấn Cancel: Chỉ áp dụng cho ngày đang chọn (${activeDate})`);
+        
+        if (applyToAll) {
+          cfg.nvct = val;
+          cfg.nvctOverrides = {}; 
+        } else {
+          cfg.nvctOverrides = cfg.nvctOverrides || {};
+          cfg.nvctOverrides[activeDate] = val;
+        }
         
         saveConfig(cfg);
         renderCapacityDashboard();
@@ -1618,16 +1623,21 @@
     // ── Freelancer total input ──
     const flInput = document.getElementById('cap-fl-total');
     if (flInput) {
-      flInput.addEventListener('input', (e) => {
+      flInput.addEventListener('change', (e) => {
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
         const activeDate = selectedDate || getTodayString();
-        cfg.flOverrides = cfg.flOverrides || {};
-        cfg.flOverrides[activeDate] = val;
         
-        // Also update the global base value
-        cfg.fl = val;
+        const applyToAll = confirm(`Bạn muốn áp dụng Freelancer = ${val} cho TOÀN BỘ các ngày không?\n\n- Nhấn OK: Áp dụng cho Toàn Bộ (xoá các tuỳ chỉnh cũ)\n- Nhấn Cancel: Chỉ áp dụng cho ngày đang chọn (${activeDate})`);
+        
+        if (applyToAll) {
+          cfg.freelancer = val;
+          cfg.flOverrides = {};
+        } else {
+          cfg.flOverrides = cfg.flOverrides || {};
+          cfg.flOverrides[activeDate] = val;
+        }
         
         saveConfig(cfg);
         renderCapacityDashboard();
