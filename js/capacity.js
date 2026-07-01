@@ -657,24 +657,6 @@
     if (config.nvctOverrides && config.nvctOverrides[dateStr] !== undefined) {
       return config.nvctOverrides[dateStr];
     }
-    
-    const d = parseDate(dateStr);
-    if (!d) return config.nvct || 0;
-    
-    const prevDate = new Date(d.getTime() - 24 * 60 * 60 * 1000);
-    const prevDateStr = `${String(prevDate.getDate()).padStart(2, '0')}/${String(prevDate.getMonth() + 1).padStart(2, '0')}/${prevDate.getFullYear()}`;
-    
-    const prevActual = actualHistory.find(x => x.date === prevDateStr);
-    if (prevActual && prevActual.nvct > 0) {
-      return prevActual.nvct;
-    }
-    
-    const validActuals = actualHistory.filter(x => x.nvct > 0);
-    if (validActuals.length > 0) {
-      const sorted = [...validActuals].sort((a, b) => parseDate(b.date) - parseDate(a.date));
-      return sorted[0].nvct;
-    }
-    
     return config.nvct || 0;
   }
 
