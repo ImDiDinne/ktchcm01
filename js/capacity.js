@@ -897,7 +897,9 @@
     // Staff inputs (flat numbers)
     const setInput = (id, value) => {
       const el = document.getElementById(id);
-      if (el) el.value = value;
+      if (el && document.activeElement !== el) {
+        el.value = value;
+      }
     };
     
     const activeDate = selectedDate || getTodayString();
@@ -1588,7 +1590,7 @@
     // ── NVCT total input ──
     const nvctInput = document.getElementById('cap-nvct-total');
     if (nvctInput) {
-      nvctInput.addEventListener('input', (e) => {
+      nvctInput.addEventListener('change', (e) => {
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
@@ -1603,7 +1605,7 @@
     // ── Freelancer total input ──
     const flInput = document.getElementById('cap-fl-total');
     if (flInput) {
-      flInput.addEventListener('input', (e) => {
+      flInput.addEventListener('change', (e) => {
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
