@@ -706,6 +706,7 @@
 
     let nvct = getNVCTForDate(dayData.date, config);
     let fl   = getFLForDate(dayData.date, config);
+    const currentTotal = nvct + fl;
 
     // Find a similar day in actual history (within +/- 10%)
     let similarDay = null;
@@ -723,30 +724,18 @@
       });
     }
 
-    if (similarDay) {
-      // If not overridden manually, use the similar day's values as calculation basis
-      if (!config.nvctOverrides || config.nvctOverrides[dayData.date] === undefined) {
-        nvct = similarDay.nvct;
-      }
-      if (!config.flOverrides || config.flOverrides[dayData.date] === undefined) {
-        fl = similarDay.freelancer;
-      }
-    }
-
-    const currentTotal = nvct + fl;
-
-    // Find the closest volume day in actual history to today's FC total (for productivity scaling)
-    const closestDay = findClosestActualDay(dayData.total);
+    // Instead of absolute closest day, we use the similar day (within 10%) as the baseline calculation
+    const baselineDay = similarDay;
     
     let requiredRaw = 0;
     let pMix = 0;
 
-    if (closestDay) {
-      // Scale closest day's staff by forecast ratio
-      requiredRaw = closestDay.staffTotal * (dayData.total / closestDay.volTotal);
+    if (baselineDay) {
+      // Scale baseline day's staff by forecast ratio
+      requiredRaw = baselineDay.staffTotal * (dayData.total / baselineDay.volTotal);
       pMix = dayData.total / requiredRaw;
     } else {
-      // Fallback if no actual data is loaded yet
+      // Fallback if no similar actual data is found
       const pTotal = derivedProductivity?.avgProductivity || 1000;
       requiredRaw = dayData.total / pTotal;
       pMix = pTotal;
@@ -774,16 +763,16 @@
       delta,
       gapPercent,
       productivity:  pMix,
-      similarActual: similarDay ? {
-        date: similarDay.date,
-        volTotal: similarDay.volTotal,
-        nvct: similarDay.nvct,
-        freelancer: similarDay.freelancer
+      similarActual: baselineDay ? {
+        date: baselineDay.date,
+        volTotal: baselineDay.volTotal,
+        nvct: baselineDay.nvct,
+        freelancer: baselineDay.freelancer
       } : null,
-      closestActual: closestDay ? {
-        date: closestDay.date,
-        volTotal: closestDay.volTotal,
-        staffTotal: closestDay.staffTotal
+      closestActual: baselineDay ? {
+        date: baselineDay.date,
+        volTotal: baselineDay.volTotal,
+        staffTotal: baselineDay.staffTotal
       } : null
     };
   }
@@ -1332,7 +1321,7 @@
               </div>
               <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
                 <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary);">
-                  <span>👔 NVCT ${todayCalc.similarActual ? `(Dựa trên Actual: ${todayCalc.similarActual.date})` : '(Ngày N-1)'}:</span>
+                  <span>👔 NVCT (Hiện Có):</span>
                   <strong style="font-family: 'JetBrains Mono', monospace; color: var(--green);">${todayCalc.nvctTotal} người</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary); align-items: center;">
@@ -1364,7 +1353,7 @@
             <div class="advisory-col">
               <div style="font-weight: 600; font-size: 0.74rem; color: var(--text-primary);">💡 Nhận Xét & Đối Chiếu AI</div>
               <div style="font-size: 0.68rem; color: var(--text-secondary); line-height: 1.45; display: flex; flex-direction: column; gap: 6px;">
-                <div>Để đáp ứng forecast ngày <strong>${todayCalc.date}</strong> với <strong>${formatNumber(todayCalc.fc.total)} đơn</strong>, kho cần <strong>${todayCalc.requiredTotal} nhân sự</strong> (gồm <strong>${config.bufferPercent}% buffer</strong>). Cần thêm <strong>${todayCalc.flNeeded} Freelancer</strong> so với NVCT ${todayCalc.similarActual ? `của ngày ${todayCalc.similarActual.date}` : 'N-1'}.</div>
+                <div>Để đáp ứng forecast ngày <strong>${todayCalc.date}</strong> với <strong>${formatNumber(todayCalc.fc.total)} đơn</strong>, kho cần <strong>${todayCalc.requiredTotal} nhân sự</strong> (gồm <strong>${config.bufferPercent}% buffer</strong>). Cần thêm <strong>${todayCalc.flNeeded} Freelancer</strong> so với NVCT hiện có.</div>
                 ${(() => {
                   if (todayCalc.requiredTotal > 1000) {
                     return `<div style="margin-top: 2px; font-size: 0.65rem; color: #fca5a5; background: rgba(239, 68, 68, 0.15); padding: 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3); line-height: 1.4;">
