@@ -1588,22 +1588,13 @@
     // ── NVCT total input ──
     const nvctInput = document.getElementById('cap-nvct-total');
     if (nvctInput) {
-      nvctInput.addEventListener('change', (e) => {
+      nvctInput.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
         const activeDate = selectedDate || getTodayString();
-        
-        const applyToAll = confirm(`Bạn muốn áp dụng NVCT = ${val} cho TOÀN BỘ các ngày không?\n\n- Nhấn OK: Áp dụng cho Toàn Bộ (xoá các tuỳ chỉnh cũ)\n- Nhấn Cancel: Chỉ áp dụng cho ngày đang chọn (${activeDate})`);
-        
-        if (applyToAll) {
-          cfg.nvct = val;
-          cfg.nvctOverrides = {}; 
-        } else {
-          cfg.nvctOverrides = cfg.nvctOverrides || {};
-          cfg.nvctOverrides[activeDate] = val;
-        }
-        
+        cfg.nvctOverrides = cfg.nvctOverrides || {};
+        cfg.nvctOverrides[activeDate] = val;
         saveConfig(cfg);
         renderCapacityDashboard();
       });
@@ -1612,24 +1603,37 @@
     // ── Freelancer total input ──
     const flInput = document.getElementById('cap-fl-total');
     if (flInput) {
-      flInput.addEventListener('change', (e) => {
+      flInput.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
         if (isNaN(val) || val < 0) return;
         const cfg = loadConfig();
         const activeDate = selectedDate || getTodayString();
-        
-        const applyToAll = confirm(`Bạn muốn áp dụng Freelancer = ${val} cho TOÀN BỘ các ngày không?\n\n- Nhấn OK: Áp dụng cho Toàn Bộ (xoá các tuỳ chỉnh cũ)\n- Nhấn Cancel: Chỉ áp dụng cho ngày đang chọn (${activeDate})`);
-        
-        if (applyToAll) {
-          cfg.freelancer = val;
-          cfg.flOverrides = {};
-        } else {
-          cfg.flOverrides = cfg.flOverrides || {};
-          cfg.flOverrides[activeDate] = val;
-        }
-        
+        cfg.flOverrides = cfg.flOverrides || {};
+        cfg.flOverrides[activeDate] = val;
         saveConfig(cfg);
         renderCapacityDashboard();
+      });
+    }
+
+    // ── Apply to All Button ──
+    const btnApplyAllStaff = document.getElementById('btn-apply-all-staff');
+    if (btnApplyAllStaff) {
+      btnApplyAllStaff.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nvctVal = parseInt(nvctInput?.value || "0", 10);
+        const flVal = parseInt(flInput?.value || "0", 10);
+        if (isNaN(nvctVal) || isNaN(flVal)) return;
+
+        if (confirm(`Bạn muốn lấy số NVCT = ${nvctVal} và Freelancer = ${flVal} đang hiển thị làm MỨC CƠ SỞ CHUNG cho TẤT CẢ CÁC NGÀY không?\n(Sẽ xoá hết các ghi đè của từng ngày)`)) {
+          const cfg = loadConfig();
+          cfg.nvct = nvctVal;
+          cfg.freelancer = flVal;
+          cfg.nvctOverrides = {};
+          cfg.flOverrides = {};
+          saveConfig(cfg);
+          renderCapacityDashboard();
+          alert('Đã áp dụng thành công cho tất cả các ngày!');
+        }
       });
     }
 
