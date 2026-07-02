@@ -41,16 +41,7 @@
     }
   }
 
-  // SHA-256 hashing for local fallback auth (works on HTTP and offline)
-  async function hashSHA256(str) {
-    if (window.sha256) {
-      return window.sha256(str);
-    }
-    const msgBuffer = new TextEncoder().encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
+  // Local hash function removed for security reasons
 
   // Apply Role-Based Access Control (RBAC)
   function applyRBAC(role) {
@@ -273,32 +264,8 @@
         if (successEl) successEl.style.display = 'none';
         
         const unameLower = uname.toLowerCase();
-        const userHashes = {
-          'manager': '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5',
-          'operator': 'ec6e1c25258002eb1c67d15c7f45da7945fa4c58778fd7d88faa5e53e3b4698d'
-        };
 
-        // 1. Verify Local Auth
-        if (userHashes[unameLower]) {
-          const inputHash = await hashSHA256(pass);
-          if (inputHash === userHashes[unameLower]) {
-            const sessionUser = {
-              username: unameLower,
-              name: unameLower === 'manager' ? 'Hub Manager' : 'Staff / Operator',
-              role: unameLower === 'manager' ? 'manager' : 'operator'
-            };
-            sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
-            setLoggedInUser(sessionUser);
-          } else {
-            if (errorEl) {
-              errorEl.textContent = 'Mật khẩu cục bộ không chính xác.';
-              errorEl.style.display = 'block';
-            }
-          }
-          return;
-        }
-        
-        // 2. Verify Cloud Auth
+        // Verify Cloud Auth
         const supabaseConfig = DEFAULT_SUPABASE;
         if (supabaseConfig && window.supabaseClient) {
           try {

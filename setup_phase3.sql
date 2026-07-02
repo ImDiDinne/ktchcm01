@@ -15,6 +15,9 @@ TO service_role
 USING (true)
 WITH CHECK (true);
 
+-- Chặn hoàn toàn quyền truy cập nặc danh và người dùng thông thường
+REVOKE ALL ON system_secrets FROM anon, authenticated;
+
 
 -- 2. Thêm cột unloaded_at vào bảng unloading_trips nếu chưa có
 DO $$
