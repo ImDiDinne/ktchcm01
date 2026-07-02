@@ -11,7 +11,7 @@ RETURNS TABLE(id uuid, email varchar, name text, role text, approved boolean)
 SECURITY DEFINER
 AS $$
 BEGIN
-  IF (auth.jwt() -> 'user_metadata' ->> 'role') != 'manager' THEN
+  IF coalesce(auth.jwt() -> 'user_metadata' ->> 'role', '') != 'manager' THEN
     RAISE EXCEPTION 'Quyền truy cập bị từ chối. Chỉ Quản lý mới được xem danh sách này.';
   END IF;
 
@@ -33,7 +33,7 @@ RETURNS void
 SECURITY DEFINER
 AS $$
 BEGIN
-  IF (auth.jwt() -> 'user_metadata' ->> 'role') != 'manager' THEN
+  IF coalesce(auth.jwt() -> 'user_metadata' ->> 'role', '') != 'manager' THEN
     RAISE EXCEPTION 'Quyền truy cập bị từ chối. Chỉ Quản lý mới được thực hiện thao tác này.';
   END IF;
 
@@ -51,7 +51,7 @@ RETURNS void
 SECURITY DEFINER
 AS $$
 BEGIN
-  IF (auth.jwt() -> 'user_metadata' ->> 'role') != 'manager' THEN
+  IF coalesce(auth.jwt() -> 'user_metadata' ->> 'role', '') != 'manager' THEN
     RAISE EXCEPTION 'Quyền truy cập bị từ chối. Chỉ Quản lý mới được thực hiện thao tác này.';
   END IF;
 
@@ -69,7 +69,7 @@ RETURNS void
 SECURITY DEFINER
 AS $$
 BEGIN
-  IF (auth.jwt() -> 'user_metadata' ->> 'role') != 'manager' THEN
+  IF coalesce(auth.jwt() -> 'user_metadata' ->> 'role', '') != 'manager' THEN
     RAISE EXCEPTION 'Quyền truy cập bị từ chối. Chỉ Quản lý mới được thực hiện thao tác này.';
   END IF;
 
