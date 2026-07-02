@@ -218,10 +218,14 @@
   // ─── Fetch Actual data from Google Sheet (transposed layout) ───
   async function fetchActualFromSheet() {
     try {
-      console.log('[Capacity] Fetching Actual data from sheet...');
-      const resp = await fetch(ACTUAL_SHEET_URL);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const csvText = await resp.text();
+      console.log('[Capacity] Fetching Actual data from proxy...');
+      if (!window.supabaseClient) throw new Error('Chưa kết nối Supabase');
+      
+      const { data, error } = await window.supabaseClient.functions.invoke('proxy-sheet', {
+        body: { gid: '0' }
+      });
+      if (error) throw error;
+      const csvText = data.csvData;
 
       const lines = csvText.split('\n').map(l => l.replace(/\r/g, ''));
       if (lines.length < 15) {
@@ -565,12 +569,13 @@
   async function fetchFromSheet() {
     updateHeartbeat('loading');
     try {
-      const response = await fetch(SHEET_URL, {
-        mode: 'cors',
-        cache: 'no-cache'
+      if (!window.supabaseClient) throw new Error('Chưa kết nối Supabase');
+      
+      const { data, error } = await window.supabaseClient.functions.invoke('proxy-sheet', {
+        body: { gid: '1731657616' }
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const csvText = await response.text();
+      if (error) throw error;
+      const csvText = data.csvData;
       const parsed  = parseCSV(csvText);
 
       if (parsed.fc.length > 0) {
