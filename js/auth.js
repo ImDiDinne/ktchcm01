@@ -133,19 +133,13 @@
       }
     }
     
-    // 2. Fallback to Local Auth Session (Session Storage)
-    const localSession = JSON.parse(sessionStorage.getItem(SESSION_KEY));
-    if (localSession) {
-      setLoggedInUser(localSession);
-    } else {
-      showLoginOverlay();
-    }
+    // Fallback logic has been completely removed to enforce strict Cloud Auth.
+    showLoginOverlay();
   }
 
   // Log out current session
   function logout() {
     window.currentUser = null;
-    sessionStorage.removeItem(SESSION_KEY);
     if (window.supabaseClient) {
       try {
         window.supabaseClient.auth.signOut();
