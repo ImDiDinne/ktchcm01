@@ -1,0 +1,17 @@
+{
+  "name": "ai-trip-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "axios": "^1.7.2"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  }
+}

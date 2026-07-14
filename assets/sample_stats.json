@@ -1,0 +1,11 @@
+{
+  "daily_stats": {
+    "01/07/2026": {"total": 120, "completed": 100, "sla": 83.33},
+    "02/07/2026": {"total": 130, "completed": 110, "sla": 84.62},
+    "03/07/2026": {"total": 115, "completed": 95, "sla": 82.61},
+    "04/07/2026": {"total": 140, "completed": 120, "sla": 85.71},
+    "05/07/2026": {"total": 125, "completed": 105, "sla": 84.00},
+    "06/07/2026": {"total": 135, "completed": 112, "sla": 82.96},
+    "07/07/2026": {"total": 128, "completed": 108, "sla": 84.38}
+  }
+}

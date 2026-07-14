@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: Trip Forecast Query MCP
+  version: 1.0.0
+  description: MCP for AI Trip Forecast. Returns SLA, peak hour, and warnings.
+servers:
+  - url: https://api.example.com
+paths:
+  /trip-forecast:
+    post:
+      summary: Query trip forecast
+      operationId: queryTripForecast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripForecastRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripForecastResponse'
+components:
+  schemas:
+    TripForecastRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+        date_range:
+          type: string
+          example: "last_7_days"
+        filters:
+          type: object
+          additionalProperties: true
+        lang:
+          type: string
+          enum: [vi, en]
+          default: vi
+      required: [user_id]
+    TripForecastResponse:
+      type: object
+      properties:
+        summary:
+          type: string
+        sla:
+          type: number
+          format: float
+        peak_hour:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: string
+      required: [summary, sla, peak_hour]
